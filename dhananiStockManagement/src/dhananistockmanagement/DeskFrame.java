@@ -57,6 +57,7 @@ import support.Library;
 import support.UnCaughtException;
 import transaction.BreakUp;
 import transaction.PurchaseBill;
+import transaction.SalesBill;
 import utility.ChangeThemes;
 import utility.CheckPrint;
 import utility.CompanySetting;
@@ -529,6 +530,7 @@ public class DeskFrame extends javax.swing.JFrame {
         transaction = new javax.swing.JMenu();
         jmnPurchaseBill = new javax.swing.JMenuItem();
         jmnPurchaseBill1 = new javax.swing.JMenuItem();
+        jmnPurchaseBill2 = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         jmnPurchaseAvarage = new javax.swing.JMenuItem();
         utility = new javax.swing.JMenu();
@@ -675,6 +677,16 @@ public class DeskFrame extends javax.swing.JFrame {
             }
         });
         transaction.add(jmnPurchaseBill1);
+
+        jmnPurchaseBill2.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnPurchaseBill2.setMnemonic('B');
+        jmnPurchaseBill2.setText("SALES BILL");
+        jmnPurchaseBill2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnPurchaseBill2ActionPerformed(evt);
+            }
+        });
+        transaction.add(jmnPurchaseBill2);
 
         jMenuBar1.add(transaction);
 
@@ -1034,6 +1046,17 @@ public class DeskFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jmnPurchaseAvarageActionPerformed
 
+    private void jmnPurchaseBill2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnPurchaseBill2ActionPerformed
+        int index = checkAlradyOpen(Constants.SALES_BILL_FORM_NAME);
+        if (index == -1) {
+            SalesBill sb = new SalesBill(0);
+            addOnScreen(sb, Constants.SALES_BILL_FORM_NAME);
+            sb.setTitle(Constants.SALES_BILL_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnPurchaseBill2ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public static javax.swing.JDesktopPane jDesktopPane1;
     private javax.swing.JMenu jMenu1;
@@ -1055,6 +1078,7 @@ public class DeskFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jmnPurchaseAvarage;
     private javax.swing.JMenuItem jmnPurchaseBill;
     private javax.swing.JMenuItem jmnPurchaseBill1;
+    private javax.swing.JMenuItem jmnPurchaseBill2;
     private javax.swing.JMenuItem jmnQuickOpen;
     private javax.swing.JMenuItem jmnSlabCategory;
     private javax.swing.JMenuItem jmnSubCategory;

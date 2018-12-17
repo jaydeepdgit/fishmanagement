@@ -19,6 +19,7 @@ public class Constants {
     // TRANSACTION
     public static String PURCHASE_BILL_FORM_ID = "41";
     public static String BREAK_UP_FORM_ID = "42";
+    public static String SALES_BILL_FORM_ID = "43";
 
     // REPORT
     public static String PURCHASE_AVERAGE_FORM_ID = "70";
@@ -56,6 +57,7 @@ public class Constants {
     public static String CONTRA_VOUCHER_FORM_NAME = "CONTRA VOUCHER";
     public static String PURCHASE_BILL_FORM_NAME = "PURCHASE BILL";
     public static String BREAK_UP_FORM_NAME = "BREAK UP";
+    public static String SALES_BILL_FORM_NAME = "SALES BILL";
 
     // REPORT
     public static String PURCHASE_AVERAGE_FORM_NAME = "PURCHASE AVERAGE";
@@ -93,6 +95,7 @@ public class Constants {
     public static String CONTRA_VOUCHER_INITIAL = "CV";
     public static String PURCHASE_BILL_INITIAL = "PB";
     public static String BREAK_UP_INITIAL = "BK";
+    public static String SALES_BILL_INITIAL = "SL";
 
     // UTILITY
     public static String COMPANY_SETTING_INITIAL = "CM";
@@ -152,4 +155,5 @@ public class Constants {
     public static String INVALID_C_GST = "Invalid C GST";
     public static String INVALID_S_GST = "Invalid S GST";
     public static String INVALID_I_GST = "Invalid I GST";
+    public static String INVALID_ITEM = "Invalid Item Name";
 }
