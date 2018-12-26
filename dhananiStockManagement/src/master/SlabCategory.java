@@ -15,6 +15,8 @@ import javax.swing.JComponent;
 import javax.swing.event.InternalFrameEvent;
 import dhananistockmanagement.DeskFrame;
 import static dhananistockmanagement.DeskFrame.getConnection;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.JTextField;
 import support.Constants;
 import support.HeaderIntFrame1;
@@ -350,6 +352,31 @@ public class SlabCategory extends javax.swing.JInternalFrame {
         psLocal.executeUpdate();
     }
 
+    private void stockUpdateADD() throws SQLException {
+        String sql = "insert into stock0_1(fk_slab_category_id, opb, pur, sal, block, bal) values(?, ?, ?, ?, ?, ?)";
+        PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
+        pstUpdate.setString(1, id);
+        pstUpdate.setDouble(2, 0);
+        pstUpdate.setDouble(3, 0);
+        pstUpdate.setDouble(4, 0);
+        pstUpdate.setDouble(5, 0);
+        pstUpdate.setDouble(6, 0);
+        pstUpdate.executeUpdate();
+        
+        sql = "insert into stock0_2 (fk_slab_category_id, trns_id, opb, pur, pur_r, sal, sal_r)"
+                + "values(?, ?, ?, ?, ?, ?, ?)";
+        pstUpdate = dataConnection.prepareStatement(sql);
+        pstUpdate.setString(1, id);
+        pstUpdate.setDouble(2, 0);
+        pstUpdate.setDouble(3, 0);
+        pstUpdate.setDouble(4, 0);
+        pstUpdate.setDouble(5, 0);
+        pstUpdate.setDouble(6, 0);
+        pstUpdate.setDouble(7, 0);
+        pstUpdate.executeUpdate();
+        lb.closeStatement(pstUpdate);
+    }
+    
     private void saveVoucher() {
         try {
             PreparedStatement psLocal = null;
@@ -357,17 +384,29 @@ public class SlabCategory extends javax.swing.JInternalFrame {
             if(navLoad.getMode().equalsIgnoreCase("N")) {
                 psLocal = dataConnection.prepareStatement("INSERT INTO slab_category(name, fk_sub_category_id, short_name, rate, status, user_cd, id) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 id = lb.generateKey("slab_category", "id", Constants.SLAB_CATEGORY_INITIAL, 8);
+                psLocal.setString(1, jtxtName.getText()); // name
+                psLocal.setString(2, lb.getSubCategory(jtxtSubCategory.getText(), "C")); // name
+                psLocal.setString(3, jtxtShortName.getText()); // short name
+                psLocal.setDouble(4, lb.replaceAll(jtxtRate.getText())); // opb
+                psLocal.setInt(5, jcmbStatus.getSelectedIndex()); // status
+                psLocal.setInt(6, DeskFrame.user_id); // user_cd
+                psLocal.setString(7, id); // id
+                psLocal.executeUpdate();
+            
+                stockUpdateADD();
+                        
             } else if(navLoad.getMode().equalsIgnoreCase("E")) {
                 psLocal = dataConnection.prepareStatement("UPDATE slab_category SET name = ?, fk_sub_category_id = ?, short_name = ?, rate = ?, status = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
+                psLocal.setString(1, jtxtName.getText()); // name
+                psLocal.setString(2, lb.getSubCategory(jtxtSubCategory.getText(), "C")); // name
+                psLocal.setString(3, jtxtShortName.getText()); // short name
+                psLocal.setDouble(4, lb.replaceAll(jtxtRate.getText())); // opb
+                psLocal.setInt(5, jcmbStatus.getSelectedIndex()); // status
+                psLocal.setInt(6, DeskFrame.user_id); // user_cd
+                psLocal.setString(7, id); // id
+                psLocal.executeUpdate();
             }
-            psLocal.setString(1, jtxtName.getText()); // name
-            psLocal.setString(2, lb.getSubCategory(jtxtSubCategory.getText(), "C")); // name
-            psLocal.setString(3, jtxtShortName.getText()); // short name
-            psLocal.setDouble(4, lb.replaceAll(jtxtRate.getText())); // opb
-            psLocal.setInt(5, jcmbStatus.getSelectedIndex()); // status
-            psLocal.setInt(6, DeskFrame.user_id); // user_cd
-            psLocal.setString(7, id); // id
-            psLocal.executeUpdate();
+            
             dataConnection.commit();
             dataConnection.setAutoCommit(true);
         } catch (SQLException ex) {
