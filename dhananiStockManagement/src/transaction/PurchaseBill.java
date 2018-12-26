@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import dhananistockmanagement.MainClass;
 import java.sql.ResultSet;
+import oldbupdate.PurchaseBillUpdate;
 import support.Constants;
 import support.HeaderIntFrame1;
 import support.Library;
@@ -200,7 +201,9 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
                 if (ans == JOptionPane.OK_OPTION) {
                     try {
                         dataConnection.setAutoCommit(false);
-
+                        PurchaseBillUpdate pb = new PurchaseBillUpdate();
+                        pb.deleteEntry(id);
+                        
                         delete();
                         dataConnection.commit();
                         setVoucher("last");
@@ -429,6 +432,9 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
             sql = "INSERT INTO purchase_bill_head (fk_account_master_id, v_date, expense, total_expense, other_expense, net_amt, total_weight, total_amount, description, fix_time, user_cd, talli_no, id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) +"', ?, ?, ?)";
             id = lb.generateKey("purchase_bill_head", "id", 8, initial); // GENERATE REF NO
         } else if (navLoad.getMode().equalsIgnoreCase("E")) {
+            PurchaseBillUpdate pb = new PurchaseBillUpdate();
+            pb.deleteEntry(id);
+            
             sql = "DELETE FROM purchase_bill_details WHERE id='"+ id +"'";
             psLocal = dataConnection.prepareStatement(sql);
             change += psLocal.executeUpdate();
@@ -472,6 +478,8 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
                 change += psLocal.executeUpdate();
             }
         }
+        PurchaseBillUpdate pb = new PurchaseBillUpdate();
+        pb.addEntry(id);
         return change;
     }
 

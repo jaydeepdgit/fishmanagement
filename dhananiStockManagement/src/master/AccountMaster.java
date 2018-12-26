@@ -14,6 +14,8 @@ import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.event.InternalFrameEvent;
 import dhananistockmanagement.DeskFrame;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import support.Constants;
 import support.HeaderIntFrame1;
 import support.Library;
@@ -276,6 +278,60 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jPanel1.add(navLoad);
         jPanel1.setVisible(true);
     }
+    
+    private void oldbUpdateADD() throws SQLException {
+        if (lb.getData("AC_CD", "oldb2_1", "AC_CD", ""+ id +"").equalsIgnoreCase("")) {
+            String sql = "insert into oldb2_1 values(?, ?, ?, ?, ?)";
+            PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
+            pstUpdate.setString(1, id);
+            pstUpdate.setDouble(2, 0);
+            pstUpdate.setString(3, "0");
+            pstUpdate.setString(4, "0");
+            pstUpdate.setDouble(5, 0);
+            
+            pstUpdate.executeUpdate();
+            lb.closeStatement(pstUpdate);
+        } else {
+            String sql = "update oldb2_1 set opb = ? where AC_CD = ?";
+            PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
+            pstUpdate.setDouble(1, 0);
+            pstUpdate.setString(2, id);
+            pstUpdate.executeUpdate();
+            lb.closeStatement(pstUpdate);
+        }
+
+        String sql = "DELETE FROM oldb2_2 WHERE DOC_REF_NO = 'OPB' AND AC_CD = ?";
+        PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
+        pstUpdate.setString(1, id);
+        pstUpdate.executeUpdate();
+
+        sql = "insert into oldb2_2 (DOC_REF_NO, DOC_CD, DOC_DATE, AC_CD, DRCR, VAL, PARTICULAR)"
+                + "values(?, ?, ?, ?, ?, ?, ?)";
+        pstUpdate = dataConnection.prepareStatement(sql);
+        pstUpdate.setString(1, "OPB");
+        pstUpdate.setString(2, "OPB");
+        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+        pstUpdate.setString(3, date.format(new Date()));
+        pstUpdate.setString(4, id);
+        pstUpdate.setString(5, "0");
+        pstUpdate.setDouble(6, 0);
+        pstUpdate.setString(7, "");
+        pstUpdate.executeUpdate();
+    }
+    
+    private void oldbUpdateEdit() throws SQLException {
+        String sql = "update oldb2_1 set OPB = ? where AC_CD = ?";
+        PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
+        pstUpdate.setString(1, "0");
+        pstUpdate.setString(2, id);
+        pstUpdate.executeUpdate();
+        lb.closeStatement(pstUpdate);
+             
+        sql = "delete from oldb2_2 where DOC_REF_NO = 'OPB' AND AC_CD = ?";
+        pstUpdate = dataConnection.prepareStatement(sql);
+        pstUpdate.setString(1, id);
+        pstUpdate.executeUpdate();
+    }
 
     private void setVoucher(String move) {
         try {
@@ -322,15 +378,24 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             if(navLoad.getMode().equalsIgnoreCase("N")) {
                 psLocal = dataConnection.prepareStatement("INSERT INTO account_master(name, expense, status, user_cd, id) VALUES (?, ?, ?, ?, ?)");
                 id = lb.generateKey("account_master", "id", Constants.ACCOUNT_MASTER_INITIAL, 8);
+                psLocal.setString(1, jtxtName.getText()); // name
+                psLocal.setString(2, jtxtExpense.getText()); // expense
+                psLocal.setInt(3, jcmbStatus.getSelectedIndex()); // status
+                psLocal.setInt(4, DeskFrame.user_id); // user_cd
+                psLocal.setString(5, id); // id
+                psLocal.executeUpdate();
+                
+                oldbUpdateADD();
             } else if(navLoad.getMode().equalsIgnoreCase("E")) {
                 psLocal = dataConnection.prepareStatement("UPDATE account_master SET name = ?, expense = ?, status = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
+                psLocal.setString(1, jtxtName.getText()); // name
+                psLocal.setString(2, jtxtExpense.getText()); // expense
+                psLocal.setInt(3, jcmbStatus.getSelectedIndex()); // status
+                psLocal.setInt(4, DeskFrame.user_id); // user_cd
+                psLocal.setString(5, id); // id
+                psLocal.executeUpdate();
             }
-            psLocal.setString(1, jtxtName.getText()); // name
-            psLocal.setString(2, jtxtExpense.getText()); // expense
-            psLocal.setInt(3, jcmbStatus.getSelectedIndex()); // status
-            psLocal.setInt(4, DeskFrame.user_id); // user_cd
-            psLocal.setString(5, id); // id
-            psLocal.executeUpdate();
+            
             dataConnection.commit();
             dataConnection.setAutoCommit(true);
         } catch (SQLException ex) {
