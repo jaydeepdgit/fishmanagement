@@ -1818,7 +1818,7 @@ public class Library {
         }
         return returnVal;
     }
-
+    
     public String getMainCategory(String strVal, String tag) {
         PreparedStatement pstLocal = null;
         ResultSet rsLocal = null;
