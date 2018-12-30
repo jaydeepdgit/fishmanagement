@@ -53,6 +53,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         accountMaster.AddColumn(0, "id", 100, java.lang.String.class, null, false);
         accountMaster.AddColumn(1, "Name", 300, java.lang.String.class, null, false);
         accountMaster.AddColumn(2, "Status", 150, java.lang.String.class, null, false);
+        accountMaster.AddColumn(3, "OPB", 150, java.lang.String.class, null, false);
+        accountMaster.AddColumn(4, "Account Type", 150, java.lang.String.class, null, false);
         accountMaster.makeTable();
     }
 
@@ -64,8 +66,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private void onViewVoucher() {
         this.dispose();
 
-        String sql = "SELECT id, name, IF(status = 0, '"+ Constants.ACTIVE +"', '"+ Constants.DEACTIVE +"') AS status FROM account_master";
-        accountMaster.setColumnValue(new int[]{1, 2, 3});
+        String sql = "SELECT id, name, IF(status = 0, '"+ Constants.ACTIVE +"', '"+ Constants.DEACTIVE +"') AS status, opb, IF(account_type = 0, '"+ Constants.USD +"', '"+ Constants.RS +"') AS status FROM account_master";
+        accountMaster.setColumnValue(new int[]{1, 2, 3, 4, 5});
         String view_title = Constants.ACCOUNT_MASTER_FORM_NAME +" VIEW";
 
         HeaderIntFrame1 rptDetail = new HeaderIntFrame1(dataConnection, id+"", view_title, accountMaster, sql, Constants.ACCOUNT_MASTER_FORM_ID, 1, this, this.getTitle());
@@ -94,6 +96,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             if (input.equals(jtxtID)) {
                 val = fielddValid(input);
             } else if (input.equals(jtxtName)) {
+                val = fielddValid(input);
+            } else if (input.equals(jtxtOPB)) {
                 val = fielddValid(input);
             }
             return val;
@@ -124,6 +128,15 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 }
             }
         }
+        if (comp == jtxtOPB) {
+            if (navLoad.getMode().equalsIgnoreCase("N") || navLoad.getMode().equalsIgnoreCase("E")) {
+                if (lb.isBlank(comp)) {
+                    navLoad.setMessage("OPB should not blank");
+                    comp.requestFocusInWindow();
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -132,6 +145,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jtxtName.setEnabled(flag);
         jtxtExpense.setEnabled(flag);
         jcmbStatus.setEnabled(flag);
+        jtxtOPB.setEnabled(flag);
+        jcmbAmountType.setEnabled(flag);
         jtxtName.requestFocusInWindow();
     }
 
@@ -140,6 +155,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jtxtName.setText(text);
         jtxtExpense.setText(text);
         jcmbStatus.setSelectedIndex(0);
+        jtxtOPB.setText(text);
+        jcmbAmountType.setSelectedIndex(0);
     }
 
     private boolean validateForm() {
@@ -184,7 +201,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             @Override
             public void callDelete() {
                 try {
-                    if(!lb.isExist("purchase_bill_head", "fk_account_master_id", id+"")) {
+                    if(!lb.isExist("purchase_bill_head", "fk_account_master_id", id+"") && !lb.isExist("sale_bill_head", "fk_account_master_id", id+"")) {
                         lb.confirmDialog(Constants.DELETE_THIS + " "+ jtxtName.getText() +" ?");
                         if(lb.type) {
                             dataConnection.setAutoCommit(false);
@@ -258,6 +275,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                     jtxtName.setText(navLoad.viewData.getString("name"));
                     jtxtExpense.setText(navLoad.viewData.getString("expense"));
                     jcmbStatus.setSelectedIndex(navLoad.viewData.getInt("status"));
+                    jtxtOPB.setText(navLoad.viewData.getString("opb"));
+                    jcmbAmountType.setSelectedIndex(navLoad.viewData.getInt("amount_type"));
                     jlblUserName.setText(lb.getUserName(navLoad.viewData.getString("user_cd"), "N"));
                     jlblEditNo.setText(navLoad.viewData.getString("edit_no"));
                     jlblLstUpdate.setText(lb.getTimeStamp(viewData.getTimestamp("time_stamp")));
@@ -281,21 +300,23 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     
     private void oldbUpdateADD() throws SQLException {
         if (lb.getData("AC_CD", "oldb2_1", "AC_CD", ""+ id +"").equalsIgnoreCase("")) {
-            String sql = "insert into oldb2_1 values(?, ?, ?, ?, ?)";
+            String sql = "insert into oldb2_1 values(?, ?, ?, ?, ?, ?)";
             PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
             pstUpdate.setString(1, id);
-            pstUpdate.setDouble(2, 0);
+            pstUpdate.setDouble(2, Double.parseDouble(jtxtOPB.getText()));
             pstUpdate.setString(3, "0");
             pstUpdate.setString(4, "0");
             pstUpdate.setDouble(5, 0);
+            pstUpdate.setInt(6, jcmbAmountType.getSelectedIndex());
             
             pstUpdate.executeUpdate();
             lb.closeStatement(pstUpdate);
         } else {
-            String sql = "update oldb2_1 set opb = ? where AC_CD = ?";
+            String sql = "update oldb2_1 set opb = ?, amount_type=? where AC_CD = ?";
             PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
-            pstUpdate.setDouble(1, 0);
-            pstUpdate.setString(2, id);
+            pstUpdate.setDouble(1, Double.parseDouble(jtxtOPB.getText()));
+            pstUpdate.setInt(2, jcmbAmountType.getSelectedIndex());
+            pstUpdate.setString(3, id);
             pstUpdate.executeUpdate();
             lb.closeStatement(pstUpdate);
         }
@@ -314,22 +335,24 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         pstUpdate.setString(3, date.format(new Date()));
         pstUpdate.setString(4, id);
         pstUpdate.setString(5, "0");
-        pstUpdate.setDouble(6, 0);
+        pstUpdate.setDouble(6, Double.parseDouble(jtxtOPB.getText()));
         pstUpdate.setString(7, "");
         pstUpdate.executeUpdate();
     }
     
     private void oldbUpdateEdit() throws SQLException {
-        String sql = "update oldb2_1 set OPB = ? where AC_CD = ?";
+        String sql = "update oldb2_1 set OPB = ?, amount_type=? where AC_CD = ?";
         PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
-        pstUpdate.setString(1, "0");
-        pstUpdate.setString(2, id);
+        pstUpdate.setDouble(1, Double.parseDouble(jtxtOPB.getText()));
+        pstUpdate.setInt(2, jcmbAmountType.getSelectedIndex());
+        pstUpdate.setString(3, id);
         pstUpdate.executeUpdate();
         lb.closeStatement(pstUpdate);
              
-        sql = "delete from oldb2_2 where DOC_REF_NO = 'OPB' AND AC_CD = ?";
+        sql = "update oldb2_2 set val = ? where DOC_REF_NO = 'OPB' AND AC_CD = ?";
         pstUpdate = dataConnection.prepareStatement(sql);
-        pstUpdate.setString(1, id);
+        pstUpdate.setDouble(1, Double.parseDouble(jtxtOPB.getText()));
+        pstUpdate.setString(2, id);
         pstUpdate.executeUpdate();
     }
 
@@ -376,24 +399,30 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             PreparedStatement psLocal = null;
             dataConnection.setAutoCommit(false);
             if(navLoad.getMode().equalsIgnoreCase("N")) {
-                psLocal = dataConnection.prepareStatement("INSERT INTO account_master(name, expense, status, user_cd, id) VALUES (?, ?, ?, ?, ?)");
+                psLocal = dataConnection.prepareStatement("INSERT INTO account_master(name, expense, status, opb, amount_type, user_cd, id) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 id = lb.generateKey("account_master", "id", Constants.ACCOUNT_MASTER_INITIAL, 8);
                 psLocal.setString(1, jtxtName.getText()); // name
                 psLocal.setString(2, jtxtExpense.getText()); // expense
                 psLocal.setInt(3, jcmbStatus.getSelectedIndex()); // status
-                psLocal.setInt(4, DeskFrame.user_id); // user_cd
-                psLocal.setString(5, id); // id
+                psLocal.setString(4, jtxtOPB.getText()); // opb
+                psLocal.setInt(5, jcmbAmountType.getSelectedIndex()); // amount type
+                psLocal.setInt(6, DeskFrame.user_id); // user_cd
+                psLocal.setString(7, id); // id
                 psLocal.executeUpdate();
                 
                 oldbUpdateADD();
             } else if(navLoad.getMode().equalsIgnoreCase("E")) {
-                psLocal = dataConnection.prepareStatement("UPDATE account_master SET name = ?, expense = ?, status = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
+                psLocal = dataConnection.prepareStatement("UPDATE account_master SET name = ?, expense = ?, status = ?, opb = ?, amount_type = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
                 psLocal.setString(1, jtxtName.getText()); // name
                 psLocal.setString(2, jtxtExpense.getText()); // expense
                 psLocal.setInt(3, jcmbStatus.getSelectedIndex()); // status
-                psLocal.setInt(4, DeskFrame.user_id); // user_cd
-                psLocal.setString(5, id); // id
+                psLocal.setString(4, jtxtOPB.getText()); // opb
+                psLocal.setInt(5, jcmbAmountType.getSelectedIndex()); // amount type
+                psLocal.setInt(6, DeskFrame.user_id); // user_cd
+                psLocal.setString(7, id); // id
                 psLocal.executeUpdate();
+                
+                oldbUpdateEdit();
             }
             
             dataConnection.commit();
@@ -465,8 +494,12 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jcmbStatus = new javax.swing.JComboBox();
         jLabel5 = new javax.swing.JLabel();
         jtxtExpense = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        jtxtOPB = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        jcmbAmountType = new javax.swing.JComboBox();
 
-        setPreferredSize(new java.awt.Dimension(686, 425));
+        setPreferredSize(new java.awt.Dimension(686, 535));
 
         jPanel1.setBackground(new java.awt.Color(253, 243, 243));
         jPanel1.setBorder(javax.swing.BorderFactory.createMatteBorder(3, 3, 1, 1, new java.awt.Color(235, 35, 35)));
@@ -581,6 +614,47 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel9.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel9.setText("OPB");
+        jLabel9.setMaximumSize(new java.awt.Dimension(61, 25));
+        jLabel9.setMinimumSize(new java.awt.Dimension(61, 25));
+        jLabel9.setPreferredSize(new java.awt.Dimension(61, 25));
+
+        jtxtOPB.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtOPB.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtOPB.setMinimumSize(new java.awt.Dimension(6, 25));
+        jtxtOPB.setPreferredSize(new java.awt.Dimension(6, 25));
+        jtxtOPB.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtOPBFocusGained(evt);
+            }
+        });
+        jtxtOPB.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtOPBKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtOPBKeyTyped(evt);
+            }
+        });
+
+        jLabel10.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel10.setText("Amount Type");
+        jLabel10.setMaximumSize(new java.awt.Dimension(61, 25));
+        jLabel10.setMinimumSize(new java.awt.Dimension(61, 25));
+        jLabel10.setPreferredSize(new java.awt.Dimension(61, 25));
+
+        jcmbAmountType.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jcmbAmountType.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "USD", "RS" }));
+        jcmbAmountType.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jcmbAmountType.setMinimumSize(new java.awt.Dimension(39, 25));
+        jcmbAmountType.setPreferredSize(new java.awt.Dimension(39, 25));
+        jcmbAmountType.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jcmbAmountTypeKeyPressed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -593,7 +667,9 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
                             .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jtxtName)
@@ -601,7 +677,9 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(jtxtID, javax.swing.GroupLayout.DEFAULT_SIZE, 99, Short.MAX_VALUE)
                                     .addComponent(jcmbStatus, 0, 103, Short.MAX_VALUE)
-                                    .addComponent(jtxtExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addComponent(jtxtExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jtxtOPB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jcmbAmountType, 0, 103, Short.MAX_VALUE))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -637,6 +715,14 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jcmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jtxtOPB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jcmbAmountType, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(35, 35, 35)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jlblUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -674,7 +760,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
         pack();
@@ -720,9 +806,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jtxtIDKeyTyped
 
     private void jcmbStatusKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcmbStatusKeyPressed
-        if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            navLoad.setSaveFocus();
-        }
+        lb.enterEvent(evt, jtxtOPB);
     }//GEN-LAST:event_jcmbStatusKeyPressed
 
     private void jtxtExpenseFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtExpenseFocusGained
@@ -737,16 +821,37 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         lb.onlyNumber(evt, 10);
     }//GEN-LAST:event_jtxtExpenseKeyTyped
 
+    private void jtxtOPBFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtOPBFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtOPBFocusGained
+
+    private void jtxtOPBKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtOPBKeyPressed
+        lb.enterEvent(evt, jcmbAmountType);
+    }//GEN-LAST:event_jtxtOPBKeyPressed
+
+    private void jtxtOPBKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtOPBKeyTyped
+        lb.onlyNumber(evt, 10);
+    }//GEN-LAST:event_jtxtOPBKeyTyped
+
+    private void jcmbAmountTypeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcmbAmountTypeKeyPressed
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            navLoad.setSaveFocus();
+        }
+    }//GEN-LAST:event_jcmbAmountTypeKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JComboBox jcmbAmountType;
     private javax.swing.JComboBox jcmbStatus;
     private javax.swing.JLabel jlblEditNo;
     private javax.swing.JLabel jlblLstUpdate;
@@ -754,5 +859,6 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private javax.swing.JTextField jtxtExpense;
     private javax.swing.JTextField jtxtID;
     private javax.swing.JTextField jtxtName;
+    private javax.swing.JTextField jtxtOPB;
     // End of variables declaration//GEN-END:variables
 }

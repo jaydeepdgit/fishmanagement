@@ -25,6 +25,8 @@ CREATE TABLE `account_master` (
   `name` varchar(255) DEFAULT NULL,
   `expense` decimal(10,2) NOT NULL DEFAULT '0.00',
   `status` tinyint(1) DEFAULT NULL,
+  `opb` decimal(10,3) DEFAULT '0.000',
+  `amount_type` tinyint(1) DEFAULT NULL,
   `edit_no` decimal(3,0) DEFAULT '0',
   `user_cd` int(11) DEFAULT NULL,
   `time_stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -33,9 +35,79 @@ CREATE TABLE `account_master` (
 
 /*Data for the table `account_master` */
 
-insert  into `account_master`(`id`,`name`,`expense`,`status`,`edit_no`,`user_cd`,`time_stamp`) values 
-('AM000003','CASH',0.00,0,0,1,'2018-12-22 14:38:25'),
-('AM000005','CHECK ACCOUNT',0.00,0,0,1,'2018-12-22 19:11:06');
+insert  into `account_master`(`id`,`name`,`expense`,`status`,`opb`,`amount_type`,`edit_no`,`user_cd`,`time_stamp`) values 
+('AM000003','CASH',0.00,0,0.000,NULL,0,1,'2018-12-22 14:38:25'),
+('AM000005','CHECK ACCOUNT',0.00,0,0.000,NULL,0,1,'2018-12-22 19:11:06'),
+('AM000006','TEST OPB',100.00,0,200.000,1,2,1,'2018-12-30 19:57:58');
+
+/*Table structure for table `appconfig` */
+
+DROP TABLE IF EXISTS `appconfig`;
+
+CREATE TABLE `appconfig` (
+  `client_id` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `issue_date` date DEFAULT NULL,
+  `act_date` date DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `act_cd` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `license_no` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `email` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `server` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `act1` varchar(4) COLLATE utf8_unicode_ci DEFAULT '',
+  `act2` varchar(4) COLLATE utf8_unicode_ci DEFAULT '',
+  `act3` varchar(4) COLLATE utf8_unicode_ci DEFAULT '',
+  `act4` varchar(4) COLLATE utf8_unicode_ci DEFAULT '',
+  `user_nm` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `pass` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `status` int(11) DEFAULT NULL,
+  `months` int(11) DEFAULT NULL,
+  `days` int(11) DEFAULT NULL,
+  `haddr` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `iaddr` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `laststart` date DEFAULT NULL,
+  `def` varchar(20) COLLATE utf8_unicode_ci DEFAULT '',
+  `app_limit` smallint(6) DEFAULT '0',
+  `cur_limit` smallint(6) DEFAULT '0',
+  `tmode` smallint(6) DEFAULT '0',
+  `proj_mode` smallint(6) DEFAULT '0',
+  `mlt_mac` smallint(6) DEFAULT '0',
+  `mac_lmt` int(10) DEFAULT '1',
+  `is_tax` smallint(6) DEFAULT NULL,
+  `theme_cd` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+/*Data for the table `appconfig` */
+
+insert  into `appconfig`(`client_id`,`issue_date`,`act_date`,`due_date`,`act_cd`,`license_no`,`email`,`server`,`act1`,`act2`,`act3`,`act4`,`user_nm`,`pass`,`status`,`months`,`days`,`haddr`,`iaddr`,`laststart`,`def`,`app_limit`,`cur_limit`,`tmode`,`proj_mode`,`mlt_mac`,`mac_lmt`,`is_tax`,`theme_cd`) values 
+('STOCK MANAGEMENT SOF','2018-09-20','2018-09-20','2019-01-01',NULL,'SMS-000001-15-06',NULL,NULL,'0000','1111','2222','3333','LG','LG123',-1,0,0,'90-4C-E5-07-79-87','192.168.0.108','2018-09-19','',0,0,0,1,0,1,0,4);
+
+/*Table structure for table `change_themes` */
+
+DROP TABLE IF EXISTS `change_themes`;
+
+CREATE TABLE `change_themes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `theme_name` varchar(255) DEFAULT NULL,
+  `theme_link` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+
+/*Data for the table `change_themes` */
+
+insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values 
+(1,'TextureLookAndFeel ','com.jtattoo.plaf.texture.TextureLookAndFeel'),
+(2,'SmartLookAndFeel','com.jtattoo.plaf.smart.SmartLookAndFeel'),
+(3,'NoireLookAndFeel','com.jtattoo.plaf.noire.NoireLookAndFeel'),
+(4,'AcrylLookAndFeel','com.jtattoo.plaf.acryl.AcrylLookAndFeel'),
+(5,'AeroLookAndFeel','com.jtattoo.plaf.aero.AeroLookAndFeel'),
+(6,'AluminiumLookAndFeel','com.jtattoo.plaf.aluminium.AluminiumLookAndFeel'),
+(7,'BernsteinLookAndFeel','com.jtattoo.plaf.bernstein.BernsteinLookAndFeel'),
+(8,'FastLookAndFeel','com.jtattoo.plaf.fast.FastLookAndFeel'),
+(9,'GraphiteLookAndFeel','com.jtattoo.plaf.graphite.GraphiteLookAndFeel'),
+(10,'HiFiLookAndFeel','com.jtattoo.plaf.hifi.HiFiLookAndFeel'),
+(11,'LunaLookAndFeel','com.jtattoo.plaf.luna.LunaLookAndFeel'),
+(12,'McWinLookAndFeel ','com.jtattoo.plaf.mcwin.McWinLookAndFeel'),
+(13,'MintLookAndFeel','com.jtattoo.plaf.mint.MintLookAndFeel');
 
 /*Table structure for table `cmpny_mst` */
 
@@ -97,6 +169,24 @@ CREATE TABLE `cmpny_mst` (
 
 insert  into `cmpny_mst`(`cmpn_cd`,`cmpn_code`,`branch_code`,`cmpn_name`,`ac_year`,`mnth`,`sh_name`,`digit`,`invoice_type`,`image_path`,`add1`,`add2`,`area_cd`,`city_cd`,`pincode`,`mob_no`,`phone_no`,`licence_no`,`email`,`fax_no`,`pan_no`,`tin_no`,`cst_no`,`tax_no`,`bank_name`,`ac_no`,`branch_name`,`cash_ac_cd`,`lab_inc_ac`,`lab_exp_ac`,`sale_ac`,`purchase_ac`,`mypwd`,`contact_person`,`website`,`edit_no`,`user_cd`,`time_stamp`,`sls_chr_lbl`,`delete_pwd`,`ifsc_code`,`bill_supply_type`,`bill_supply`,`bill_supply_desc`,`is_retail`,`multiple_company_data`,`corraddress1`,`corraddress2`) values 
 ('C000001','01','001','DHANANI FROZAL','2017','01','SE',2,0,'','ahmedabad','ahmedabad','','','','9727397009','7405116442','','dhameliya.jaydeep@gmail.com','','ACNFS5720D','24060305663ABC','24560305663123','','STATE BANK OF INDIA','30425911901','BAPUNAGAR BR.','AM000003','0','0','0','0','','','',0,1,'2016-01-10 22:04:45','Loading Charge','123','SBI29051693',0,'BILL OF SUPPLY','Composition Taxable Person, Not Eligible to Collect Tax on Supplies',0,0,'ahmedabad','ahmedabad');
+
+/*Table structure for table `dbmst` */
+
+DROP TABLE IF EXISTS `dbmst`;
+
+CREATE TABLE `dbmst` (
+  `cmp_name` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
+  `db_year` varchar(4) COLLATE utf8_unicode_ci NOT NULL,
+  `db_name` varchar(30) COLLATE utf8_unicode_ci NOT NULL,
+  `dbmonth` smallint(6) DEFAULT '0',
+  `dbname` varchar(30) COLLATE utf8_unicode_ci DEFAULT '',
+  `dbyear` varchar(4) COLLATE utf8_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+/*Data for the table `dbmst` */
+
+insert  into `dbmst`(`cmp_name`,`db_year`,`db_name`,`dbmonth`,`dbname`,`dbyear`) values 
+('DHANANI FROZAL','2018','dhananiforzal',5,'dhananiforzal','2018');
 
 /*Table structure for table `form_mst` */
 
@@ -238,13 +328,15 @@ CREATE TABLE `oldb2_1` (
   `OPB` decimal(15,3) DEFAULT NULL,
   `DR` decimal(15,3) DEFAULT NULL,
   `CR` decimal(15,3) DEFAULT NULL,
-  `BAL` decimal(15,3) DEFAULT NULL
+  `BAL` decimal(15,3) DEFAULT NULL,
+  `AMOUNT_TYPE` tinyint(1) DEFAULT '0' COMMENT '0-USD, 1-RS'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `oldb2_1` */
 
-insert  into `oldb2_1`(`AC_CD`,`OPB`,`DR`,`CR`,`BAL`) values 
-('AM000005',0.000,0.000,24000.000,0.000);
+insert  into `oldb2_1`(`AC_CD`,`OPB`,`DR`,`CR`,`BAL`,`AMOUNT_TYPE`) values 
+('AM000005',0.000,3000.000,24000.000,0.000,0),
+('AM000006',200.000,0.000,0.000,0.000,1);
 
 /*Table structure for table `oldb2_2` */
 
@@ -265,7 +357,9 @@ CREATE TABLE `oldb2_2` (
 insert  into `oldb2_2`(`DOC_REF_NO`,`DOC_CD`,`DOC_DATE`,`AC_CD`,`DRCR`,`VAL`,`PARTICULAR`) values 
 ('OPB','OPB','2018-12-22','AM000005','0',0.00000,''),
 ('PB000001','PB','2018-12-24','AM000005','1',24000.00000,'Purchase Bill'),
-('PB000001','PB','2018-12-24','AM000003','0',24000.00000,'Purchase Bill');
+('PB000001','PB','2018-12-24','AM000003','0',24000.00000,'Purchase Bill'),
+('SL00002','SL','2018-12-30','AM000005','0',3000.00000,'SALES BILL'),
+('OPB','OPB','2018-12-30','AM000006','0',200.00000,'');
 
 /*Table structure for table `purchase_bill_details` */
 
@@ -333,7 +427,8 @@ CREATE TABLE `sale_bill_detail` (
 /*Data for the table `sale_bill_detail` */
 
 insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values 
-('SL00001',1,'SL000001',10.00000,100.00000,1000.00000);
+('SL00001',1,'SL000001',10.00000,100.00000,1000.00000),
+('SL00002',1,'SL000003',15.00000,200.00000,3000.00000);
 
 /*Table structure for table `sale_bill_head` */
 
@@ -343,6 +438,7 @@ CREATE TABLE `sale_bill_head` (
   `ref_no` varchar(7) NOT NULL,
   `voucher_date` date DEFAULT NULL,
   `bill_no` varchar(15) NOT NULL,
+  `amount_type` int(3) DEFAULT NULL,
   `fk_account_id` varchar(10) NOT NULL,
   `total_qty` decimal(15,5) NOT NULL DEFAULT '0.00000',
   `total_rate` decimal(15,5) NOT NULL DEFAULT '0.00000',
@@ -364,8 +460,9 @@ CREATE TABLE `sale_bill_head` (
 
 /*Data for the table `sale_bill_head` */
 
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values 
-('SL00001','2018-12-26','1','AM000005',10.00000,0.00000,1000.00000,0.000,0.000,1000.000,1000.000,0.000,1000.000,'','2018-12-01',0,1,0,'2018-12-26 08:08:04');
+insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values 
+('SL00001','2018-12-26','1',NULL,'AM000005',10.00000,0.00000,1000.00000,0.000,0.000,1000.000,1000.000,0.000,1000.000,'','2018-12-01',0,1,0,'2018-12-26 08:08:04'),
+('SL00002','2018-12-30','2',0,'AM000005',15.00000,0.00000,3000.00000,0.000,0.000,3000.000,3000.000,0.000,3000.000,'','2018-12-01',0,1,1,'2018-12-30 18:50:46');
 
 /*Table structure for table `slab_category` */
 
@@ -416,7 +513,7 @@ insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`bloc
 (5,'SL000004',0.000,0.000,0.000,0.000,0.000,'2018-12-24 21:44:06'),
 (6,'SL000005',0.000,0.000,0.000,0.000,0.000,'2018-12-24 21:44:17'),
 (7,'SL000001',0.000,18.000,0.000,3.000,NULL,'2018-12-24 21:59:33'),
-(8,'SL000003',0.000,29.000,0.000,4.000,NULL,'2018-12-24 21:59:47');
+(8,'SL000003',0.000,29.000,15.000,4.000,NULL,'2018-12-24 21:59:47');
 
 /*Table structure for table `stock0_2` */
 
@@ -434,7 +531,7 @@ CREATE TABLE `stock0_2` (
   `sal_r` decimal(10,2) DEFAULT NULL,
   `time_stamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stock2_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
 /*Data for the table `stock0_2` */
 
@@ -445,7 +542,8 @@ insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`op
 (16,'BK000001','SL000001',2,NULL,15.00,NULL,NULL,NULL,'2018-12-24 22:04:58'),
 (17,'BK000001','SL000003',2,NULL,25.00,NULL,NULL,NULL,'2018-12-24 22:04:58'),
 (18,'BK000002','SL000001',2,NULL,3.00,NULL,NULL,NULL,'2018-12-24 22:26:05'),
-(19,'BK000002','SL000003',2,NULL,4.00,NULL,NULL,NULL,'2018-12-24 22:26:05');
+(19,'BK000002','SL000003',2,NULL,4.00,NULL,NULL,NULL,'2018-12-24 22:26:05'),
+(21,'SL00002','SL000003',4,NULL,NULL,NULL,15.00,NULL,'2018-12-30 18:50:46');
 
 /*Table structure for table `sub_category` */
 

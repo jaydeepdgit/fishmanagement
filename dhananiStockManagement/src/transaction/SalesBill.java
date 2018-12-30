@@ -291,6 +291,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 lb.setDateChooserProperty(jtxtVDate);
                 jtxtVDate.requestFocusInWindow();
                 jtxtVDate.selectAll();
+                jcmbPmt.setSelectedIndex(0);
             }
 
             @Override
@@ -308,6 +309,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jtxtVoucher.setEnabled(!bFlag);
                 jtxtInvoiceNo.setEnabled(false);
                 jtxtRemarks.setEnabled(bFlag);
+                jcmbPmt.setEnabled(bFlag);
                 jtxtPDate.setEnabled(bFlag);
                 jBillDateBtn1.setEnabled(bFlag);
                 jTable1.setEnabled(bFlag);
@@ -356,6 +358,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     jtxtVoucher.setText(viewDataRs.getString("ref_no").substring(initial.length()));
                     jtxtVDate.setText(lb.ConvertDateFormetForDBForConcurrency(viewDataRs.getString("voucher_date")));
                     jtxtInvoiceNo.setText(viewDataRs.getString("bill_no"));
+                    jcmbPmt.setSelectedIndex(viewDataRs.getInt("amount_type"));
                     jtxtACAlias.setText(lb.getAccountMstName(viewDataRs.getString("fk_account_id"), "N"));
                     jlblQty.setText(lb.Convert2DecFmt(viewDataRs.getDouble("total_qty")));
                     jlblAmt.setText(lb.getIndianFormat(viewDataRs.getDouble("total_amt")));
@@ -443,17 +446,17 @@ public class SalesBill extends javax.swing.JInternalFrame {
         PreparedStatement psLocal = null;
         int change = 0;
         if (navLoad.getMode().equalsIgnoreCase("N")) {
-            sql = "INSERT INTO sale_bill_head(voucher_date, bill_no, fk_account_id, total_qty, total_amt, disc_per, disc_rs, amount_total, bill_amount, adj_amount, net_amount, remark, p_date, chck, user_cd, ref_no) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO sale_bill_head(voucher_date, bill_no, amount_type, fk_account_id, total_qty, total_amt, disc_per, disc_rs, amount_total, bill_amount, adj_amount, net_amount, remark, p_date, chck, user_cd, ref_no) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             ref_no = lb.generateKey("sale_bill_head", "ref_no", 7, initial);
         } else if (navLoad.getMode().equalsIgnoreCase("E")) {
             SalesBillUpdate sb = new SalesBillUpdate();
-            //sb.deleteEntry(ref_no);
+            sb.deleteEntry(ref_no);
 
             sql = "DELETE FROM sale_bill_detail WHERE ref_no='"+ ref_no +"'";
             psLocal = dataConnection.prepareStatement(sql);
             change += psLocal.executeUpdate();
 
-            sql = "UPDATE sale_bill_head SET voucher_date = ?, bill_no = ?, fk_account_id = ?, total_qty = ?, total_amt = ?, disc_per = ?, disc_rs = ?, amount_total = ?, bill_amount = ?, adj_amount = ?, net_amount = ?, remark = ?, p_date = ?, chck = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE ref_no = ?";
+            sql = "UPDATE sale_bill_head SET voucher_date = ?, bill_no = ?, amount_type = ?, fk_account_id = ?, total_qty = ?, total_amt = ?, disc_per = ?, disc_rs = ?, amount_total = ?, bill_amount = ?, adj_amount = ?, net_amount = ?, remark = ?, p_date = ?, chck = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE ref_no = ?";
         }
         int check = 0;
         String p_date = jtxtPDate.getText();
@@ -465,20 +468,21 @@ public class SalesBill extends javax.swing.JInternalFrame {
         psLocal = dataConnection.prepareStatement(sql);
         psLocal.setString(1, lb.tempConvertFormatForDBorConcurrency(jtxtVDate.getText())); // Voucher Date
         psLocal.setString(2, jtxtInvoiceNo.getText()); // Bill No
-        psLocal.setString(3, lb.getAccountMstName(jtxtACAlias.getText(), "C")); // AC CD
-        psLocal.setDouble(4, lb.replaceAll(jlblQty.getText())); // Total Qty
-        psLocal.setDouble(5, lb.replaceAll(jlblAmt.getText())); // Total Amt
-        psLocal.setDouble(6, lb.replaceAll(jtxtDiscPer.getText())); // Disc Per
-        psLocal.setDouble(7, lb.replaceAll(jtxtDiscRs.getText())); // Disc Rs
-        psLocal.setDouble(8, lb.replaceAll(jtxtTotalAmt.getText())); // Total Amt
-        psLocal.setDouble(9, lb.replaceAll(jtxtBillAmount.getText())); // Bill Amt
-        psLocal.setDouble(10, lb.replaceAll(jtxtAdjustAmt.getText())); // Adjustment
-        psLocal.setDouble(11, lb.replaceAll(jtxtNetAmt.getText())); // Net Amt
-        psLocal.setString(12, jtxtRemarks.getText()); // Remarks
-        psLocal.setString(13, p_date); // P_DATE
-        psLocal.setInt(14, check); // CHECK
-        psLocal.setInt(15, DeskFrame.user_id); // User CD
-        psLocal.setString(16, ref_no); // Ref No
+        psLocal.setInt(3, jcmbPmt.getSelectedIndex()); // amount type
+        psLocal.setString(4, lb.getAccountMstName(jtxtACAlias.getText(), "C")); // AC CD
+        psLocal.setDouble(5, lb.replaceAll(jlblQty.getText())); // Total Qty
+        psLocal.setDouble(6, lb.replaceAll(jlblAmt.getText())); // Total Amt
+        psLocal.setDouble(7, lb.replaceAll(jtxtDiscPer.getText())); // Disc Per
+        psLocal.setDouble(8, lb.replaceAll(jtxtDiscRs.getText())); // Disc Rs
+        psLocal.setDouble(9, lb.replaceAll(jtxtTotalAmt.getText())); // Total Amt
+        psLocal.setDouble(10, lb.replaceAll(jtxtBillAmount.getText())); // Bill Amt
+        psLocal.setDouble(11, lb.replaceAll(jtxtAdjustAmt.getText())); // Adjustment
+        psLocal.setDouble(12, lb.replaceAll(jtxtNetAmt.getText())); // Net Amt
+        psLocal.setString(13, jtxtRemarks.getText()); // Remarks
+        psLocal.setString(14, p_date); // P_DATE
+        psLocal.setInt(15, check); // CHECK
+        psLocal.setInt(16, DeskFrame.user_id); // User CD
+        psLocal.setString(17, ref_no); // Ref No
         change += psLocal.executeUpdate();
 
         sql = "INSERT INTO sale_bill_detail(sr_no, fk_slab_category_id, qty, rate, amt, ref_no) VALUES (?, ?, ?, ?, ?, ?)";
@@ -502,7 +506,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
             }
         }
         SalesBillUpdate sb = new SalesBillUpdate();
-        //sb.addEntry(ref_no);
+        sb.addEntry(ref_no);
         return change;
     }
 
@@ -585,6 +589,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jtxtPDate = new javax.swing.JTextField();
         jBillDateBtn1 = new javax.swing.JButton();
         jbtnAdd = new javax.swing.JButton();
+        jcmbPmt = new javax.swing.JComboBox();
+        jLabel6 = new javax.swing.JLabel();
         jlblAmt = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jtxtRemarks = new javax.swing.JTextField();
@@ -648,7 +654,6 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable1.setMinimumSize(new java.awt.Dimension(75, 0));
         jTable1.setRowHeight(23);
         jTable1.getTableHeader().setReorderingAllowed(false);
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -786,17 +791,17 @@ public class SalesBill extends javax.swing.JInternalFrame {
 
         jtxtACAlias.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jtxtACAlias.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 0, 0)));
-        jtxtACAlias.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent evt) {
-                jtxtACAliasComponentResized(evt);
-            }
-        });
         jtxtACAlias.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtACAliasFocusLost(evt);
+            }
             public void focusGained(java.awt.event.FocusEvent evt) {
                 jtxtACAliasFocusGained(evt);
             }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jtxtACAliasFocusLost(evt);
+        });
+        jtxtACAlias.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jtxtACAliasComponentResized(evt);
             }
         });
         jtxtACAlias.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -850,6 +855,26 @@ public class SalesBill extends javax.swing.JInternalFrame {
             }
         });
 
+        jcmbPmt.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jcmbPmt.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "USD", "RS" }));
+        jcmbPmt.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jcmbPmt.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jcmbPmtFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jcmbPmtFocusLost(evt);
+            }
+        });
+        jcmbPmt.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jcmbPmtKeyPressed(evt);
+            }
+        });
+
+        jLabel6.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jLabel6.setText("Amount Type : ");
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -861,7 +886,6 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jlblStart, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -873,13 +897,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         .addGap(0, 0, 0)
                         .addComponent(jBillDateBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jtxtInvoiceNo, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(32, 32, 32)
                         .addComponent(jLabel11)
@@ -887,8 +906,16 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         .addComponent(jtxtPDate, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
                         .addComponent(jBillDateBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 109, Short.MAX_VALUE)))
-                .addGap(0, 4, Short.MAX_VALUE))
+                        .addGap(0, 113, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(48, 48, 48)
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jcmbPmt, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
 
         jPanel3Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel22, jLabel23, jLabel25});
@@ -913,12 +940,18 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         .addComponent(jlblStart, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap())
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(12, 12, 12))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jcmbPmt, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addContainerGap())))
         );
 
         jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jBillDateBtn, jLabel2, jtxtVDate});
@@ -1221,17 +1254,17 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jtxtItemName.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
         jtxtItemName.setMinimumSize(new java.awt.Dimension(2, 25));
         jtxtItemName.setPreferredSize(new java.awt.Dimension(2, 25));
-        jtxtItemName.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent evt) {
-                jtxtItemNameComponentResized(evt);
-            }
-        });
         jtxtItemName.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtItemNameFocusLost(evt);
+            }
             public void focusGained(java.awt.event.FocusEvent evt) {
                 jtxtItemNameFocusGained(evt);
             }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jtxtItemNameFocusLost(evt);
+        });
+        jtxtItemName.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jtxtItemNameComponentResized(evt);
             }
         });
         jtxtItemName.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1438,7 +1471,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
         accountPickList.pickListKeyPress(evt);
         lb.downFocus(evt, navLoad);
         if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            jtxtItemName.requestFocusInWindow();
+            jcmbPmt.requestFocusInWindow();
         }
     }//GEN-LAST:event_jtxtACAliasKeyPressed
 
@@ -1448,7 +1481,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
             PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT name FROM account_master WHERE name LIKE '%"+ jtxtACAlias.getText().toUpperCase() +"%'");
             accountPickList.setValidation(dataConnection.prepareStatement("SELECT name FROM account_master WHERE name = ?"));
             accountPickList.setPreparedStatement(pstLocal);
-            accountPickList.setNextComponent(jtxtItemName);
+            accountPickList.setNextComponent(jcmbPmt);
             accountPickList.pickListKeyRelease(evt);
         } catch (Exception ex) {
             lb.printToLogFile("Exception at jtxtACAliasKeyReleased In Tax Invoice", ex);
@@ -1788,6 +1821,18 @@ public class SalesBill extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_jbtnDeleteActionPerformed
 
+    private void jcmbPmtFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jcmbPmtFocusGained
+        //lb.englishKeyPress();
+    }//GEN-LAST:event_jcmbPmtFocusGained
+
+    private void jcmbPmtFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jcmbPmtFocusLost
+
+    }//GEN-LAST:event_jcmbPmtFocusLost
+
+    private void jcmbPmtKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcmbPmtKeyPressed
+        lb.enterFocus(evt, jtxtItemName);
+    }//GEN-LAST:event_jcmbPmtKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBillDateBtn;
     private javax.swing.JButton jBillDateBtn1;
@@ -1810,6 +1855,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -1820,6 +1866,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private javax.swing.JButton jbtnAdd;
     private javax.swing.JButton jbtnClear;
     private javax.swing.JButton jbtnDelete;
+    private javax.swing.JComboBox jcmbPmt;
     private javax.swing.JLabel jlblAmt;
     private javax.swing.JLabel jlblEditNo;
     private javax.swing.JLabel jlblQty;

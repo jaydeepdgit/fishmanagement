@@ -1047,11 +1047,11 @@ public class DeskFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jmnPurchaseAvarageActionPerformed
 
     private void jmnPurchaseBill2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnPurchaseBill2ActionPerformed
-        int index = checkAlradyOpen(Constants.SALES_BILL_FORM_NAME);
+        int index = checkAlradyOpen(Constants.SALES_BILL_FORM_NAME1);
         if (index == -1) {
             SalesBill sb = new SalesBill(0);
-            addOnScreen(sb, Constants.SALES_BILL_FORM_NAME);
-            sb.setTitle(Constants.SALES_BILL_FORM_NAME);
+            addOnScreen(sb, Constants.SALES_BILL_FORM_NAME1);
+            sb.setTitle(Constants.SALES_BILL_FORM_NAME1);
         } else {
             tabbedPane.setSelectedIndex(index);
         }

@@ -58,6 +58,7 @@ public class Constants {
     public static String PURCHASE_BILL_FORM_NAME = "PURCHASE BILL";
     public static String BREAK_UP_FORM_NAME = "BREAK UP";
     public static String SALES_BILL_FORM_NAME = "SALES BILL";
+    public static String SALES_BILL_FORM_NAME1 = "SALES BILL";
 
     // REPORT
     public static String PURCHASE_AVERAGE_FORM_NAME = "PURCHASE AVERAGE";
@@ -156,4 +157,7 @@ public class Constants {
     public static String INVALID_S_GST = "Invalid S GST";
     public static String INVALID_I_GST = "Invalid I GST";
     public static String INVALID_ITEM = "Invalid Item Name";
+    
+    public static String USD = "USD";
+    public static String RS = "RS";
 }
