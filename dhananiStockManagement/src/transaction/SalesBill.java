@@ -16,8 +16,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -27,15 +25,12 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import oldbupdate.SalesBillUpdate;
 import dhananistockmanagement.MainClass;
-import support.EmailSelect;
 import support.HeaderIntFrame1;
 import support.Library;
 import support.NavigationPanel1;
 import support.OurDateChooser;
 import support.PickList;
 import support.ReportTable;
-import support.VoucherDisplay;
-import static dhananistockmanagement.DeskFrame.SLS_CHR_LBL;
 import support.Constants;
 
 /**
@@ -51,7 +46,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     Connection dataConnection = DeskFrame.connMpAdmin;
     private int type = 0;
     private String initial = Constants.SALES_BILL_INITIAL;
-    private PickList accountPickList = null, itemPickList = null, unitPickList = null, cgstPickList = null, sgstPickList = null;
+    private PickList accountPickList = null, itemPickList = null, mainCategoryPickList = null, subCategoryPickList = null, gradePickList = null;
     String Syspath = System.getProperty("user.dir");
     private String view_title = Constants.SALES_BILL_FORM_NAME;
 
@@ -104,14 +99,25 @@ public class SalesBill extends javax.swing.JInternalFrame {
         accountPickList = new PickList(dataConnection);
         accountPickList.setLayer(getLayeredPane());
         accountPickList.setPickListComponent(jtxtACAlias);
-        accountPickList.setNextComponent(jtxtItemName);
+        accountPickList.setNextComponent(jtxtGradeCategory);
 
         itemPickList = new PickList(dataConnection);
         itemPickList.setLayer(getLayeredPane());
-        itemPickList.setPickListComponent(jtxtItemName);
+        itemPickList.setPickListComponent(jtxtGradeCategory);
         itemPickList.setNextComponent(jtxtQty);
-        itemPickList.setReturnComponent(new JTextField[]{jtxtItemName});
+        itemPickList.setReturnComponent(new JTextField[]{jtxtGradeCategory});
 
+        mainCategoryPickList = new PickList(dataConnection);
+
+        mainCategoryPickList.setLayer(getLayeredPane());
+        mainCategoryPickList.setPickListComponent(jtxtMainCategory);
+        mainCategoryPickList.setNextComponent(jtxtSubCategory);
+
+        subCategoryPickList = new PickList(dataConnection);
+
+        subCategoryPickList.setLayer(getLayeredPane());
+        subCategoryPickList.setPickListComponent(jtxtSubCategory);
+        subCategoryPickList.setNextComponent(jtxtGradeCategory);
     }
 
     private void makeChildTableSalesBill() {
@@ -138,9 +144,9 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private boolean reValidate(){
         boolean flag = true;
 
-        if(lb.isBlank(jtxtItemName)) {
+        if(lb.isBlank(jtxtGradeCategory)) {
             navLoad.setMessage(Constants.INVALID_ITEM);
-            jtxtItemName.requestFocusInWindow();
+            jtxtGradeCategory.requestFocusInWindow();
             flag = flag && false;
         }
 
@@ -314,7 +320,9 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jBillDateBtn1.setEnabled(bFlag);
                 jTable1.setEnabled(bFlag);
                 jtxtACAlias.setEnabled(bFlag);
-                jtxtItemName.setEnabled(bFlag);
+                jtxtMainCategory.setEnabled(bFlag);
+                jtxtSubCategory.setEnabled(bFlag);
+                jtxtGradeCategory.setEnabled(bFlag);
                 jtxtparticulars.setEnabled(false);
                 jtxtQty.setEnabled(bFlag);
                 jtxtRate.setEnabled(bFlag);
@@ -386,6 +394,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     while (viewDataRs.next()) {
                         Vector row = new Vector();
                         row.add(++i);
+                        row.add(lb.getMainCategory(viewDataRs.getString("fk_main_category_id"), "N"));
+                        row.add(lb.getSubCategory(viewDataRs.getString("fk_sub_category_id"), "N"));
                         row.add(lb.getSlabCategory(viewDataRs.getString("fk_slab_category_id"), "N"));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("qty")));
                         row.add(lb.getIndianFormat(viewDataRs.getDouble("rate")));
@@ -485,22 +495,25 @@ public class SalesBill extends javax.swing.JInternalFrame {
         psLocal.setString(17, ref_no); // Ref No
         change += psLocal.executeUpdate();
 
-        sql = "INSERT INTO sale_bill_detail(sr_no, fk_slab_category_id, qty, rate, amt, ref_no) VALUES (?, ?, ?, ?, ?, ?)";
+        sql = "INSERT INTO sale_bill_detail(sr_no, fk_main_category_id, fk_sub_category_id, fk_slab_category_id, qty, rate, amt, ref_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         psLocal = dataConnection.prepareStatement(sql);
         for (int i = 0; i < jTable1.getRowCount(); i++) {
-            String itm_cd = lb.getSlabCategory(jTable1.getValueAt(i, 1).toString(), "C"); // ITEM CD
-            String item_name = jTable1.getValueAt(i, 1).toString(); // ITEM NAME
-            double qty = lb.replaceAll(jTable1.getValueAt(i, 2).toString()); // QTY
-            double rate = lb.replaceAll(jTable1.getValueAt(i, 3).toString()); // RATE
-            double amount = lb.replaceAll(jTable1.getValueAt(i, 4).toString()); // AMOUNT
-            if(!(itm_cd.equalsIgnoreCase("0") || itm_cd.equalsIgnoreCase(""))) {
+            String main_category_cd = lb.getMainCategory(jTable1.getValueAt(i, 1).toString(), "C"); // ITEM CD
+            String sub_category_cd = lb.getSubCategory(jTable1.getValueAt(i, 2).toString(), "C"); // ITEM CD
+            String slab_category_cd = lb.getSlabCategory(jTable1.getValueAt(i, 3).toString(), "C"); // ITEM CD
+            double qty = lb.replaceAll(jTable1.getValueAt(i, 4).toString()); // QTY
+            double rate = lb.replaceAll(jTable1.getValueAt(i, 5).toString()); // RATE
+            double amount = lb.replaceAll(jTable1.getValueAt(i, 6).toString()); // AMOUNT
+            if(!(slab_category_cd.equalsIgnoreCase("0") || slab_category_cd.equalsIgnoreCase(""))) {
                 if (qty > 0) { // CONDITION QTY
                     psLocal.setInt(1, i + 1); // SR NO
-                    psLocal.setString(2, itm_cd); // ITEM CD
-                    psLocal.setDouble(3, qty); // QTY
-                    psLocal.setDouble(4, rate); // RATE
-                    psLocal.setDouble(5, amount); // AMT
-                    psLocal.setString(6, ref_no); // REF NO
+                    psLocal.setString(2, main_category_cd); // Main Category CD
+                    psLocal.setString(3, sub_category_cd); // Sub Category CD
+                    psLocal.setString(4, slab_category_cd); // Slab Category CD
+                    psLocal.setDouble(5, qty); // QTY
+                    psLocal.setDouble(6, rate); // RATE
+                    psLocal.setDouble(7, amount); // AMT
+                    psLocal.setString(8, ref_no); // REF NO
                     change += psLocal.executeUpdate();
                 }
             }
@@ -520,7 +533,9 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }
 
     private void clear() {
-        jtxtItemName.setText("");
+        jtxtMainCategory.setText("");
+        jtxtSubCategory.setText("");
+        jtxtGradeCategory.setText("");
         jtxtparticulars.setText("");
         jtxtQty.setText("0.00");
         jtxtRate.setText("0.00");
@@ -531,8 +546,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
         double qty = 0.00, amt = 0.00;
         for (int i = 0; i < jTable1.getRowCount(); i++) {
             jTable1.setValueAt(i+1, i, 0);
-            qty += lb.replaceAll(jTable1.getValueAt(i, 2).toString());
-            amt += lb.replaceAll(jTable1.getValueAt(i, 4).toString());
+            qty += lb.replaceAll(jTable1.getValueAt(i, 4).toString());
+            amt += lb.replaceAll(jTable1.getValueAt(i, 6).toString());
         }
         jlblQty.setText(lb.Convert2DecFmt(qty));
         jlblAmt.setText(lb.getIndianFormat(amt));
@@ -550,8 +565,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }
 
     private void setTextfieldsAtBottom() {
-        JComponent[] header = new JComponent[]{null, jtxtItemName, jtxtQty, jtxtRate, jtxtAmt};
-        JComponent[] footer = new JComponent[]{null, null, jlblQty, null, jlblAmt};
+        JComponent[] header = new JComponent[]{null, jtxtMainCategory, jtxtSubCategory, jtxtGradeCategory, jtxtQty, jtxtRate, jtxtAmt};
+        JComponent[] footer = new JComponent[]{null, null, null, null, jlblQty, null, jlblAmt};
         lb.setTable(jPanel1, jTable1, header, footer);
     }
     /**
@@ -615,10 +630,12 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jtxtAmt = new javax.swing.JTextField();
         jtxtRate = new javax.swing.JTextField();
         jtxtQty = new javax.swing.JTextField();
-        jtxtItemName = new javax.swing.JTextField();
+        jtxtGradeCategory = new javax.swing.JTextField();
         jtxtparticulars = new javax.swing.JTextArea();
         jbtnClear = new javax.swing.JButton();
         jbtnDelete = new javax.swing.JButton();
+        jtxtSubCategory = new javax.swing.JTextField();
+        jtxtMainCategory = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(211, 226, 245));
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -643,11 +660,11 @@ public class SalesBill extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Sr No.", "Item Name", "Qty", "Rate", "Amount"
+                "Sr No.", "Main Category", "Sub Category", "Grade Category", "Qty", "Rate", "Amount"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -673,11 +690,15 @@ public class SalesBill extends javax.swing.JInternalFrame {
             jTable1.getColumnModel().getColumn(1).setResizable(false);
             jTable1.getColumnModel().getColumn(1).setPreferredWidth(170);
             jTable1.getColumnModel().getColumn(2).setResizable(false);
-            jTable1.getColumnModel().getColumn(2).setPreferredWidth(60);
+            jTable1.getColumnModel().getColumn(2).setPreferredWidth(170);
             jTable1.getColumnModel().getColumn(3).setResizable(false);
-            jTable1.getColumnModel().getColumn(3).setPreferredWidth(70);
+            jTable1.getColumnModel().getColumn(3).setPreferredWidth(170);
             jTable1.getColumnModel().getColumn(4).setResizable(false);
-            jTable1.getColumnModel().getColumn(4).setPreferredWidth(100);
+            jTable1.getColumnModel().getColumn(4).setPreferredWidth(60);
+            jTable1.getColumnModel().getColumn(5).setResizable(false);
+            jTable1.getColumnModel().getColumn(5).setPreferredWidth(70);
+            jTable1.getColumnModel().getColumn(6).setResizable(false);
+            jTable1.getColumnModel().getColumn(6).setPreferredWidth(100);
         }
 
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -792,11 +813,11 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jtxtACAlias.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jtxtACAlias.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 0, 0)));
         jtxtACAlias.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jtxtACAliasFocusLost(evt);
-            }
             public void focusGained(java.awt.event.FocusEvent evt) {
                 jtxtACAliasFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtACAliasFocusLost(evt);
             }
         });
         jtxtACAlias.addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -900,16 +921,16 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jtxtInvoiceNo, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(32, 32, 32)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel11)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jtxtPDate, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
                         .addComponent(jBillDateBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 113, Short.MAX_VALUE))
+                        .addGap(0, 135, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(48, 48, 48)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jcmbPmt, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -940,23 +961,17 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         .addComponent(jlblStart, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(12, 12, 12))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jcmbPmt, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addContainerGap())))
+                    .addComponent(jcmbPmt, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(7, 7, 7))
         );
 
         jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jBillDateBtn, jLabel2, jtxtVDate});
 
-        jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jBillDateBtn1, jLabel11, jLabel23, jLabel25, jbtnAdd, jtxtACAlias, jtxtInvoiceNo, jtxtPDate});
+        jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jBillDateBtn1, jLabel11, jLabel23, jLabel25, jLabel6, jbtnAdd, jcmbPmt, jtxtACAlias, jtxtInvoiceNo, jtxtPDate});
 
         jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel22, jlblStart, jtxtVoucher});
 
@@ -1250,32 +1265,32 @@ public class SalesBill extends javax.swing.JInternalFrame {
             }
         });
 
-        jtxtItemName.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
-        jtxtItemName.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
-        jtxtItemName.setMinimumSize(new java.awt.Dimension(2, 25));
-        jtxtItemName.setPreferredSize(new java.awt.Dimension(2, 25));
-        jtxtItemName.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jtxtItemNameFocusLost(evt);
-            }
+        jtxtGradeCategory.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jtxtGradeCategory.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtGradeCategory.setMinimumSize(new java.awt.Dimension(2, 25));
+        jtxtGradeCategory.setPreferredSize(new java.awt.Dimension(2, 25));
+        jtxtGradeCategory.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
-                jtxtItemNameFocusGained(evt);
+                jtxtGradeCategoryFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtGradeCategoryFocusLost(evt);
             }
         });
-        jtxtItemName.addComponentListener(new java.awt.event.ComponentAdapter() {
+        jtxtGradeCategory.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
-                jtxtItemNameComponentResized(evt);
+                jtxtGradeCategoryComponentResized(evt);
             }
         });
-        jtxtItemName.addKeyListener(new java.awt.event.KeyAdapter() {
+        jtxtGradeCategory.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                jtxtItemNameKeyPressed(evt);
+                jtxtGradeCategoryKeyPressed(evt);
             }
             public void keyReleased(java.awt.event.KeyEvent evt) {
-                jtxtItemNameKeyReleased(evt);
+                jtxtGradeCategoryKeyReleased(evt);
             }
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                jtxtItemNameKeyTyped(evt);
+                jtxtGradeCategoryKeyTyped(evt);
             }
         });
 
@@ -1309,6 +1324,64 @@ public class SalesBill extends javax.swing.JInternalFrame {
             }
         });
 
+        jtxtSubCategory.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jtxtSubCategory.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtSubCategory.setMinimumSize(new java.awt.Dimension(2, 25));
+        jtxtSubCategory.setPreferredSize(new java.awt.Dimension(2, 25));
+        jtxtSubCategory.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtSubCategoryFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtSubCategoryFocusLost(evt);
+            }
+        });
+        jtxtSubCategory.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jtxtSubCategoryComponentResized(evt);
+            }
+        });
+        jtxtSubCategory.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyTyped(evt);
+            }
+        });
+
+        jtxtMainCategory.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jtxtMainCategory.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtMainCategory.setMinimumSize(new java.awt.Dimension(2, 25));
+        jtxtMainCategory.setPreferredSize(new java.awt.Dimension(2, 25));
+        jtxtMainCategory.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtMainCategoryFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtMainCategoryFocusLost(evt);
+            }
+        });
+        jtxtMainCategory.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jtxtMainCategoryComponentResized(evt);
+            }
+        });
+        jtxtMainCategory.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtMainCategoryKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jtxtMainCategoryKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtMainCategoryKeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -1320,13 +1393,17 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jtxtItemName, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jtxtQty, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(97, 97, 97)
-                        .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(275, 275, 275)
-                        .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtGradeCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtQty, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jtxtparticulars, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1367,13 +1444,15 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtGradeCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jtxtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtItemName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jlblAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1408,7 +1487,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jlblAmt, jlblQty});
 
-        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jtxtAmt, jtxtItemName, jtxtQty, jtxtRate});
+        layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jtxtAmt, jtxtGradeCategory, jtxtMainCategory, jtxtQty, jtxtRate, jtxtSubCategory});
 
         layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jbtnClear, jbtnDelete});
 
@@ -1425,11 +1504,13 @@ public class SalesBill extends javax.swing.JInternalFrame {
             if(!navLoad.getMode().equalsIgnoreCase("")) {
                 int rowSel = jTable1.getSelectedRow();
                 if(rowSel != -1) {
-                    jtxtItemName.setText(jTable1.getValueAt(rowSel, 1).toString());
-                    jtxtQty.setText(jTable1.getValueAt(rowSel, 2).toString());
-                    jtxtRate.setText(jTable1.getValueAt(rowSel, 3).toString());
-                    jtxtAmt.setText(jTable1.getValueAt(rowSel, 4).toString());
-                    jtxtItemName.requestFocusInWindow();
+                    jtxtMainCategory.setText(jTable1.getValueAt(rowSel, 1).toString());
+                    jtxtSubCategory.setText(jTable1.getValueAt(rowSel, 2).toString());
+                    jtxtGradeCategory.setText(jTable1.getValueAt(rowSel, 3).toString());
+                    jtxtQty.setText(jTable1.getValueAt(rowSel, 4).toString());
+                    jtxtRate.setText(jTable1.getValueAt(rowSel, 5).toString());
+                    jtxtAmt.setText(jTable1.getValueAt(rowSel, 6).toString());
+                    jtxtMainCategory.requestFocusInWindow();
                 }
             }
         }
@@ -1713,20 +1794,20 @@ public class SalesBill extends javax.swing.JInternalFrame {
         lb.onlyNumber(evt, 15);
     }//GEN-LAST:event_jtxtQtyKeyTyped
 
-    private void jtxtItemNameComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jtxtItemNameComponentResized
+    private void jtxtGradeCategoryComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jtxtGradeCategoryComponentResized
         setTextfieldsAtBottom();
-    }//GEN-LAST:event_jtxtItemNameComponentResized
+    }//GEN-LAST:event_jtxtGradeCategoryComponentResized
 
-    private void jtxtItemNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtItemNameFocusGained
+    private void jtxtGradeCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtGradeCategoryFocusGained
         lb.selectAll(evt);
-    }//GEN-LAST:event_jtxtItemNameFocusGained
+    }//GEN-LAST:event_jtxtGradeCategoryFocusGained
 
-    private void jtxtItemNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtItemNameFocusLost
+    private void jtxtGradeCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtGradeCategoryFocusLost
         itemPickList.setVisible(false);
         try {
             PreparedStatement psLocal = null;
             ResultSet rsLocal = null;
-            String sql = "SELECT rate FROM slab_category WHERE name LIKE '%"+ jtxtItemName.getText() +"%'";
+            String sql = "SELECT rate FROM slab_category WHERE name LIKE '%"+ jtxtGradeCategory.getText() +"%'";
             psLocal = dataConnection.prepareStatement(sql);
             rsLocal = psLocal.executeQuery();
             if(rsLocal.next()) {
@@ -1735,10 +1816,10 @@ public class SalesBill extends javax.swing.JInternalFrame {
         } catch(Exception ex) {
             lb.printToLogFile("Exception at jtxtItemNameFocusLost In Tax Invoice", ex);
         }
-    }//GEN-LAST:event_jtxtItemNameFocusLost
+    }//GEN-LAST:event_jtxtGradeCategoryFocusLost
 
-    private void jtxtItemNameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtItemNameKeyPressed
-        itemPickList.setLocation(jtxtItemName.getX(), jtxtItemName.getY() + jtxtItemName.getHeight());
+    private void jtxtGradeCategoryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtGradeCategoryKeyPressed
+        itemPickList.setLocation(jtxtGradeCategory.getX(), jtxtGradeCategory.getY() + jtxtGradeCategory.getHeight());
         itemPickList.pickListKeyPress(evt);
         if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
             if (evt.getModifiers() == KeyEvent.SHIFT_MASK) {
@@ -1746,13 +1827,13 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jtxtDiscPer.requestFocusInWindow();
             }
         }
-    }//GEN-LAST:event_jtxtItemNameKeyPressed
+    }//GEN-LAST:event_jtxtGradeCategoryKeyPressed
 
-    private void jtxtItemNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtItemNameKeyReleased
+    private void jtxtGradeCategoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtGradeCategoryKeyReleased
         try {
-            itemPickList.setReturnComponent(new JTextField[]{jtxtItemName});
+            itemPickList.setReturnComponent(new JTextField[]{jtxtGradeCategory});
             PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT name FROM slab_category "
-                    + " WHERE name LIKE '%" + jtxtItemName.getText() +"%' GROUP BY id ORDER BY id");
+                    + " WHERE name LIKE '%" + jtxtGradeCategory.getText() +"%' GROUP BY id ORDER BY id");
             itemPickList.setValidation(dataConnection.prepareStatement("SELECT name FROM slab_category WHERE name = ?"));
             itemPickList.setFirstAssociation(new int[]{0});
             itemPickList.setSecondAssociation(new int[]{0});
@@ -1761,11 +1842,11 @@ public class SalesBill extends javax.swing.JInternalFrame {
         } catch (Exception ex) {
             lb.printToLogFile("Exception at jtxtItemNameKeyReleased In Tax Invoice", ex);
         }
-    }//GEN-LAST:event_jtxtItemNameKeyReleased
+    }//GEN-LAST:event_jtxtGradeCategoryKeyReleased
 
-    private void jtxtItemNameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtItemNameKeyTyped
+    private void jtxtGradeCategoryKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtGradeCategoryKeyTyped
         lb.fixLength(evt, 200);
-    }//GEN-LAST:event_jtxtItemNameKeyTyped
+    }//GEN-LAST:event_jtxtGradeCategoryKeyTyped
 
     private void jbtnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnAddActionPerformed
         int rowSel = jTable1.getSelectedRow();
@@ -1773,22 +1854,26 @@ public class SalesBill extends javax.swing.JInternalFrame {
             if(rowSel == -1) {
                 Vector row = new Vector();
                 row.add("");
-                row.add(jtxtItemName.getText());
+                row.add(jtxtMainCategory.getText());
+                row.add(jtxtSubCategory.getText());
+                row.add(jtxtGradeCategory.getText());
                 row.add(lb.Convert2DecFmt(lb.replaceAll(jtxtQty.getText())));
                 row.add(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())));
                 row.add(lb.getIndianFormat(lb.replaceAll(jtxtAmt.getText())));
                 dtm.addRow(row);
             } else {
-                jTable1.setValueAt(jtxtItemName.getText(), rowSel, 1);
-                jTable1.setValueAt(lb.Convert2DecFmt(lb.replaceAll(jtxtQty.getText())), rowSel, 2);
-                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())), rowSel, 3);
-                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtAmt.getText())), rowSel, 4);
+                jTable1.setValueAt(jtxtMainCategory.getText(), rowSel, 1);
+                jTable1.setValueAt(jtxtSubCategory.getText(), rowSel, 2);
+                jTable1.setValueAt(jtxtGradeCategory.getText(), rowSel, 3);
+                jTable1.setValueAt(lb.Convert2DecFmt(lb.replaceAll(jtxtQty.getText())), rowSel, 4);
+                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())), rowSel, 5);
+                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtAmt.getText())), rowSel, 6);
             }
             updateLabel();
             clear();
             jTable1.clearSelection();
             if (JOptionPane.showConfirmDialog(this, Constants.ADD_MORE_ENTRY, DeskFrame.TITLE, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                jtxtItemName.requestFocusInWindow();
+                jtxtMainCategory.requestFocusInWindow();
             } else {
                 //jtxtNoofParcel.requestFocusInWindow();
             }
@@ -1830,8 +1915,80 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jcmbPmtFocusLost
 
     private void jcmbPmtKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcmbPmtKeyPressed
-        lb.enterFocus(evt, jtxtItemName);
+        lb.enterFocus(evt, jtxtGradeCategory);
     }//GEN-LAST:event_jcmbPmtKeyPressed
+
+    private void jtxtSubCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusLost
+        subCategoryPickList.setVisible(false);
+    }//GEN-LAST:event_jtxtSubCategoryFocusLost
+
+    private void jtxtSubCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtSubCategoryFocusGained
+
+    private void jtxtSubCategoryComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jtxtSubCategoryComponentResized
+        setTextfieldsAtBottom();
+    }//GEN-LAST:event_jtxtSubCategoryComponentResized
+
+    private void jtxtSubCategoryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyPressed
+        subCategoryPickList.setLocation(jtxtSubCategory.getX() + jPanel3.getX(), jtxtSubCategory.getY() + jtxtSubCategory.getHeight() + jPanel3.getY());
+        subCategoryPickList.pickListKeyPress(evt);
+    }//GEN-LAST:event_jtxtSubCategoryKeyPressed
+
+    private void jtxtSubCategoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyReleased
+        try {
+            String sql = "SELECT name FROM sub_category WHERE fk_main_category_id = '"+ lb.getMainCategory(jtxtMainCategory.getText(), "C") 
+                +"' AND status = 0 AND name LIKE '%"+ jtxtSubCategory.getText() +"%'";
+            subCategoryPickList.setReturnComponent(new JTextField[]{jtxtSubCategory});
+            PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
+            subCategoryPickList.setValidation(dataConnection.prepareStatement("SELECT name FROM sub_category WHERE status = 0 AND name = ?"));
+            subCategoryPickList.setFirstAssociation(new int[]{0});
+            subCategoryPickList.setSecondAssociation(new int[]{0});
+            subCategoryPickList.setPreparedStatement(pstLocal);
+            subCategoryPickList.pickListKeyRelease(evt);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at jtxtMainCategoryKeyReleased In Break Up", ex);
+        }
+    }//GEN-LAST:event_jtxtSubCategoryKeyReleased
+
+    private void jtxtSubCategoryKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyTyped
+        lb.fixLength(evt, 255);
+    }//GEN-LAST:event_jtxtSubCategoryKeyTyped
+
+    private void jtxtMainCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtMainCategoryFocusLost
+        mainCategoryPickList.setVisible(false);
+    }//GEN-LAST:event_jtxtMainCategoryFocusLost
+
+    private void jtxtMainCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtMainCategoryFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtMainCategoryFocusGained
+
+    private void jtxtMainCategoryComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jtxtMainCategoryComponentResized
+        setTextfieldsAtBottom();
+    }//GEN-LAST:event_jtxtMainCategoryComponentResized
+
+    private void jtxtMainCategoryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainCategoryKeyPressed
+        mainCategoryPickList.setLocation(jtxtMainCategory.getX() + jPanel3.getX(), jtxtMainCategory.getY() + jtxtMainCategory.getHeight() + jPanel3.getY());
+        mainCategoryPickList.pickListKeyPress(evt);
+    }//GEN-LAST:event_jtxtMainCategoryKeyPressed
+
+    private void jtxtMainCategoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainCategoryKeyReleased
+        try {
+            mainCategoryPickList.setReturnComponent(new JTextField[]{jtxtMainCategory});
+            PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT name FROM main_category WHERE status = 0 AND name LIKE '%"+ jtxtMainCategory.getText() +"%'");
+            mainCategoryPickList.setValidation(dataConnection.prepareStatement("SELECT name FROM main_category WHERE status = 0 AND name = ?"));
+            mainCategoryPickList.setFirstAssociation(new int[]{0});
+            mainCategoryPickList.setSecondAssociation(new int[]{0});
+            mainCategoryPickList.setPreparedStatement(pstLocal);
+            mainCategoryPickList.pickListKeyRelease(evt);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at jtxtMainCategoryKeyReleased In Break Up", ex);
+        }
+    }//GEN-LAST:event_jtxtMainCategoryKeyReleased
+
+    private void jtxtMainCategoryKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainCategoryKeyTyped
+        lb.fixLength(evt, 255);
+    }//GEN-LAST:event_jtxtMainCategoryKeyTyped
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBillDateBtn;
@@ -1879,13 +2036,15 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jtxtBillAmount;
     private javax.swing.JTextField jtxtDiscPer;
     private javax.swing.JTextField jtxtDiscRs;
+    private javax.swing.JTextField jtxtGradeCategory;
     private javax.swing.JTextField jtxtInvoiceNo;
-    private javax.swing.JTextField jtxtItemName;
+    private javax.swing.JTextField jtxtMainCategory;
     private javax.swing.JLabel jtxtNetAmt;
     private javax.swing.JTextField jtxtPDate;
     private javax.swing.JTextField jtxtQty;
     private javax.swing.JTextField jtxtRate;
     private javax.swing.JTextField jtxtRemarks;
+    private javax.swing.JTextField jtxtSubCategory;
     private javax.swing.JLabel jtxtTotalAmt;
     private javax.swing.JTextField jtxtVDate;
     private javax.swing.JTextField jtxtVoucher;

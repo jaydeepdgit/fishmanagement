@@ -1824,7 +1824,7 @@ public class Library {
         ResultSet rsLocal = null;
         String returnVal = "";
         String sql = "";
-        if (strVal.trim().equalsIgnoreCase("") && tag.equalsIgnoreCase("C")) {
+        if ((strVal == null || strVal.trim().equalsIgnoreCase("")) && tag.equalsIgnoreCase("C")) {
             return "0";
         }
         try {
@@ -1854,7 +1854,7 @@ public class Library {
         ResultSet rsLocal = null;
         String returnVal = "";
         String sql = "";
-        if (strVal.trim().equalsIgnoreCase("") && tag.equalsIgnoreCase("C")) {
+        if ((strVal == null || strVal.trim().equalsIgnoreCase("")) && tag.equalsIgnoreCase("C")) {
             return "0";
         }
         try {

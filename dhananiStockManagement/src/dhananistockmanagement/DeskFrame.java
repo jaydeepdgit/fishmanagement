@@ -51,11 +51,15 @@ import javax.swing.JPasswordField;
 import master.AccountMaster;
 import master.SlabCategory;
 import reports.PurchaseAverage;
+import reports.StockSummary;
+import reports.Workablity;
 import support.Constants;
 import utility.BackUp;
 import support.Library;
 import support.UnCaughtException;
+import transaction.BankPayment;
 import transaction.BreakUp;
+import transaction.CashPaymntRcpt;
 import transaction.PurchaseBill;
 import transaction.SalesBill;
 import utility.ChangeThemes;
@@ -531,8 +535,14 @@ public class DeskFrame extends javax.swing.JFrame {
         jmnPurchaseBill = new javax.swing.JMenuItem();
         jmnPurchaseBill1 = new javax.swing.JMenuItem();
         jmnPurchaseBill2 = new javax.swing.JMenuItem();
+        jmnCashPayment = new javax.swing.JMenuItem();
+        jmnCashReceipt = new javax.swing.JMenuItem();
+        jmnBankPayment = new javax.swing.JMenuItem();
+        jmnBankReceipt = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         jmnPurchaseAvarage = new javax.swing.JMenuItem();
+        jmnWorkablility = new javax.swing.JMenuItem();
+        jmnStockSummary = new javax.swing.JMenuItem();
         utility = new javax.swing.JMenu();
         jmnCmpnyStting = new javax.swing.JMenuItem();
         jmnManageUser = new javax.swing.JMenuItem();
@@ -633,7 +643,7 @@ public class DeskFrame extends javax.swing.JFrame {
         master.add(jmnMainCategory);
 
         jmnSubCategory.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
-        jmnSubCategory.setMnemonic('I');
+        jmnSubCategory.setMnemonic('S');
         jmnSubCategory.setText("SUB CATEGORY");
         jmnSubCategory.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -643,7 +653,7 @@ public class DeskFrame extends javax.swing.JFrame {
         master.add(jmnSubCategory);
 
         jmnSlabCategory.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
-        jmnSlabCategory.setMnemonic('I');
+        jmnSlabCategory.setMnemonic('S');
         jmnSlabCategory.setText("SLAB CATEGORY");
         jmnSlabCategory.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -679,7 +689,7 @@ public class DeskFrame extends javax.swing.JFrame {
         transaction.add(jmnPurchaseBill1);
 
         jmnPurchaseBill2.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
-        jmnPurchaseBill2.setMnemonic('B');
+        jmnPurchaseBill2.setMnemonic('S');
         jmnPurchaseBill2.setText("SALES BILL");
         jmnPurchaseBill2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -687,6 +697,46 @@ public class DeskFrame extends javax.swing.JFrame {
             }
         });
         transaction.add(jmnPurchaseBill2);
+
+        jmnCashPayment.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnCashPayment.setMnemonic('C');
+        jmnCashPayment.setText("CASH PAYMENT");
+        jmnCashPayment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnCashPaymentActionPerformed(evt);
+            }
+        });
+        transaction.add(jmnCashPayment);
+
+        jmnCashReceipt.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnCashReceipt.setMnemonic('C');
+        jmnCashReceipt.setText("CASH RECEIPT");
+        jmnCashReceipt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnCashReceiptActionPerformed(evt);
+            }
+        });
+        transaction.add(jmnCashReceipt);
+
+        jmnBankPayment.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnBankPayment.setMnemonic('B');
+        jmnBankPayment.setText("BANK PAYMENT");
+        jmnBankPayment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnBankPaymentActionPerformed(evt);
+            }
+        });
+        transaction.add(jmnBankPayment);
+
+        jmnBankReceipt.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnBankReceipt.setMnemonic('B');
+        jmnBankReceipt.setText("BANK RECEIPT");
+        jmnBankReceipt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnBankReceiptActionPerformed(evt);
+            }
+        });
+        transaction.add(jmnBankReceipt);
 
         jMenuBar1.add(transaction);
 
@@ -702,6 +752,26 @@ public class DeskFrame extends javax.swing.JFrame {
             }
         });
         jMenu1.add(jmnPurchaseAvarage);
+
+        jmnWorkablility.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnWorkablility.setMnemonic('W');
+        jmnWorkablility.setText("WORKABILITY");
+        jmnWorkablility.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnWorkablilityActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jmnWorkablility);
+
+        jmnStockSummary.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnStockSummary.setMnemonic('S');
+        jmnStockSummary.setText("STOCK SUMMARY");
+        jmnStockSummary.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnStockSummaryActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jmnStockSummary);
 
         jMenuBar1.add(jMenu1);
 
@@ -1057,12 +1127,83 @@ public class DeskFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jmnPurchaseBill2ActionPerformed
 
+    private void jmnWorkablilityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnWorkablilityActionPerformed
+        int index = checkAlradyOpen(Constants.WORKABILITY_FORM_NAME);
+        if (index == -1) {
+            Workablity wo = new Workablity();
+            addOnScreen(wo, Constants.WORKABILITY_FORM_NAME);
+            wo.setTitle(Constants.WORKABILITY_FORM_NAME);
+            wo.setStartupFocus();
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnWorkablilityActionPerformed
+
+    private void jmnCashPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnCashPaymentActionPerformed
+        int index = checkAlradyOpen(Constants.CASH_PAYMENT_FORM_NAME);
+        if (index == -1) {
+            CashPaymntRcpt cp = new CashPaymntRcpt(1);
+            addOnScreen(cp, Constants.CASH_PAYMENT_FORM_NAME);
+            cp.setTitle(Constants.CASH_PAYMENT_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnCashPaymentActionPerformed
+
+    private void jmnCashReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnCashReceiptActionPerformed
+        int index = checkAlradyOpen(Constants.CASH_RECEIPT_FORM_NAME);
+        if (index == -1) {
+            CashPaymntRcpt cp = new CashPaymntRcpt(2);
+            addOnScreen(cp, Constants.CASH_RECEIPT_FORM_NAME);
+            cp.setTitle(Constants.CASH_RECEIPT_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnCashReceiptActionPerformed
+
+    private void jmnBankPaymentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnBankPaymentActionPerformed
+        int index = checkAlradyOpen(Constants.BANK_PAYMENT_FORM_NAME);
+        if (index == -1) {
+            BankPayment bp = new BankPayment(0);
+            addOnScreen(bp, Constants.BANK_PAYMENT_FORM_NAME);
+            bp.setTitle(Constants.BANK_PAYMENT_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnBankPaymentActionPerformed
+
+    private void jmnBankReceiptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnBankReceiptActionPerformed
+        int index = checkAlradyOpen(Constants.BANK_RECEIPT_FORM_NAME);
+        if (index == -1) {
+            BankPayment bp = new BankPayment(1);
+            addOnScreen(bp, Constants.BANK_RECEIPT_FORM_NAME);
+            bp.setTitle(Constants.BANK_RECEIPT_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnBankReceiptActionPerformed
+
+    private void jmnStockSummaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnStockSummaryActionPerformed
+        int index = checkAlradyOpen(Constants.STOCK_SUMMARY_FORM_NAME);
+        if (index == -1) {
+            StockSummary bp = new StockSummary();
+            addOnScreen(bp, Constants.STOCK_SUMMARY_FORM_NAME);
+            bp.setTitle(Constants.STOCK_SUMMARY_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnStockSummaryActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public static javax.swing.JDesktopPane jDesktopPane1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jmnAccountMst;
     private javax.swing.JMenuItem jmnBackUp;
+    private javax.swing.JMenuItem jmnBankPayment;
+    private javax.swing.JMenuItem jmnBankReceipt;
+    private javax.swing.JMenuItem jmnCashPayment;
+    private javax.swing.JMenuItem jmnCashReceipt;
     private javax.swing.JMenuItem jmnChangeDate;
     private javax.swing.JMenuItem jmnChangePassword;
     public static javax.swing.JMenuItem jmnChangeThemes;
@@ -1081,8 +1222,10 @@ public class DeskFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jmnPurchaseBill2;
     private javax.swing.JMenuItem jmnQuickOpen;
     private javax.swing.JMenuItem jmnSlabCategory;
+    private javax.swing.JMenuItem jmnStockSummary;
     private javax.swing.JMenuItem jmnSubCategory;
     private javax.swing.JMenuItem jmnUserRights;
+    private javax.swing.JMenuItem jmnWorkablility;
     public javax.swing.JMenu login;
     private javax.swing.JMenu master;
     private javax.swing.JMenu transaction;

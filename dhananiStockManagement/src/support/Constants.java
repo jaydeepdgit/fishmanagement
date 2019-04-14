@@ -20,9 +20,15 @@ public class Constants {
     public static String PURCHASE_BILL_FORM_ID = "41";
     public static String BREAK_UP_FORM_ID = "42";
     public static String SALES_BILL_FORM_ID = "43";
+    public static String CASH_PAYMENT_FORM_ID = "44";
+    public static String CASH_RECEIPT_FORM_ID = "45";
+    public static String BANK_PAYMENT_FORM_ID = "46";
+    public static String BANK_RECEIPT_FORM_ID = "47";
 
     // REPORT
     public static String PURCHASE_AVERAGE_FORM_ID = "70";
+    public static String WORKABILITY_FORM_ID = "71";
+    public static String STOCK_SUMMARY_FORM_ID = "72";
 
     // UTILITY
     public static String COMPANY_SETTING_FORM_ID = "111";
@@ -62,6 +68,8 @@ public class Constants {
 
     // REPORT
     public static String PURCHASE_AVERAGE_FORM_NAME = "PURCHASE AVERAGE";
+    public static String WORKABILITY_FORM_NAME = "WORKABILITY";
+    public static String STOCK_SUMMARY_FORM_NAME = "STOCK SUMMARY";
 
     // UTILITY
     public static String COMPANY_SETTING_FORM_NAME = "COMPANY SETTING";
