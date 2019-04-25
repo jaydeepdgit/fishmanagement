@@ -296,7 +296,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
                     jlblTimeStamp.setText(lb.ConvertTimeStampFormetForDisplay(viewDataRs.getString("time_stamp")));
 
                     dtm.setRowCount(0);
-                    viewDataRs = fetchData("SELECT * FROM grade_sub WHERE id = '"+ id +"'");
+                    viewDataRs = fetchData("SELECT gs.*, st.block as stBlock FROM grade_sub gs LEFT JOIN stock0_1 st ON gs.fk_slab_category_id = st.fk_slab_category_id WHERE gs.id = '"+ id +"'");
                     int i = 0;
                     while (viewDataRs.next()) {
                         Vector row = new Vector();
@@ -309,7 +309,9 @@ public class BreakUp extends javax.swing.JInternalFrame {
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("total_usd")));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("rate_inr")));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("total_inr")));
-                        row.add(lb.Convert2DecFmt(viewDataRs.getDouble("block")));
+                        row.add(lb.Convert2DecFmt(viewDataRs.getDouble("stBlock")));
+                        row.add(lb.Convert2DecFmt(viewDataRs.getDouble("stBlock")));
+                        row.add(lb.Convert2DecFmt(viewDataRs.getDouble("block_used")));
                         dtm.addRow(row);
                     }
                 } catch (Exception ex) {
@@ -436,14 +438,16 @@ public class BreakUp extends javax.swing.JInternalFrame {
     }
 
     private void setTextfieldsAtBottom() {
-        JComponent[] footer = new JComponent[]{null, null, jlblSlabQty, jlblKgs, jlblBlockUsed, null, jlblUSD, null, jlblINR, jlblBlock};
+        JComponent[] footer = new JComponent[]{null, null, jlblSlabQty, jlblKgs, jlblBlockUsed, null, jlblUSD, null, jlblINR, jlblBlock, null, null};
         lb.setTable(jPanel1, jTable1, null, footer);
     }
 
     private void setJtableTotal() {
         double tSlabQty = 0.000, tKgs = 0.000, tBlockUsed = 0.000, tUSD = 0.000, tINR = 0.000, tBlock = 0.000;
-        double slabQty = 0.000, kgs = 0.00, blockUsed = 0.000, rateUSD = 0.00, totalUSD = 0.00, rateINR = 0.00, totalINR = 0.00, block = 0.00;
+        
         for (int i = 0; i < jTable1.getRowCount(); i++) {
+            double slabQty = 0.000, kgs = 0.00, blockUsed = 0.000, editBlockUsed = 0.000, rateUSD = 0.00, totalUSD = 0.00, rateINR = 0.00, totalINR = 0.00, block = 0.00;
+            
             slabQty = lb.replaceAll(jTable1.getValueAt(i, 2).toString());
             tSlabQty += slabQty;
 
@@ -463,7 +467,9 @@ public class BreakUp extends javax.swing.JInternalFrame {
             tINR += totalINR;
             jTable1.setValueAt(totalINR, i, 8);
 
-            block = lb.replaceAll(jTable1.getValueAt(i, 9).toString());
+            block = lb.replaceAll(jTable1.getValueAt(i, 10).toString());
+            editBlockUsed = lb.replaceAll(jTable1.getValueAt(i, 11).toString());
+            jTable1.setValueAt(((block + editBlockUsed) - blockUsed), i, 9);
             tBlock += block;
         }
         jlblSlabQty.setText(tSlabQty+"");
@@ -542,11 +548,11 @@ public class BreakUp extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Sr No.", "Grade Name", "Slab Qty", "KGS", "Block Used", "Rate (USD)", "Total (USD)", "Rate (INR)", "Total (INR)", "Block"
+                "Sr No.", "Grade Name", "Slab Qty", "KGS", "Block Used", "Rate (USD)", "Total (USD)", "Rate (INR)", "Total (INR)", "Block", "Block Hidden", "Block Used Hidden"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, true, true, true, true, false, true, false, true
+                false, false, true, true, true, true, false, true, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -581,6 +587,12 @@ public class BreakUp extends javax.swing.JInternalFrame {
             jTable1.getColumnModel().getColumn(7).setResizable(false);
             jTable1.getColumnModel().getColumn(8).setResizable(false);
             jTable1.getColumnModel().getColumn(9).setResizable(false);
+            jTable1.getColumnModel().getColumn(10).setMinWidth(0);
+            jTable1.getColumnModel().getColumn(10).setPreferredWidth(0);
+            jTable1.getColumnModel().getColumn(10).setMaxWidth(0);
+            jTable1.getColumnModel().getColumn(11).setMinWidth(0);
+            jTable1.getColumnModel().getColumn(11).setPreferredWidth(0);
+            jTable1.getColumnModel().getColumn(11).setMaxWidth(0);
         }
 
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -1078,11 +1090,11 @@ public class BreakUp extends javax.swing.JInternalFrame {
 
     private void jbtnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnAddActionPerformed
         try {
-            String sql = "SELECT name FROM slab_category WHERE status = 0 AND fk_sub_category_id = '"+ lb.getSubCategory(jtxtSubCategory.getText(), "C") +"'";
+            String sql = "SELECT sc.name, (st.block-st.block_used) as block FROM slab_category sc LEFT JOIN stock0_1 st ON sc.id = st.fk_slab_category_id WHERE sc.status = 0 AND sc.fk_sub_category_id = '"+ lb.getSubCategory(jtxtSubCategory.getText(), "C") +"'";
             PreparedStatement psLocal = dataConnection.prepareStatement(sql);
             ResultSet rsLocal = psLocal.executeQuery();
             int i = 0;
-            for (int i1 = 0; i1 < jTable1.getRowCount(); i1++) {
+            for (int i1=(jTable1.getRowCount()-1); i1 >= 0; i1--) {
                 dtm.removeRow(i1);
             }
             while(rsLocal.next()) {
@@ -1096,6 +1108,8 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 row.add("");
                 row.add("");
                 row.add("");
+                row.add(rsLocal.getString("block"));
+                row.add(rsLocal.getString("block"));
                 row.add("");
                 dtm.addRow(row);
             }

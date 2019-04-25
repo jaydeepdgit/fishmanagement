@@ -1833,7 +1833,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
         try {
             itemPickList.setReturnComponent(new JTextField[]{jtxtGradeCategory});
             PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT name FROM slab_category "
-                    + " WHERE name LIKE '%" + jtxtGradeCategory.getText() +"%' GROUP BY id ORDER BY id");
+                    + " WHERE fk_sub_category_id = '"+ lb.getSubCategory(jtxtSubCategory.getText(), "C") +"' AND name LIKE '%" + jtxtGradeCategory.getText() +"%' GROUP BY id ORDER BY id");
             itemPickList.setValidation(dataConnection.prepareStatement("SELECT name FROM slab_category WHERE name = ?"));
             itemPickList.setFirstAssociation(new int[]{0});
             itemPickList.setSecondAssociation(new int[]{0});
@@ -1875,7 +1875,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
             if (JOptionPane.showConfirmDialog(this, Constants.ADD_MORE_ENTRY, DeskFrame.TITLE, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 jtxtMainCategory.requestFocusInWindow();
             } else {
-                //jtxtNoofParcel.requestFocusInWindow();
+                jtxtDiscPer.requestFocusInWindow();
             }
         }
     }//GEN-LAST:event_jbtnAddActionPerformed
@@ -1915,7 +1915,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jcmbPmtFocusLost
 
     private void jcmbPmtKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcmbPmtKeyPressed
-        lb.enterFocus(evt, jtxtGradeCategory);
+        lb.enterFocus(evt, jtxtMainCategory);
     }//GEN-LAST:event_jcmbPmtKeyPressed
 
     private void jtxtSubCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusLost

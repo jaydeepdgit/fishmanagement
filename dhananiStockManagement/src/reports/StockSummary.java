@@ -39,14 +39,14 @@ import support.PickList;
  */
 public class StockSummary extends javax.swing.JInternalFrame {
     private Library lb = new Library();
-    private PickList mainCategoryPickListView = null;
+    private PickList mainCategoryPickListView, subCategoryPickList = null;
     private Connection dataConnection = DeskFrame.connMpAdmin;
     private DefaultTableModel model = null;
     private ResultSet rsLocal = null;
     private TableRowSorter<TableModel> rowSorter;
     private CachedRowSet crsMain = null;
-    String colname[] = new String[]{"mnitm_name", "itm_name", "pcs", "unt_name", "rate"};
-    int column[] = new int[]{0, 0, 0, 0, 2};
+    String colname[] = new String[]{"mnitm_name", "itm_name", "pcs", "slab", "block", "rate"};
+    int column[] = new int[]{0, 0, 0, 1, 0, 2};
     String Syspath = System.getProperty("user.dir");
 
     /**
@@ -56,6 +56,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
         initComponents();
         model = (DefaultTableModel) jTable1.getModel();
         mainCategoryPickListView = new PickList(dataConnection);
+        subCategoryPickList = new PickList(dataConnection);
         setPickListView();
         registerShortKeys();
         setPermission();
@@ -63,6 +64,9 @@ public class StockSummary extends javax.swing.JInternalFrame {
         rowSorter = new TableRowSorter<>(jTable1.getModel());
         jTable1.setRowSorter(rowSorter);
         jTable1.getColumnModel().getColumn(2).setCellRenderer(new StatusColumnCellRenderer());
+        jTable1.getColumnModel().getColumn(3).setCellRenderer(new StatusColumnCellRenderer());
+        jTable1.getColumnModel().getColumn(4).setCellRenderer(new StatusColumnCellRenderer());
+        jTable1.getColumnModel().getColumn(5).setCellRenderer(new StatusColumnCellRenderer());
         jTable1.setBackground(new Color(253, 243, 243));
         setTitle(Constants.STOCK_SUMMARY_FORM_NAME);
     }
@@ -74,7 +78,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
             JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
             l.setHorizontalAlignment(SwingConstants.RIGHT);
             //Get the status for the current row.
-            if(col == 2) {
+            if(col == 2 || col == 3 || col ==4 || col == 5) {
                 double val = Double.parseDouble(lb.getDeCustomFormat(jTable1.getValueAt(row, col).toString()));
                 if(val >= 0) {
                     if(!isSelected) {
@@ -115,11 +119,16 @@ public class StockSummary extends javax.swing.JInternalFrame {
     private void setPickListView() {
         mainCategoryPickListView.setLayer(getLayeredPane());
         mainCategoryPickListView.setPickListComponent(jtxtMainItemName);
-        mainCategoryPickListView.setNextComponent(jbtnView);
+        mainCategoryPickListView.setNextComponent(jtxtSubCategory);
         mainCategoryPickListView.setDefaultWidth(210);
         mainCategoryPickListView.setAllowBlank(true);
         mainCategoryPickListView.setDefaultColumnWidth(200);
         mainCategoryPickListView.setLocation(122, 63);
+        
+        subCategoryPickList = new PickList(dataConnection);
+        subCategoryPickList.setLayer(getLayeredPane());
+        subCategoryPickList.setPickListComponent(jtxtSubCategory);
+        subCategoryPickList.setNextComponent(jbtnView);
     }
 
     private boolean validateForm() {
@@ -145,53 +154,33 @@ public class StockSummary extends javax.swing.JInternalFrame {
 
     private void makeQuery() {
         PreparedStatement psLocal = null;
-        String sql = "";
         try {
-            sql = "(SELECT sc.name AS slabCategory, - SUM(st.qty) AS pcs, " +
-                "sc.id AS slabid " +
-                "FROM slab_category sc, stock0_2 st " +
-                "WHERE sc.id = st.fk_slab_category_id AND st.trns_id = '2' ";
-//            if(!jtxtMainItemName.getText().equalsIgnoreCase("")) {
-//                sql += " AND mm.mnitm_cd = '"+ lb.getMainCategory(jtxtMainItemName.getText(), "C") +"'";
-//            }
-            sql += "GROUP BY sc.id) UNION "+
-                "(SELECT sc.name AS slabCategory, SUM(st.qty) AS pcs, " +
-                "sc.id AS slabid " +
-                "FROM slab_category sc, stock0_2 st " +
-                "WHERE sc.id = st.fk_slab_category_id AND (st.trns_id = '4'  OR st.trns_id = '0') ";
-//            if(!jtxtMainItemName.getText().equalsIgnoreCase("")) {
-//                sql += " AND mm.mnitm_cd = '"+ lb.getMainCategory(jtxtMainItemName.getText(), "C") +"'";
-//            }
-            sql += "GROUP BY sc.id) ORDER BY slabid";
+            String sql = "SELECT sc.id AS slabid, sc.name AS slabCategory, sc.rate AS rate, (st.qty - st.sal) AS pcs, st.block as block" 
+                + " FROM stock0_1 st LEFT JOIN slab_category sc ON st.fk_slab_category_id = sc.id"
+                + " WHERE sc.fk_sub_category_id = '"+ lb.getSubCategory(jtxtSubCategory.getText(), "C") +"' ORDER BY slabid";
             psLocal = dataConnection.prepareStatement(sql);
             rsLocal = psLocal.executeQuery();
             crsMain = lb.getBlankCachedRowSet(colname, column);
-            String arr[] = new String[5];
-            String new_itm_name = "", old_itm_name = "";
-            double rate = 0.00;
-            double pcs = 0.00;
+            String arr[] = new String[6];
+            double pcs = 0.00, slab = 0.00, block = 0.00;
             while (rsLocal.next()) {
-                new_itm_name = rsLocal.getString("slabCategory");
-                if(!new_itm_name.equalsIgnoreCase(old_itm_name) && rsLocal.getRow() > 1) {
-                    arr[0] = "";
-                    arr[1] = old_itm_name;
-                    arr[2] = lb.Convert2DecFmt(pcs);
-                    arr[3] = "";
-                    arr[4] = lb.getIndianFormat(rate);
-                    lb.appendColumnToCacheRowSet(crsMain, arr, column);
-                    pcs = 0.00;
-                }
+                arr[0] = "";
+                arr[1] = rsLocal.getString("slabCategory");
+                arr[2] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
+                arr[3] = lb.Convert2DecFmt(rsLocal.getDouble("pcs") / 10);
+                arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("block"));
+                arr[5] = lb.getIndianFormat(rsLocal.getDouble("rate"));
+                lb.appendColumnToCacheRowSet(crsMain, arr, column);
                 pcs += rsLocal.getDouble("pcs");
-//                mnitm_name = rsLocal.getString("mnitm_name");
-//                unt_name = rsLocal.getString("unt_name");
-//                rate = rsLocal.getDouble("rate");
-                old_itm_name = new_itm_name;
+                slab += rsLocal.getDouble("pcs") / 10;
+                block += rsLocal.getDouble("block");
             }
             arr[0] = "";
-            arr[1] = new_itm_name;
+            arr[1] = "Total";
             arr[2] = lb.Convert2DecFmt(pcs);
-            arr[3] = "";
-            arr[4] = lb.getIndianFormat(rate);
+            arr[3] = lb.Convert2DecFmt(slab);
+            arr[4] = lb.Convert2DecFmt(block);
+            arr[5] = "";
             lb.appendColumnToCacheRowSet(crsMain, arr, column);
         } catch(Exception ex) {
             lb.printToLogFile("Exception at MakeQuery In Stock Summary", ex);
@@ -248,6 +237,8 @@ public class StockSummary extends javax.swing.JInternalFrame {
         jbtnView = new javax.swing.JButton();
         jtxtMainItemName = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
+        jtxtSubCategory = new javax.swing.JTextField();
+        jLabel2 = new javax.swing.JLabel();
         jtxtSearch = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(211, 226, 245));
@@ -268,11 +259,11 @@ public class StockSummary extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "SR No", "Item Name", "Stock", "Unit Name", "Rate"
+                "SR No", "Item Name", "Stock", "Slab", "Block", "Rate"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false
+                false, false, false, true, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -355,6 +346,11 @@ public class StockSummary extends javax.swing.JInternalFrame {
                 jtxtMainItemNameFocusLost(evt);
             }
         });
+        jtxtMainItemName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jtxtMainItemNameActionPerformed(evt);
+            }
+        });
         jtxtMainItemName.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 jtxtMainItemNameKeyPressed(evt);
@@ -370,15 +366,51 @@ public class StockSummary extends javax.swing.JInternalFrame {
         jLabel1.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jLabel1.setText("Main Item Name");
 
+        jtxtSubCategory.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jtxtSubCategory.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtSubCategory.setMinimumSize(new java.awt.Dimension(2, 25));
+        jtxtSubCategory.setPreferredSize(new java.awt.Dimension(2, 25));
+        jtxtSubCategory.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtSubCategoryFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtSubCategoryFocusLost(evt);
+            }
+        });
+        jtxtSubCategory.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jtxtSubCategoryComponentResized(evt);
+            }
+        });
+        jtxtSubCategory.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyTyped(evt);
+            }
+        });
+
+        jLabel2.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel2.setText("Sub Item Name");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jtxtMainItemName, javax.swing.GroupLayout.DEFAULT_SIZE, 378, Short.MAX_VALUE)
+                .addComponent(jtxtMainItemName, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jbtnView, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -393,11 +425,15 @@ public class StockSummary extends javax.swing.JInternalFrame {
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(7, 7, 7)
+                .addGap(6, 6, 6)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtMainItemName, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jbtnView)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtMainItemName, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jbtnView)
+                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jbtnPreview)
                     .addComponent(jbtnClose))
                 .addGap(7, 7, 7))
@@ -422,9 +458,9 @@ public class StockSummary extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 956, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jtxtSearch, javax.swing.GroupLayout.DEFAULT_SIZE, 956, Short.MAX_VALUE))
+                    .addComponent(jtxtSearch))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -435,7 +471,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
                 .addGap(2, 2, 2)
                 .addComponent(jtxtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -458,6 +494,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
                     row.add(crsMain.getString(3));
                     row.add(crsMain.getString(4));
                     row.add(crsMain.getString(5));
+                    row.add(crsMain.getString(6));
                     model.addRow(row);
                     i++;
                 }
@@ -532,7 +569,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
             mainCategoryPickListView.setReturnComponent(new JTextField[]{jtxtMainItemName});
             PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT name FROM main_category WHERE name LIKE '%" + jtxtMainItemName.getText().toUpperCase() + "%'");
             mainCategoryPickListView.setPreparedStatement(pstLocal);
-            mainCategoryPickListView.setValidation(dataConnection.prepareStatement("SELECT * FROM mnitm_mst WHERE name = ?"));
+            mainCategoryPickListView.setValidation(dataConnection.prepareStatement("SELECT * FROM main_category WHERE name = ?"));
             mainCategoryPickListView.pickListKeyRelease(evt);
         } catch (Exception ex) {
             lb.printToLogFile("Exception at jtxtMainItemNameKeyReleased In Stock Summary", ex);
@@ -569,8 +606,50 @@ public class StockSummary extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_jTable1MouseClicked
 
+    private void jtxtSubCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtSubCategoryFocusGained
+
+    private void jtxtSubCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusLost
+        subCategoryPickList.setVisible(false);
+    }//GEN-LAST:event_jtxtSubCategoryFocusLost
+
+    private void jtxtSubCategoryComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jtxtSubCategoryComponentResized
+        //setTextfieldsAtBottom();
+    }//GEN-LAST:event_jtxtSubCategoryComponentResized
+
+    private void jtxtSubCategoryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyPressed
+        subCategoryPickList.setLocation(jtxtSubCategory.getX() + jPanel2.getX(), jtxtSubCategory.getY() + jtxtSubCategory.getHeight() + jPanel2.getY());
+        subCategoryPickList.pickListKeyPress(evt);
+    }//GEN-LAST:event_jtxtSubCategoryKeyPressed
+
+    private void jtxtSubCategoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyReleased
+        try {
+            String sql = "SELECT name FROM sub_category WHERE fk_main_category_id = '"+ lb.getMainCategory(jtxtMainItemName.getText(), "C")
+            +"' AND status = 0 AND name LIKE '%"+ jtxtSubCategory.getText() +"%'";
+            subCategoryPickList.setReturnComponent(new JTextField[]{jtxtSubCategory});
+            PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
+            subCategoryPickList.setValidation(dataConnection.prepareStatement("SELECT name FROM sub_category WHERE status = 0 AND name = ?"));
+            subCategoryPickList.setFirstAssociation(new int[]{0});
+            subCategoryPickList.setSecondAssociation(new int[]{0});
+            subCategoryPickList.setPreparedStatement(pstLocal);
+            subCategoryPickList.pickListKeyRelease(evt);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at jtxtMainCategoryKeyReleased In Break Up", ex);
+        }
+    }//GEN-LAST:event_jtxtSubCategoryKeyReleased
+
+    private void jtxtSubCategoryKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyTyped
+        lb.fixLength(evt, 255);
+    }//GEN-LAST:event_jtxtSubCategoryKeyTyped
+
+    private void jtxtMainItemNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtxtMainItemNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jtxtMainItemNameActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -580,5 +659,6 @@ public class StockSummary extends javax.swing.JInternalFrame {
     private javax.swing.JButton jbtnView;
     private javax.swing.JTextField jtxtMainItemName;
     private javax.swing.JTextField jtxtSearch;
+    private javax.swing.JTextField jtxtSubCategory;
     // End of variables declaration//GEN-END:variables
 }
