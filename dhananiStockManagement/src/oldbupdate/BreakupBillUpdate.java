@@ -20,7 +20,7 @@ public class BreakupBillUpdate {
     Connection dataConMain = null;
     Library lb = null;
     
-    public BreakupBillUpdate(){
+    public BreakupBillUpdate(){ 
         lb = new Library();
         dataConnection = DeskFrame.connMpAdmin;
         dataConMain = DeskFrame.connMpMain;
@@ -44,15 +44,15 @@ public class BreakupBillUpdate {
             pstUpdate.setString(2, slab_id);
             pstUpdate.setInt(3, 2);
             pstUpdate.setDouble(4, kgs * grad_qty);
-            pstUpdate.setDouble(5, block);
+            pstUpdate.setDouble(5, 0.00);
             pstUpdate.setDouble(6, block_used);
             pstUpdate.executeUpdate();
 
-            sqlUpdate = "UPDATE stock0_1 SET qty = qty + ?, block = block + ?, block_used = block_used + ? WHERE fk_slab_category_id = ?";
+            sqlUpdate = "UPDATE stock0_1 SET qty = qty + ?, block = ?, block_used = ? WHERE fk_slab_category_id = ?";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.setDouble(1, kgs * grad_qty);
             pstUpdate.setDouble(2, block);
-            pstUpdate.setDouble(3, block_used);
+            pstUpdate.setDouble(3, 0.00);
             pstUpdate.setString(4, slab_id);
             pstUpdate.executeUpdate();
         }
@@ -72,11 +72,11 @@ public class BreakupBillUpdate {
             String sqlUpdate = "";
             PreparedStatement pstUpdate = null;
 
-            sqlUpdate = "UPDATE stock0_1 SET qty = qty - ?, block = block - ?, block_used = block_used - ? WHERE fk_slab_category_id = ?";
+            sqlUpdate = "UPDATE stock0_1 SET qty = qty - ?, block = block - ?, block_used = ? WHERE fk_slab_category_id = ?";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.setDouble(1, kgs * grad_qty);
             pstUpdate.setDouble(2, block);
-            pstUpdate.setDouble(3, block_used);
+            pstUpdate.setDouble(3, 0.000);
             pstUpdate.setString(4, slab_id);
             pstUpdate.executeUpdate();
 
