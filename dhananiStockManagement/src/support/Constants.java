@@ -15,6 +15,7 @@ public class Constants {
     public static String SUB_CATEGORY_FORM_ID = "2";
     public static String SLAB_CATEGORY_FORM_ID = "3";
     public static String ACCOUNT_MASTER_FORM_ID = "4";
+    public static String GROUP_MASTER_FORM_ID = "5";
 
     // TRANSACTION
     public static String PURCHASE_BILL_FORM_ID = "41";
@@ -29,6 +30,10 @@ public class Constants {
     public static String PURCHASE_AVERAGE_FORM_ID = "70";
     public static String WORKABILITY_FORM_ID = "71";
     public static String STOCK_SUMMARY_FORM_ID = "72";
+    public static String COLLECTION_REPORT_FORM_ID = "73";
+    public static String GROUP_SUMMARY_FORM_ID = "74";
+    public static String GENERAL_LEDGER_FORM_ID = "75";
+    public static String DAILY_ACTIVITY_REPORT_FORM_ID = "76";
 
     // UTILITY
     public static String COMPANY_SETTING_FORM_ID = "111";
@@ -38,8 +43,8 @@ public class Constants {
     public static String CHANGE_PASSWORD_FORM_ID = "115";
     public static String QUICK_OPEN_FORM_ID = "116";
     public static String BACK_UP_FORM_ID = "117";
-    public static String CHECK_PRINT_FORM_ID = "121";
-    public static String CHANGE_THEMES_FORM_ID = "124";
+    public static String CHECK_PRINT_FORM_ID = "118";
+    public static String CHANGE_THEMES_FORM_ID = "119";
 
     /* form name: start */
     // LOGIN
@@ -49,27 +54,29 @@ public class Constants {
     public static String MINIMIZE_FORM_NAME = "MINIMIZE";
 
     // MASTER
-    public static String ACCOUNT_MASTER_FORM_NAME = "ACCOUNT MASTER";
     public static String MAIN_CATEGORY_FORM_NAME = "MAIN CATEGORY";
     public static String SUB_CATEGORY_FORM_NAME = "SUB CATEGORY";
     public static String SLAB_CATEGORY_FORM_NAME = "SLAB CATEGORY";
+    public static String ACCOUNT_MASTER_FORM_NAME = "ACCOUNT MASTER";
+    public static String GROUP_MASTER_FORM_NAME = "GROUP MASTER";
 
     // TRANSACTION
+    public static String PURCHASE_BILL_FORM_NAME = "PURCHASE BILL";
+    public static String BREAK_UP_FORM_NAME = "BREAK UP";
+    public static String SALES_BILL_FORM_NAME = "SALES BILL";
     public static String CASH_PAYMENT_FORM_NAME = "CASH PAYMENT";
     public static String CASH_RECEIPT_FORM_NAME = "CASH RECEIPT";
     public static String BANK_PAYMENT_FORM_NAME = "BANK PAYMENT";
     public static String BANK_RECEIPT_FORM_NAME = "BANK RECEIPT";
-    public static String JOURNAL_VOUCHER_FORM_NAME = "JOURNAL VOUCHER";
-    public static String CONTRA_VOUCHER_FORM_NAME = "CONTRA VOUCHER";
-    public static String PURCHASE_BILL_FORM_NAME = "PURCHASE BILL";
-    public static String BREAK_UP_FORM_NAME = "BREAK UP";
-    public static String SALES_BILL_FORM_NAME = "SALES BILL";
-    public static String SALES_BILL_FORM_NAME1 = "SALES BILL";
 
     // REPORT
     public static String PURCHASE_AVERAGE_FORM_NAME = "PURCHASE AVERAGE";
     public static String WORKABILITY_FORM_NAME = "WORKABILITY";
     public static String STOCK_SUMMARY_FORM_NAME = "STOCK SUMMARY";
+    public static String COLLECTION_REPORT_FORM_NAME = "COLLECTION REPORT";
+    public static String GROUP_SUMMARY_FORM_NAME = "GROUP SUMMARY";
+    public static String GENERAL_LEDGER_FORM_NAME = "GENERAL LEDGER";
+    public static String DAILY_ACTIVITY_REPORT_FORM_NAME = "DAILY ACTIVITY REPORT";
 
     // UTILITY
     public static String COMPANY_SETTING_FORM_NAME = "COMPANY SETTING";
@@ -77,19 +84,16 @@ public class Constants {
     public static String USER_RIGHTS_FORM_NAME = "USER RIGHTS";
     public static String MANAGE_EMAIL_FORM_NAME = "MANAGE EMAIL";
     public static String CHANGE_PASSWORD_FORM_NAME = "CHANGE PASSWORD";
-    public static String STICKER_PRINT_FORM_NAME = "STICKER PRINT";
     public static String CHANGE_DATE_FORM_NAME = "CHANGE DATE";
     public static String QUICK_OPEN_FORM_NAME = "QUICK OPEN";
     public static String BACK_UP_FORM_NAME = "BACK UP";
     public static String RESET_FORM_NAME = "RESET";
-    public static String EMAIL_FORM_NAME = "EMAIL";
-    public static String EXPORT_DATA_FORM_NAME = "EXPORT DATA";
     public static String CHECK_PRINT_FORM_NAME = "CHECK PRINT";
-    public static String NEW_YEAR_FORM_NAME = "NEW YEAR";
     public static String CHANGE_THEMES_FORM_NAME = "CHANGE THEMES";
 
     /* INITIAL Name: Start */
     // MASTER
+    public static String GROUP_MASTER_INITIAL = "GM";
     public static String ACCOUNT_MASTER_INITIAL = "AM";
     public static String MAIN_CATEGORY_INITIAL = "MC";
     public static String SUB_CATEGORY_INITIAL = "SC";

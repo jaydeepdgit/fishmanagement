@@ -49,7 +49,12 @@ import java.awt.event.KeyListener;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import master.AccountMaster;
+import master.GroupMaster;
 import master.SlabCategory;
+import reports.CollectionReport;
+import reports.DailyActivityReport;
+import reports.GeneralLedger;
+import reports.GroupSummary;
 import reports.PurchaseAverage;
 import reports.StockSummary;
 import reports.Workablity;
@@ -210,6 +215,7 @@ public class DeskFrame extends javax.swing.JFrame {
         jmnMinimize.setText(Constants.MINIMIZE_FORM_NAME);
 
         // MASTER
+        jmnGroupMst.setText(Constants.GROUP_MASTER_FORM_NAME);
         jmnAccountMst.setText(Constants.ACCOUNT_MASTER_FORM_NAME);
         jmnMainCategory.setText(Constants.MAIN_CATEGORY_FORM_NAME);
         jmnSubCategory.setText(Constants.SUB_CATEGORY_FORM_NAME);
@@ -217,6 +223,20 @@ public class DeskFrame extends javax.swing.JFrame {
 
         // TRANSACTION
         jmnPurchaseBill.setText(Constants.PURCHASE_BILL_FORM_NAME);
+        jmnBreakUp.setText(Constants.BREAK_UP_FORM_NAME);
+        jmnSalesBill.setText(Constants.SALES_BILL_FORM_NAME);
+        jmnCashPayment.setText(Constants.CASH_PAYMENT_FORM_NAME);
+        jmnCashReceipt.setText(Constants.CASH_RECEIPT_FORM_NAME);
+        jmnBankPayment.setText(Constants.BANK_PAYMENT_FORM_NAME);
+        jmnBankReceipt.setText(Constants.BANK_RECEIPT_FORM_NAME);
+
+        // Report
+        jmnPurchaseAvarage.setText(Constants.PURCHASE_AVERAGE_FORM_NAME);
+        jmnWorkablility.setText(Constants.WORKABILITY_FORM_NAME);
+        jmnStockSummary.setText(Constants.STOCK_SUMMARY_FORM_NAME);
+        jmnCollectionReport.setText(Constants.COLLECTION_REPORT_FORM_NAME);
+        jmnGroupSummary.setText(Constants.GROUP_SUMMARY_FORM_NAME);
+        jmnGeneralLedger.setText(Constants.GENERAL_LEDGER_FORM_NAME);
 
         // UTILITY
         jmnCmpnyStting.setText(Constants.COMPANY_SETTING_FORM_NAME);
@@ -355,6 +375,7 @@ public class DeskFrame extends javax.swing.JFrame {
     private void createMenuList() {
         hashMenu = new HashMap<Integer, JMenuItem>();
         // MASTER
+        hashMenu.put(Integer.parseInt(Constants.GROUP_MASTER_FORM_ID), jmnGroupMst);
         hashMenu.put(Integer.parseInt(Constants.ACCOUNT_MASTER_FORM_ID), jmnAccountMst);
         hashMenu.put(Integer.parseInt(Constants.MAIN_CATEGORY_FORM_ID), jmnMainCategory);
         hashMenu.put(Integer.parseInt(Constants.SUB_CATEGORY_FORM_ID), jmnSubCategory);
@@ -362,6 +383,21 @@ public class DeskFrame extends javax.swing.JFrame {
 
         // TRANSACTION
         hashMenu.put(Integer.parseInt(Constants.PURCHASE_BILL_FORM_ID), jmnPurchaseBill);
+        hashMenu.put(Integer.parseInt(Constants.BREAK_UP_FORM_ID), jmnBreakUp);
+        hashMenu.put(Integer.parseInt(Constants.SALES_BILL_FORM_ID), jmnSalesBill);
+        hashMenu.put(Integer.parseInt(Constants.CASH_PAYMENT_FORM_ID), jmnCashPayment);
+        hashMenu.put(Integer.parseInt(Constants.CASH_RECEIPT_FORM_ID), jmnCashReceipt);
+        hashMenu.put(Integer.parseInt(Constants.BANK_PAYMENT_FORM_ID), jmnBankPayment);
+        hashMenu.put(Integer.parseInt(Constants.BANK_RECEIPT_FORM_ID), jmnBankReceipt);
+
+        //REPORT
+        hashMenu.put(Integer.parseInt(Constants.PURCHASE_AVERAGE_FORM_ID), jmnPurchaseAvarage);
+        hashMenu.put(Integer.parseInt(Constants.WORKABILITY_FORM_ID), jmnWorkablility);
+        hashMenu.put(Integer.parseInt(Constants.STOCK_SUMMARY_FORM_ID), jmnStockSummary);
+        hashMenu.put(Integer.parseInt(Constants.COLLECTION_REPORT_FORM_ID), jmnCollectionReport);
+        hashMenu.put(Integer.parseInt(Constants.GROUP_SUMMARY_FORM_ID), jmnGroupSummary);
+        hashMenu.put(Integer.parseInt(Constants.GENERAL_LEDGER_FORM_ID), jmnGeneralLedger);
+        hashMenu.put(Integer.parseInt(Constants.DAILY_ACTIVITY_REPORT_FORM_ID), jmnDailyActivity);
 
         // UTILITY
         hashMenu.put(Integer.parseInt(Constants.COMPANY_SETTING_FORM_ID), jmnCmpnyStting);
@@ -455,6 +491,7 @@ public class DeskFrame extends javax.swing.JFrame {
     public void setEnabledDisabledMenu(boolean flag) {
         master.setEnabled(flag);
         transaction.setEnabled(flag);
+        report.setEnabled(flag);
         utility.setEnabled(flag);
     }
 
@@ -527,22 +564,27 @@ public class DeskFrame extends javax.swing.JFrame {
         jmnExit = new javax.swing.JMenuItem();
         jmnMinimize = new javax.swing.JMenuItem();
         master = new javax.swing.JMenu();
+        jmnGroupMst = new javax.swing.JMenuItem();
         jmnAccountMst = new javax.swing.JMenuItem();
         jmnMainCategory = new javax.swing.JMenuItem();
         jmnSubCategory = new javax.swing.JMenuItem();
         jmnSlabCategory = new javax.swing.JMenuItem();
         transaction = new javax.swing.JMenu();
         jmnPurchaseBill = new javax.swing.JMenuItem();
-        jmnPurchaseBill1 = new javax.swing.JMenuItem();
-        jmnPurchaseBill2 = new javax.swing.JMenuItem();
+        jmnBreakUp = new javax.swing.JMenuItem();
+        jmnSalesBill = new javax.swing.JMenuItem();
         jmnCashPayment = new javax.swing.JMenuItem();
         jmnCashReceipt = new javax.swing.JMenuItem();
         jmnBankPayment = new javax.swing.JMenuItem();
         jmnBankReceipt = new javax.swing.JMenuItem();
-        jMenu1 = new javax.swing.JMenu();
+        report = new javax.swing.JMenu();
         jmnPurchaseAvarage = new javax.swing.JMenuItem();
         jmnWorkablility = new javax.swing.JMenuItem();
         jmnStockSummary = new javax.swing.JMenuItem();
+        jmnCollectionReport = new javax.swing.JMenuItem();
+        jmnGroupSummary = new javax.swing.JMenuItem();
+        jmnGeneralLedger = new javax.swing.JMenuItem();
+        jmnDailyActivity = new javax.swing.JMenuItem();
         utility = new javax.swing.JMenu();
         jmnCmpnyStting = new javax.swing.JMenuItem();
         jmnManageUser = new javax.swing.JMenuItem();
@@ -622,6 +664,16 @@ public class DeskFrame extends javax.swing.JFrame {
         master.setText("MASTER");
         master.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
 
+        jmnGroupMst.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnGroupMst.setMnemonic('A');
+        jmnGroupMst.setText("GROUP MASTER");
+        jmnGroupMst.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnGroupMstActionPerformed(evt);
+            }
+        });
+        master.add(jmnGroupMst);
+
         jmnAccountMst.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         jmnAccountMst.setMnemonic('A');
         jmnAccountMst.setText("ACCOUNT MASTER");
@@ -678,25 +730,25 @@ public class DeskFrame extends javax.swing.JFrame {
         });
         transaction.add(jmnPurchaseBill);
 
-        jmnPurchaseBill1.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
-        jmnPurchaseBill1.setMnemonic('B');
-        jmnPurchaseBill1.setText("BREAK UP");
-        jmnPurchaseBill1.addActionListener(new java.awt.event.ActionListener() {
+        jmnBreakUp.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnBreakUp.setMnemonic('B');
+        jmnBreakUp.setText("BREAK UP");
+        jmnBreakUp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jmnPurchaseBill1ActionPerformed(evt);
+                jmnBreakUpActionPerformed(evt);
             }
         });
-        transaction.add(jmnPurchaseBill1);
+        transaction.add(jmnBreakUp);
 
-        jmnPurchaseBill2.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
-        jmnPurchaseBill2.setMnemonic('S');
-        jmnPurchaseBill2.setText("SALES BILL");
-        jmnPurchaseBill2.addActionListener(new java.awt.event.ActionListener() {
+        jmnSalesBill.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnSalesBill.setMnemonic('S');
+        jmnSalesBill.setText("SALES BILL");
+        jmnSalesBill.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jmnPurchaseBill2ActionPerformed(evt);
+                jmnSalesBillActionPerformed(evt);
             }
         });
-        transaction.add(jmnPurchaseBill2);
+        transaction.add(jmnSalesBill);
 
         jmnCashPayment.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         jmnCashPayment.setMnemonic('C');
@@ -740,8 +792,9 @@ public class DeskFrame extends javax.swing.JFrame {
 
         jMenuBar1.add(transaction);
 
-        jMenu1.setText("REPORT");
-        jMenu1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        report.setMnemonic('R');
+        report.setText("REPORT");
+        report.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
 
         jmnPurchaseAvarage.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         jmnPurchaseAvarage.setMnemonic('P');
@@ -751,7 +804,7 @@ public class DeskFrame extends javax.swing.JFrame {
                 jmnPurchaseAvarageActionPerformed(evt);
             }
         });
-        jMenu1.add(jmnPurchaseAvarage);
+        report.add(jmnPurchaseAvarage);
 
         jmnWorkablility.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         jmnWorkablility.setMnemonic('W');
@@ -761,7 +814,7 @@ public class DeskFrame extends javax.swing.JFrame {
                 jmnWorkablilityActionPerformed(evt);
             }
         });
-        jMenu1.add(jmnWorkablility);
+        report.add(jmnWorkablility);
 
         jmnStockSummary.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         jmnStockSummary.setMnemonic('S');
@@ -771,9 +824,49 @@ public class DeskFrame extends javax.swing.JFrame {
                 jmnStockSummaryActionPerformed(evt);
             }
         });
-        jMenu1.add(jmnStockSummary);
+        report.add(jmnStockSummary);
 
-        jMenuBar1.add(jMenu1);
+        jmnCollectionReport.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnCollectionReport.setMnemonic('C');
+        jmnCollectionReport.setText("COLLECTION REPORT");
+        jmnCollectionReport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnCollectionReportActionPerformed(evt);
+            }
+        });
+        report.add(jmnCollectionReport);
+
+        jmnGroupSummary.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnGroupSummary.setMnemonic('G');
+        jmnGroupSummary.setText("GROUP SUMMARY");
+        jmnGroupSummary.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnGroupSummaryActionPerformed(evt);
+            }
+        });
+        report.add(jmnGroupSummary);
+
+        jmnGeneralLedger.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnGeneralLedger.setMnemonic('G');
+        jmnGeneralLedger.setText("GENERAL LEDGER");
+        jmnGeneralLedger.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnGeneralLedgerActionPerformed(evt);
+            }
+        });
+        report.add(jmnGeneralLedger);
+
+        jmnDailyActivity.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnDailyActivity.setMnemonic('D');
+        jmnDailyActivity.setText("DAILY ACTIVITY");
+        jmnDailyActivity.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnDailyActivityActionPerformed(evt);
+            }
+        });
+        report.add(jmnDailyActivity);
+
+        jMenuBar1.add(report);
 
         utility.setMnemonic('U');
         utility.setText("UTILITY");
@@ -1081,7 +1174,7 @@ public class DeskFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jmnPurchaseBillActionPerformed
 
-    private void jmnPurchaseBill1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnPurchaseBill1ActionPerformed
+    private void jmnBreakUpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnBreakUpActionPerformed
         int index = checkAlradyOpen(Constants.BREAK_UP_FORM_NAME);
         if (index == -1) {
             BreakUp bu = new BreakUp();
@@ -1090,7 +1183,7 @@ public class DeskFrame extends javax.swing.JFrame {
         } else {
             tabbedPane.setSelectedIndex(index);
         }
-    }//GEN-LAST:event_jmnPurchaseBill1ActionPerformed
+    }//GEN-LAST:event_jmnBreakUpActionPerformed
 
     private void jmnAccountMstActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnAccountMstActionPerformed
         int index = checkAlradyOpen(Constants.ACCOUNT_MASTER_FORM_NAME);
@@ -1116,16 +1209,16 @@ public class DeskFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jmnPurchaseAvarageActionPerformed
 
-    private void jmnPurchaseBill2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnPurchaseBill2ActionPerformed
-        int index = checkAlradyOpen(Constants.SALES_BILL_FORM_NAME1);
+    private void jmnSalesBillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnSalesBillActionPerformed
+        int index = checkAlradyOpen(Constants.SALES_BILL_FORM_NAME);
         if (index == -1) {
             SalesBill sb = new SalesBill(0);
-            addOnScreen(sb, Constants.SALES_BILL_FORM_NAME1);
-            sb.setTitle(Constants.SALES_BILL_FORM_NAME1);
+            addOnScreen(sb, Constants.SALES_BILL_FORM_NAME);
+            sb.setTitle(Constants.SALES_BILL_FORM_NAME);
         } else {
             tabbedPane.setSelectedIndex(index);
         }
-    }//GEN-LAST:event_jmnPurchaseBill2ActionPerformed
+    }//GEN-LAST:event_jmnSalesBillActionPerformed
 
     private void jmnWorkablilityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnWorkablilityActionPerformed
         int index = checkAlradyOpen(Constants.WORKABILITY_FORM_NAME);
@@ -1194,14 +1287,69 @@ public class DeskFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jmnStockSummaryActionPerformed
 
+    private void jmnGeneralLedgerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnGeneralLedgerActionPerformed
+        int index = checkAlradyOpen(Constants.GENERAL_LEDGER_FORM_NAME);
+        if (index == -1) {
+            GeneralLedger gl = new GeneralLedger();
+            addOnScreen(gl, Constants.GENERAL_LEDGER_FORM_NAME);
+            gl.setTitle(Constants.GENERAL_LEDGER_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnGeneralLedgerActionPerformed
+
+    private void jmnCollectionReportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnCollectionReportActionPerformed
+        int index = checkAlradyOpen(Constants.COLLECTION_REPORT_FORM_NAME);
+        if (index == -1) {
+            CollectionReport cr = new CollectionReport();
+            addOnScreen(cr, Constants.COLLECTION_REPORT_FORM_NAME);
+            cr.setTitle(Constants.COLLECTION_REPORT_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnCollectionReportActionPerformed
+
+    private void jmnGroupSummaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnGroupSummaryActionPerformed
+        int index = checkAlradyOpen(Constants.GROUP_SUMMARY_FORM_NAME);
+        if (index == -1) {
+            GroupSummary cr = new GroupSummary();
+            addOnScreen(cr, Constants.GROUP_SUMMARY_FORM_NAME);
+            cr.setTitle(Constants.GROUP_SUMMARY_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnGroupSummaryActionPerformed
+
+    private void jmnGroupMstActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnGroupMstActionPerformed
+        int index = checkAlradyOpen(Constants.GROUP_MASTER_FORM_NAME);
+        if (index == -1) {
+            GroupMaster gm = new GroupMaster();
+            addOnScreen(gm, Constants.GROUP_MASTER_FORM_NAME);
+            gm.setTitle(Constants.GROUP_MASTER_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnGroupMstActionPerformed
+
+    private void jmnDailyActivityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnDailyActivityActionPerformed
+        int index = checkAlradyOpen(Constants.DAILY_ACTIVITY_REPORT_FORM_NAME);
+        if (index == -1) {
+            DailyActivityReport dar = new DailyActivityReport();
+            addOnScreen(dar, Constants.DAILY_ACTIVITY_REPORT_FORM_NAME);
+            dar.setTitle(Constants.DAILY_ACTIVITY_REPORT_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnDailyActivityActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public static javax.swing.JDesktopPane jDesktopPane1;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jmnAccountMst;
     private javax.swing.JMenuItem jmnBackUp;
     private javax.swing.JMenuItem jmnBankPayment;
     private javax.swing.JMenuItem jmnBankReceipt;
+    private javax.swing.JMenuItem jmnBreakUp;
     private javax.swing.JMenuItem jmnCashPayment;
     private javax.swing.JMenuItem jmnCashReceipt;
     private javax.swing.JMenuItem jmnChangeDate;
@@ -1209,7 +1357,12 @@ public class DeskFrame extends javax.swing.JFrame {
     public static javax.swing.JMenuItem jmnChangeThemes;
     public static javax.swing.JMenuItem jmnCheckPrint;
     private javax.swing.JMenuItem jmnCmpnyStting;
+    private javax.swing.JMenuItem jmnCollectionReport;
+    private javax.swing.JMenuItem jmnDailyActivity;
     private javax.swing.JMenuItem jmnExit;
+    private javax.swing.JMenuItem jmnGeneralLedger;
+    private javax.swing.JMenuItem jmnGroupMst;
+    private javax.swing.JMenuItem jmnGroupSummary;
     private javax.swing.JMenuItem jmnLogin;
     private javax.swing.JMenuItem jmnLogout;
     private javax.swing.JMenuItem jmnMainCategory;
@@ -1218,9 +1371,8 @@ public class DeskFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jmnMinimize;
     private javax.swing.JMenuItem jmnPurchaseAvarage;
     private javax.swing.JMenuItem jmnPurchaseBill;
-    private javax.swing.JMenuItem jmnPurchaseBill1;
-    private javax.swing.JMenuItem jmnPurchaseBill2;
     private javax.swing.JMenuItem jmnQuickOpen;
+    private javax.swing.JMenuItem jmnSalesBill;
     private javax.swing.JMenuItem jmnSlabCategory;
     private javax.swing.JMenuItem jmnStockSummary;
     private javax.swing.JMenuItem jmnSubCategory;
@@ -1228,6 +1380,7 @@ public class DeskFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jmnWorkablility;
     public javax.swing.JMenu login;
     private javax.swing.JMenu master;
+    private javax.swing.JMenu report;
     private javax.swing.JMenu transaction;
     private javax.swing.JMenu utility;
     // End of variables declaration//GEN-END:variables

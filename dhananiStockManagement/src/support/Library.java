@@ -286,19 +286,17 @@ public class Library {
             return "";
         }
         try {
-            String sql = "SELECT * FROM acnt_mst WHERE ac_name = '"+ ac_name +"' AND ac_cd <> '"+ ac_id +"'";
-            if (ac_id.equalsIgnoreCase("AC")) {
-                sql = "SELECT ac_alias FROM acnt_mst WHERE ac_name = ?";
-            } else if (ac_id.equalsIgnoreCase("N")) {
-                sql = "SELECT ac_name FROM acnt_mst WHERE ac_cd = ?";
+            String sql = "SELECT * FROM account_master WHERE ac_name = '"+ ac_name +"' AND ac_cd <> '"+ ac_id +"'";
+            if (ac_id.equalsIgnoreCase("N")) {
+                sql = "SELECT name FROM account_master WHERE id = ?";
             } else if (ac_id.equalsIgnoreCase("C")) {
-                sql = "SELECT ac_cd FROM acnt_mst WHERE ac_name = ?";
+                sql = "SELECT id FROM account_master WHERE name = ?";
             } else if (ac_id.equalsIgnoreCase("CN")) {
-                sql = "SELECT ac_cd FROM acnt_mst WHERE ac_name = ?";
+                sql = "SELECT id FROM account_master WHERE name = ?";
             } else if (ac_id.equalsIgnoreCase("CG")) {
-                sql = "SELECT grp_cd FROM acnt_mst WHERE ac_cd = ?";
+                sql = "SELECT grp_cd FROM account_master WHERE id = ?";
             } else if (ac_id.equalsIgnoreCase("DT")) {
-                sql = "SELECT lock_date FROM acnt_mst WHERE ac_cd = ?";
+                sql = "SELECT lock_date FROM account_master WHERE id = ?";
             }
 
             PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
@@ -905,7 +903,7 @@ public class Library {
     public boolean checkGroup(String id) {
         boolean flag = false;
         try {
-            String sql = "SELECT head FROM group_mst WHERE grp_cd = ?";
+            String sql = "SELECT head FROM group_master WHERE id = ?";
             PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
             pstLocal.setString(1, id);
             ResultSet rsLocal = pstLocal.executeQuery();
@@ -1001,7 +999,7 @@ public class Library {
         String sql = "";
 
         try {
-            sql = "SELECT acc_eff FROM group_mst WHERE grp_cd = '"+ strVal +"'";
+            sql = "SELECT acc_eff FROM group_master WHERE id = '"+ strVal +"'";
 
             if (sql != null) {
                 pstLocal = dataConnection.prepareStatement(sql);
@@ -1028,9 +1026,9 @@ public class Library {
         }
         try {
             if (tag.equalsIgnoreCase("C")) {
-                sql = "SELECT grp_cd FROM group_mst WHERE group_name='"+ strVal +"'";
+                sql = "SELECT id FROM group_master WHERE name='"+ strVal +"'";
             } else if (tag.equalsIgnoreCase("N")) {
-                sql = "SELECT group_name FROM group_mst WHERE grp_cd='"+ strVal +"'";
+                sql = "SELECT name FROM group_master WHERE id='"+ strVal +"'";
             }
 
             if (sql != null) {
@@ -2636,10 +2634,6 @@ public class Library {
             book = Constants.BANK_PAYMENT_FORM_NAME;
         } else if (tag.startsWith(Constants.BANK_RECEIPT_INITIAL)) {
             book = Constants.BANK_RECEIPT_FORM_NAME;
-        } else if (tag.startsWith(Constants.JOURNAL_VOUCHER_INITIAL)) {
-            book = Constants.JOURNAL_VOUCHER_FORM_NAME;
-        } else if (tag.startsWith(Constants.CONTRA_VOUCHER_INITIAL)) {
-            book = Constants.CONTRA_VOUCHER_FORM_NAME;
         } else if (tag.startsWith(Constants.OPB_INITIAL)) {
             book = Constants.OPENING_BALANCE;
         }

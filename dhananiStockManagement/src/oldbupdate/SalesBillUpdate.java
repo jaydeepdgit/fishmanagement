@@ -29,7 +29,7 @@ public class SalesBillUpdate {
             String date = rsLocal.getString("voucher_date");
             String remarks = "";
             String doc_cd = "";
-            remarks = Constants.SALES_BILL_FORM_NAME1;
+            remarks = Constants.SALES_BILL_FORM_NAME;
             doc_cd = Constants.SALES_BILL_INITIAL;
             double net_amt = rsLocal.getDouble("net_amount");
             sql = "SELECT * FROM sale_bill_detail WHERE ref_no = '"+ refNo +"'";

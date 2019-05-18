@@ -92,15 +92,13 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
             displayCashReceipt(ref_no, mode, 0);
         } else if (tag.equalsIgnoreCase(Constants.BANK_PAYMENT_INITIAL) || tag.equalsIgnoreCase(Constants.BANK_RECEIPT_INITIAL)) {
             displayBankReceipt(ref_no, mode, 0);
-        } else if (tag.equalsIgnoreCase(Constants.JOURNAL_VOUCHER_INITIAL)) {
-            displayJournalVoucher(ref_no, mode);
-        } else if (tag.equalsIgnoreCase(Constants.CONTRA_VOUCHER_INITIAL)) {
-            displayContraVoucher(ref_no, mode);
         }
     }
 
     private void getVoucher(String tag, String ref_no, boolean flag) {
-        if(tag.equalsIgnoreCase(""+ Constants.ACCOUNT_MASTER_INITIAL +"M")) {
+        if(tag.equalsIgnoreCase(Constants.GROUP_MASTER_INITIAL)) {
+            groupMasterReport(ref_no);
+        } else if(tag.equalsIgnoreCase(Constants.ACCOUNT_MASTER_INITIAL)) {
             accountMasterReport(ref_no);
         } else if(tag.equalsIgnoreCase(Constants.COMPANY_SETTING_INITIAL)) {
             companyMasterReport(ref_no);
@@ -128,8 +126,8 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
     }
 
     private void groupMasterReport(String ref_no) {
-        String sql = "SELECT g.grp_cd, g.group_name, (SELECT g1.group_name FROM group_mst g1 "
-                +"WHERE g.head_grp = g1.grp_cd) AS headg_name FROM group_mst g ORDER BY g.group_name";
+        String sql = "SELECT g.id, g.name, (SELECT g1.name FROM group_master g1 "
+                +"WHERE g.head_grp = g1.id) AS headg_name FROM group_master g ORDER BY g.name";
         HashMap params = new HashMap();
         params.put("dir", System.getProperty("user.dir"));
         params.put("digit", lb.getDigit());
@@ -673,98 +671,6 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
             }
         } catch (Exception ex) {
             lb.printToLogFile("Exception at displayBankReceipt In Voucher Display", ex);
-        }
-    }
-
-    private void displayJournalVoucher(String ref_no, int mode) {
-        HashMap params = new HashMap();
-        try {
-            String sql = "SELECT ref_no, vdate FROM jvhd WHERE ref_no = '"+ ref_no +"'";
-            dataConnecrtion.setAutoCommit(false);
-            PreparedStatement pstLocal = dataConnecrtion.prepareStatement(sql);
-            ResultSet rsLocal = pstLocal.executeQuery();
-            String view_title = Constants.JOURNAL_VOUCHER_FORM_NAME;
-            String email_title = "JournalVoucher";
-            if (rsLocal.next()) {
-                params.put("date", lb.ConvertDateFormetForDBForConcurrency(rsLocal.getString("vdate")));
-                params.put("voucher", (int)lb.replaceAll(rsLocal.getString("ref_no").substring(tag.length()))+"");
-                params.put("dir", System.getProperty("user.dir"));
-            }
-            params.put("v_type", view_title);
-            params.put("cname", DeskFrame.clSysEnv.getCMPN_NAME());
-            params.put("cadd1", DeskFrame.clSysEnv.getADD1());
-            params.put("cadd2", DeskFrame.clSysEnv.getADD2());
-            params.put("ccorradd1", DeskFrame.clSysEnv.getCORRADD1());
-            params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
-            params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
-            dataConnecrtion.setAutoCommit(true);
-            lb.closeResultSet(rsLocal);
-            lb.closeStatement(pstLocal);
-            sql = "SELECT jh.ref_no, jh.vdate, am.ac_name AS ac_name, jd.amt AS amt, " +
-                "CASE WHEN jd.drcr = 0 THEN 'cr' ELSE 'dr' END drcr, jd.part AS remark " +
-                "FROM jvhd jh, jvdt jd, acnt_mst am WHERE jh.ref_no = jd.ref_no AND am.ac_cd = jd.ac_cd AND " +
-                "jh.ref_no = '"+ ref_no +"' ORDER BY jh.ref_no";
-            pstLocal = dataConnecrtion.prepareStatement(sql);
-            rsLocal = pstLocal.executeQuery();
-            if(email.equalsIgnoreCase("")) {
-                params.put("isshow", DeskFrame.is_show);
-                print = lb.reportGenerator("JournalVoucher.jasper", params, rsLocal, jPanel1);
-            } else {
-                params.put("isshow", true);
-                if(lb.reportGeneratorInPDF("JournalVoucher.jasper", email_title, email, params, rsLocal, jPanel1)) {
-                    JOptionPane.showMessageDialog(null, "Successfully Send E-mail", view_title, JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Problem In Send E-mail", view_title, JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        } catch (Exception ex) {
-            lb.printToLogFile("Exception at displayJournalVoucher In Voucher Display", ex);
-        }
-    }
-
-    private void displayContraVoucher(String ref_no, int mode) {
-        HashMap params = new HashMap();
-        try {
-            String sql = "SELECT ref_no, vdate FROM contrahd WHERE ref_no = '"+ ref_no +"'";
-            dataConnecrtion.setAutoCommit(false);
-            PreparedStatement pstLocal = dataConnecrtion.prepareStatement(sql);
-            ResultSet rsLocal = pstLocal.executeQuery();
-            String view_title = Constants.CONTRA_VOUCHER_FORM_NAME;
-            String email_title = "ContraVoucher";
-            if (rsLocal.next()) {
-                params.put("date", lb.ConvertDateFormetForDBForConcurrency(rsLocal.getString("vdate")));
-                params.put("voucher", (int)lb.replaceAll(rsLocal.getString("ref_no").substring(tag.length()))+"");
-                params.put("dir", System.getProperty("user.dir"));
-            }
-            params.put("v_type", view_title);
-            params.put("cname", DeskFrame.clSysEnv.getCMPN_NAME());
-            params.put("cadd1", DeskFrame.clSysEnv.getADD1());
-            params.put("cadd2", DeskFrame.clSysEnv.getADD2());
-            params.put("ccorradd1", DeskFrame.clSysEnv.getCORRADD1());
-            params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
-            params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
-            dataConnecrtion.setAutoCommit(true);
-            lb.closeResultSet(rsLocal);
-            lb.closeStatement(pstLocal);
-            sql = "SELECT jh.ref_no, jh.vdate, am.ac_name AS ac_name, jd.amt AS amt, " +
-                "CASE WHEN jd.drcr = 0 THEN 'cr' ELSE 'dr' END drcr, jd.part AS remark " +
-                "FROM contrahd jh, contradt jd, acnt_mst am WHERE jh.ref_no = jd.ref_no AND am.ac_cd = jd.ac_cd AND " +
-                "jh.ref_no = '"+ ref_no +"' ORDER BY jh.ref_no";
-            pstLocal = dataConnecrtion.prepareStatement(sql);
-            rsLocal = pstLocal.executeQuery();
-            if(email.equalsIgnoreCase("")) {
-                params.put("isshow", DeskFrame.is_show);
-                print = lb.reportGenerator("JournalVoucher.jasper", params, rsLocal, jPanel1);
-            } else {
-                params.put("isshow", true);
-                if(lb.reportGeneratorInPDF("JournalVoucher.jasper", email_title, email, params, rsLocal, jPanel1)) {
-                    JOptionPane.showMessageDialog(null, "Successfully Send E-mail", view_title, JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Problem In Send E-mail", view_title, JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        } catch (Exception ex) {
-            lb.printToLogFile("Exception at displayContraVoucher In Voucher Display", ex);
         }
     }
 
