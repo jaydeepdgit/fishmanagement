@@ -66,7 +66,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private void onViewVoucher() {
         this.dispose();
 
-        String sql = "SELECT id, name, IF(status = 0, '"+ Constants.ACTIVE +"', '"+ Constants.DEACTIVE +"') AS status, opb, IF(account_type = 0, '"+ Constants.USD +"', '"+ Constants.RS +"') AS status FROM account_master";
+        String sql = "SELECT id, name, IF(status = 0, '"+ Constants.ACTIVE +"', '"+ Constants.DEACTIVE +"') AS status, opb, IF(amount_type = 0, '"+ Constants.USD +"', '"+ Constants.RS +"') AS status FROM account_master";
         accountMaster.setColumnValue(new int[]{1, 2, 3, 4, 5});
         String view_title = Constants.ACCOUNT_MASTER_FORM_NAME +" VIEW";
 
@@ -300,7 +300,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     
     private void oldbUpdateADD() throws SQLException {
         if (lb.getData("AC_CD", "oldb2_1", "AC_CD", ""+ id +"").equalsIgnoreCase("")) {
-            String sql = "insert into oldb2_1 values(?, ?, ?, ?, ?, ?)";
+            String sql = "insert into oldb2_1(ac_cd, opb, dr, cr, bal, amount_type) values(?, ?, ?, ?, ?, ?)";
             PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
             pstUpdate.setString(1, id);
             pstUpdate.setDouble(2, Double.parseDouble(jtxtOPB.getText()));
