@@ -1544,11 +1544,11 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
                 row.add(lb.getIndianFormat(lb.replaceAll(jtxtAmount.getText())));
                 dtm.addRow(row);
             } else {
-                jTable1.setValueAt(jtxtMainCategory.getText(), rowSel, 2);
-                jTable1.setValueAt(jtxtSubCategory.getText(), rowSel, 3);
-                jTable1.setValueAt(lb.Convert2DecFmt(lb.replaceAll(jtxtWeight.getText())), rowSel, 4);
-                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())), rowSel, 5);
-                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtAmount.getText())), rowSel, 6);
+                jTable1.setValueAt(jtxtMainCategory.getText(), rowSel, 1);
+                jTable1.setValueAt(jtxtSubCategory.getText(), rowSel, 2);
+                jTable1.setValueAt(lb.Convert2DecFmt(lb.replaceAll(jtxtWeight.getText())), rowSel, 3);
+                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())), rowSel, 4);
+                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtAmount.getText())), rowSel, 5);
             }
             updateLabel();
             clear();

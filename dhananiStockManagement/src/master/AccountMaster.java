@@ -4,21 +4,23 @@
  */
 package master;
 
+import dhananistockmanagement.DeskFrame;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import javax.swing.InputVerifier;
-import javax.swing.JComponent;
-import javax.swing.event.InternalFrameEvent;
-import dhananistockmanagement.DeskFrame;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
+import javax.swing.JTextField;
+import javax.swing.event.InternalFrameEvent;
 import support.Constants;
 import support.HeaderIntFrame1;
 import support.Library;
+import support.PickList;
 import support.ReportTable;
 import support.SmallNavigation;
 import support.VoucherDisplay;
@@ -32,6 +34,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private Library lb = new Library();
     private String id = "";
     private Connection dataConnection = DeskFrame.connMpAdmin;
+    private PickList groupPickList = null;
     private ReportTable accountMaster;
 
     /**
@@ -41,6 +44,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         initComponents();
         addNavigation();
         addValidation();
+        setPickListView();
         setCompEnable(false);
         setVoucher("Last");
         makeChildTable();
@@ -61,6 +65,15 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     public void setID(String id) {
         this.id = id;
         setVoucher("edit");
+    }
+    
+    private void setPickListView() {
+        groupPickList = new PickList(dataConnection);
+
+        groupPickList.setLayer(getLayeredPane());
+        groupPickList.setPickListComponent(jtxtGroup);
+        groupPickList.setNextComponent(jtxtExpense);
+
     }
 
     private void onViewVoucher() {
@@ -87,6 +100,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         FieldValidation valid = new FieldValidation();
         jtxtID.setInputVerifier(valid);
         jtxtName.setInputVerifier(valid);
+        jtxtGroup.setInputVerifier(valid);
     }
 
     class FieldValidation extends InputVerifier {
@@ -94,17 +108,19 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         public boolean verify(JComponent input) {
             boolean val = false;
             if (input.equals(jtxtID)) {
-                val = fielddValid(input);
+                val = fieldValid(input);
             } else if (input.equals(jtxtName)) {
-                val = fielddValid(input);
+                val = fieldValid(input);
+            } else if (input.equals(jtxtGroup)) {
+                val = fieldValid(input);
             } else if (input.equals(jtxtOPB)) {
-                val = fielddValid(input);
-            }
+                val = fieldValid(input);
+            } 
             return val;
         }
     }
 
-    private boolean fielddValid(Component comp) {
+    private boolean fieldValid(Component comp) {
         navLoad.setMessage("");
         if (comp == jtxtName) {
             if (navLoad.getMode().equalsIgnoreCase("N") || navLoad.getMode().equalsIgnoreCase("E")) {
@@ -128,12 +144,26 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 }
             }
         }
+        if (comp == jtxtGroup) {
+            if (navLoad.getMode().equalsIgnoreCase("N") || navLoad.getMode().equalsIgnoreCase("E")) {
+                if (lb.isBlank(comp)) {
+                    navLoad.setMessage("Please select group");
+                    comp.requestFocusInWindow();
+                    return false;
+                }
+            }
+        }
         if (comp == jtxtOPB) {
             if (navLoad.getMode().equalsIgnoreCase("N") || navLoad.getMode().equalsIgnoreCase("E")) {
                 if (lb.isBlank(comp)) {
-                    navLoad.setMessage("OPB should not blank");
-                    comp.requestFocusInWindow();
-                    return false;
+                    jtxtOPB.setText("0.00");
+                }
+            }
+        }
+        if (comp == jtxtExpense) {
+            if (navLoad.getMode().equalsIgnoreCase("N") || navLoad.getMode().equalsIgnoreCase("E")) {
+                if (lb.isBlank(comp)) {
+                    jtxtExpense.setText("0.00");
                 }
             }
         }
@@ -143,6 +173,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private void setCompEnable(boolean flag) {
         jtxtID.setEnabled(!flag);
         jtxtName.setEnabled(flag);
+        jtxtGroup.setEnabled(flag);
         jtxtExpense.setEnabled(flag);
         jcmbStatus.setEnabled(flag);
         jtxtOPB.setEnabled(flag);
@@ -153,6 +184,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private void setCompText(String text) {
         jtxtID.setText(text);
         jtxtName.setText(text);
+        jtxtGroup.setText(text);
         jtxtExpense.setText(text);
         jcmbStatus.setSelectedIndex(0);
         jtxtOPB.setText(text);
@@ -160,7 +192,11 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     }
 
     private boolean validateForm() {
-        boolean flag = fielddValid(jtxtName);
+        boolean flag = true;
+        flag = flag && fieldValid(jtxtName);
+        flag = flag && fieldValid(jtxtGroup);
+        flag = flag && fieldValid(jtxtExpense);
+        flag = flag && fieldValid(jtxtOPB);
         return flag;
     }
 
@@ -273,6 +309,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                     id = navLoad.viewData.getString("id");
                     jtxtID.setText(id+"");
                     jtxtName.setText(navLoad.viewData.getString("name"));
+                    jtxtGroup.setText(lb.getGroupName(navLoad.viewData.getString("fk_group_id"), "N"));
                     jtxtExpense.setText(navLoad.viewData.getString("expense"));
                     jcmbStatus.setSelectedIndex(navLoad.viewData.getInt("status"));
                     jtxtOPB.setText(navLoad.viewData.getString("opb"));
@@ -399,27 +436,29 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             PreparedStatement psLocal = null;
             dataConnection.setAutoCommit(false);
             if(navLoad.getMode().equalsIgnoreCase("N")) {
-                psLocal = dataConnection.prepareStatement("INSERT INTO account_master(name, expense, status, opb, amount_type, user_cd, id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                psLocal = dataConnection.prepareStatement("INSERT INTO account_master(name, fk_group_id, expense, status, opb, amount_type, user_cd, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                 id = lb.generateKey("account_master", "id", Constants.ACCOUNT_MASTER_INITIAL, 8);
                 psLocal.setString(1, jtxtName.getText()); // name
-                psLocal.setString(2, jtxtExpense.getText()); // expense
-                psLocal.setInt(3, jcmbStatus.getSelectedIndex()); // status
-                psLocal.setString(4, jtxtOPB.getText()); // opb
-                psLocal.setInt(5, jcmbAmountType.getSelectedIndex()); // amount type
-                psLocal.setInt(6, DeskFrame.user_id); // user_cd
-                psLocal.setString(7, id); // id
+                psLocal.setString(2, lb.getGroupName(jtxtGroup.getText(), "C")); // group
+                psLocal.setString(3, jtxtExpense.getText()); // expense
+                psLocal.setInt(4, jcmbStatus.getSelectedIndex()); // status
+                psLocal.setString(5, jtxtOPB.getText()); // opb
+                psLocal.setInt(6, jcmbAmountType.getSelectedIndex()); // amount type
+                psLocal.setInt(7, DeskFrame.user_id); // user_cd
+                psLocal.setString(8, id); // id
                 psLocal.executeUpdate();
                 
                 oldbUpdateADD();
             } else if(navLoad.getMode().equalsIgnoreCase("E")) {
-                psLocal = dataConnection.prepareStatement("UPDATE account_master SET name = ?, expense = ?, status = ?, opb = ?, amount_type = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
+                psLocal = dataConnection.prepareStatement("UPDATE account_master SET name = ?, fk_group_id = ?, expense = ?, status = ?, opb = ?, amount_type = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
                 psLocal.setString(1, jtxtName.getText()); // name
-                psLocal.setString(2, jtxtExpense.getText()); // expense
-                psLocal.setInt(3, jcmbStatus.getSelectedIndex()); // status
-                psLocal.setString(4, jtxtOPB.getText()); // opb
-                psLocal.setInt(5, jcmbAmountType.getSelectedIndex()); // amount type
-                psLocal.setInt(6, DeskFrame.user_id); // user_cd
-                psLocal.setString(7, id); // id
+                psLocal.setString(2, lb.getGroupName(jtxtGroup.getText(), "C")); // group
+                psLocal.setString(3, jtxtExpense.getText()); // expense
+                psLocal.setInt(4, jcmbStatus.getSelectedIndex()); // status
+                psLocal.setString(5, jtxtOPB.getText()); // opb
+                psLocal.setInt(6, jcmbAmountType.getSelectedIndex()); // amount type
+                psLocal.setInt(7, DeskFrame.user_id); // user_cd
+                psLocal.setString(8, id); // id
                 psLocal.executeUpdate();
                 
                 oldbUpdateEdit();
@@ -498,6 +537,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jtxtOPB = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
         jcmbAmountType = new javax.swing.JComboBox();
+        jtxtGroup = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(686, 535));
 
@@ -655,6 +696,37 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             }
         });
 
+        jtxtGroup.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jtxtGroup.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtGroup.setMinimumSize(new java.awt.Dimension(2, 25));
+        jtxtGroup.setPreferredSize(new java.awt.Dimension(2, 25));
+        jtxtGroup.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtGroupFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtGroupFocusLost(evt);
+            }
+        });
+        jtxtGroup.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtGroupKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jtxtGroupKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtGroupKeyTyped(evt);
+            }
+        });
+
+        jLabel3.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel3.setText("Group");
+        jLabel3.setMaximumSize(new java.awt.Dimension(77, 25));
+        jLabel3.setMinimumSize(new java.awt.Dimension(77, 25));
+        jLabel3.setPreferredSize(new java.awt.Dimension(77, 25));
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -663,35 +735,36 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 .addGap(23, 23, 23)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jtxtName)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jtxtID, javax.swing.GroupLayout.DEFAULT_SIZE, 99, Short.MAX_VALUE)
-                                    .addComponent(jcmbStatus, 0, 103, Short.MAX_VALUE)
-                                    .addComponent(jtxtExpense, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jtxtOPB, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jcmbAmountType, 0, 103, Short.MAX_VALUE))
-                                .addGap(0, 0, Short.MAX_VALUE))))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jlblUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jlblLstUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 323, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jlblEditNo, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(183, Short.MAX_VALUE))
+                            .addComponent(jlblEditNo, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jcmbAmountType, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jtxtOPB, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jcmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jtxtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 103, Short.MAX_VALUE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jtxtID, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jtxtName, javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jtxtGroup, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 311, Short.MAX_VALUE)))
+                        .addGap(0, 121, Short.MAX_VALUE)))
+                .addContainerGap(76, Short.MAX_VALUE))
         );
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel2, jLabel6, jLabel7, jLabel8});
@@ -708,22 +781,26 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jtxtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jtxtGroup, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(5, 5, 5)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jtxtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jcmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jcmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jtxtOPB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtOPB, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jcmbAmountType, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(35, 35, 35)
+                    .addComponent(jcmbAmountType, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jlblUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
@@ -735,7 +812,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jlblLstUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
-                .addContainerGap())
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jLabel2, jtxtID, jtxtName});
@@ -758,7 +835,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(42, Short.MAX_VALUE))
         );
@@ -767,7 +844,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jtxtNameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtNameKeyPressed
-        lb.enterEvent(evt, jtxtExpense);
+        lb.enterEvent(evt, jtxtGroup);
     }//GEN-LAST:event_jtxtNameKeyPressed
 
     private void jtxtNameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtNameKeyTyped
@@ -839,10 +916,43 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_jcmbAmountTypeKeyPressed
 
+    private void jtxtGroupFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtGroupFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtGroupFocusGained
+
+    private void jtxtGroupFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtGroupFocusLost
+        groupPickList.setVisible(false);
+    }//GEN-LAST:event_jtxtGroupFocusLost
+
+    private void jtxtGroupKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtGroupKeyPressed
+        groupPickList.setLocation(jtxtGroup.getX(), jtxtGroup.getY() + jtxtGroup.getHeight());
+        groupPickList.pickListKeyPress(evt);
+    }//GEN-LAST:event_jtxtGroupKeyPressed
+
+    private void jtxtGroupKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtGroupKeyReleased
+        try {
+            groupPickList.setReturnComponent(new JTextField[]{jtxtGroup});
+            String sql = "SELECT name FROM group_master WHERE name LIKE '%"+ jtxtGroup.getText() +"%'";
+            PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
+            groupPickList.setValidation(dataConnection.prepareStatement("SELECT name FROM group_master WHERE name = ?"));
+            groupPickList.setFirstAssociation(new int[]{0});
+            groupPickList.setSecondAssociation(new int[]{0});
+            groupPickList.setPreparedStatement(pstLocal);
+            groupPickList.pickListKeyRelease(evt);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at jtxtGroupKeyReleased In Account Master", ex);
+        }
+    }//GEN-LAST:event_jtxtGroupKeyReleased
+
+    private void jtxtGroupKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtGroupKeyTyped
+        lb.onlyAlpha(evt, 255);
+    }//GEN-LAST:event_jtxtGroupKeyTyped
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -857,6 +967,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jlblLstUpdate;
     private javax.swing.JLabel jlblUserName;
     private javax.swing.JTextField jtxtExpense;
+    private javax.swing.JTextField jtxtGroup;
     private javax.swing.JTextField jtxtID;
     private javax.swing.JTextField jtxtName;
     private javax.swing.JTextField jtxtOPB;
