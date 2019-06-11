@@ -404,7 +404,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         row.add(++i);
                         row.add(lb.getMainCategory(viewDataRs.getString("fk_main_category_id"), "N"));
                         row.add(lb.getSubCategory(viewDataRs.getString("fk_sub_category_id"), "N"));
-                        row.add(lb.getSlabCategory(viewDataRs.getString("fk_slab_category_id"), "N"));
+                        row.add(lb.getSlabCategory(viewDataRs.getString("fk_slab_category_id"), "N", viewDataRs.getString("fk_sub_category_id")));
                         row.add(String.valueOf(viewDataRs.getInt("slab")));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("qty")));
                         row.add(lb.getIndianFormat(viewDataRs.getDouble("rate")));
@@ -509,7 +509,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
         for (int i = 0; i < jTable1.getRowCount(); i++) {
             String main_category_cd = lb.getMainCategory(jTable1.getValueAt(i, 1).toString(), "C"); // ITEM CD
             String sub_category_cd = lb.getSubCategory(jTable1.getValueAt(i, 2).toString(), "C"); // ITEM CD
-            String slab_category_cd = lb.getSlabCategory(jTable1.getValueAt(i, 3).toString(), "C"); // ITEM CD
+            String slab_category_cd = lb.getSlabCategory(jTable1.getValueAt(i, 3).toString(), "C", sub_category_cd); // ITEM CD
             int slab = Integer.parseInt(jTable1.getValueAt(i, 4).toString()); // SLAB
             double qty = lb.replaceAll(jTable1.getValueAt(i, 5).toString()); // QTY
             double rate = lb.replaceAll(jTable1.getValueAt(i, 6).toString()); // RATE

@@ -279,11 +279,12 @@ public class BreakUp extends javax.swing.JInternalFrame {
             public void setComponentTextFromRs() {
                 try {
                     id = viewDataRs.getString("id");
+                    String sub_category_id = viewDataRs.getString("fk_sub_category_id");
                     jtxtVoucher.setText(viewDataRs.getString("id").substring(initial.length()));
                     jtxtVDate.setText(lb.ConvertDateFormetForDBForConcurrency(viewDataRs.getString("v_date")));
                     jtxtAccountName.setText(lb.getAccountMstName(viewDataRs.getString("fk_account_master_id"), "N"));
                     jtxtMainCategory.setText(lb.getMainCategory(viewDataRs.getString("fk_main_category_id"), "N"));
-                    jtxtSubCategory.setText(lb.getSubCategory(viewDataRs.getString("fk_sub_category_id"), "N"));
+                    jtxtSubCategory.setText(lb.getSubCategory(sub_category_id, "N"));
                     jlblDay.setText(lb.setDay(jtxtVDate));
                     jlblSlabQty.setText(lb.getIndianFormat(viewDataRs.getDouble("total_slabqty")));
                     jlblKgs.setText(lb.getIndianFormat(viewDataRs.getDouble("total_kgs")));
@@ -301,7 +302,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
                     while (viewDataRs.next()) {
                         Vector row = new Vector();
                         row.add(++i);
-                        row.add(lb.getSlabCategory(viewDataRs.getString("fk_slab_category_id"), "N"));
+                        row.add(lb.getSlabCategory(viewDataRs.getString("fk_slab_category_id"), "N", sub_category_id));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("grad_qty")));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("kgs")));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("block_used")));
@@ -380,11 +381,13 @@ public class BreakUp extends javax.swing.JInternalFrame {
             sql = "UPDATE grade_main SET fk_account_master_id = ?, v_date = ?, fk_main_category_id = ?, fk_sub_category_id = ?, total_slabqty = ?, total_kgs = ?, total_blockused = ?, total_usd = ?, total_inr = ?, total_block = ?, fix_time = '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) 
                 +"', user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?";
         }
+        
+        String sub_category_id = lb.getSubCategory(jtxtSubCategory.getText(), "C");
         psLocal = dataConnection.prepareStatement(sql);
         psLocal.setString(1, lb.getAccountMstName(jtxtAccountName.getText(), "C")); // fk_account_master_id
         psLocal.setString(2, lb.tempConvertFormatForDBorConcurrency(jtxtVDate.getText())); // v_date
         psLocal.setString(3, lb.getMainCategory(jtxtMainCategory.getText(), "C")); // Main Category
-        psLocal.setString(4, lb.getSubCategory(jtxtSubCategory.getText(), "C")); // Sub Category
+        psLocal.setString(4, sub_category_id); // Sub Category
         psLocal.setDouble(5, lb.replaceAll(jlblSlabQty.getText())); // total_slabqty
         psLocal.setDouble(6, lb.replaceAll(jlblKgs.getText())); // total_kgs
         psLocal.setDouble(7, lb.replaceAll(jlblBlockUsed.getText())); // total_blockused
@@ -407,7 +410,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
             double rateINR = lb.replaceAll(jTable1.getValueAt(i, 7).toString()); // rateINR
             double totalINR = lb.replaceAll(jTable1.getValueAt(i, 8).toString()); // totalINR
             double block = lb.replaceAll(jTable1.getValueAt(i, 9).toString()); // block
-            String fkSlabCategoryId = lb.getSlabCategory(fkSlabCategoryName, "C"); // slab category od
+            String fkSlabCategoryId = lb.getSlabCategory(fkSlabCategoryName, "C", sub_category_id); // slab category od
             if(!(fkSlabCategoryId.equalsIgnoreCase("0") || fkSlabCategoryId.equalsIgnoreCase(""))) {
                 psLocal.setInt(1, i + 1); // sr_no
                 psLocal.setString(2, fkSlabCategoryId); // sub category id

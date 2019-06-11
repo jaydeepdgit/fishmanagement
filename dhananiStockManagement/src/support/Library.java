@@ -1877,7 +1877,7 @@ public class Library {
         return returnVal;
     }
 
-    public String getSlabCategory(String strVal, String tag) {
+    public String getSlabCategory(String strVal, String tag, String subCat) {
         PreparedStatement pstLocal = null;
         ResultSet rsLocal = null;
         String returnVal = "";
@@ -1887,9 +1887,9 @@ public class Library {
         }
         try {
             if (tag.equalsIgnoreCase("C")) {
-                sql = "SELECT id FROM slab_category WHERE name = '"+ strVal +"'";
+                sql = "SELECT id FROM slab_category WHERE name = '"+ strVal +"' AND fk_sub_category_id = '"+ subCat +"'";
             } else if (tag.equalsIgnoreCase("N")) {
-                sql = "SELECT name FROM slab_category WHERE id = '"+ strVal +"'";
+                sql = "SELECT name FROM slab_category WHERE id = '"+ strVal +"' AND fk_sub_category_id = '"+ subCat +"'";
             }
 
             if (sql != null) {
