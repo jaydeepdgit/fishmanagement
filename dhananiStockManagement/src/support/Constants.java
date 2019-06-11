@@ -162,6 +162,7 @@ public class Constants {
     public static String CORRECT_DATE = "Enter Correct Date";
     public static String INVALID_MAIN_CATEGORY = "Invalid Main Category";
     public static String INVALID_QTY = "Invalid Weight";
+    public static String INVALID_SLAB = "Invalid Slab";
     public static String INVALID_RATE = "Invalid Rate";
     public static String INVALID_DATE = "Invalid Date";
     public static String INVALID_DISCOUNT = "Invalid Disc";

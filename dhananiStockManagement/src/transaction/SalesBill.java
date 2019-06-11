@@ -104,7 +104,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
         itemPickList = new PickList(dataConnection);
         itemPickList.setLayer(getLayeredPane());
         itemPickList.setPickListComponent(jtxtGradeCategory);
-        itemPickList.setNextComponent(jtxtQty);
+        itemPickList.setNextComponent(jtxtSlab);
         itemPickList.setReturnComponent(new JTextField[]{jtxtGradeCategory});
 
         mainCategoryPickList = new PickList(dataConnection);
@@ -132,7 +132,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }
 
     private void calculation() {
-        double qty = lb.replaceAll(jtxtQty.getText());
+        int slab = Integer.parseInt(jtxtSlab.getText());
+        double qty = slab * 10;
         double rate = lb.replaceAll(jtxtRate.getText());
         double amt = (qty * rate);
         
@@ -147,6 +148,12 @@ public class SalesBill extends javax.swing.JInternalFrame {
         if(lb.isBlank(jtxtGradeCategory)) {
             navLoad.setMessage(Constants.INVALID_ITEM);
             jtxtGradeCategory.requestFocusInWindow();
+            flag = flag && false;
+        }
+        
+        if(lb.replaceAll(jtxtSlab.getText()) < 0) {
+            navLoad.setMessage(Constants.INVALID_SLAB);
+            jtxtSlab.requestFocusInWindow();
             flag = flag && false;
         }
 
@@ -324,7 +331,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jtxtSubCategory.setEnabled(bFlag);
                 jtxtGradeCategory.setEnabled(bFlag);
                 jtxtparticulars.setEnabled(false);
-                jtxtQty.setEnabled(bFlag);
+                jtxtSlab.setEnabled(bFlag);
+                jtxtQty.setEnabled(false);
                 jtxtRate.setEnabled(bFlag);
                 jtxtAmt.setEnabled(bFlag);
                 jtxtDiscPer.setEnabled(bFlag);
@@ -397,6 +405,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         row.add(lb.getMainCategory(viewDataRs.getString("fk_main_category_id"), "N"));
                         row.add(lb.getSubCategory(viewDataRs.getString("fk_sub_category_id"), "N"));
                         row.add(lb.getSlabCategory(viewDataRs.getString("fk_slab_category_id"), "N"));
+                        row.add(String.valueOf(viewDataRs.getInt("slab")));
                         row.add(lb.Convert2DecFmt(viewDataRs.getDouble("qty")));
                         row.add(lb.getIndianFormat(viewDataRs.getDouble("rate")));
                         row.add(lb.getIndianFormat(viewDataRs.getDouble("amt")));
@@ -495,25 +504,27 @@ public class SalesBill extends javax.swing.JInternalFrame {
         psLocal.setString(17, ref_no); // Ref No
         change += psLocal.executeUpdate();
 
-        sql = "INSERT INTO sale_bill_detail(sr_no, fk_main_category_id, fk_sub_category_id, fk_slab_category_id, qty, rate, amt, ref_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        sql = "INSERT INTO sale_bill_detail(sr_no, fk_main_category_id, fk_sub_category_id, fk_slab_category_id, slab, qty, rate, amt, ref_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         psLocal = dataConnection.prepareStatement(sql);
         for (int i = 0; i < jTable1.getRowCount(); i++) {
             String main_category_cd = lb.getMainCategory(jTable1.getValueAt(i, 1).toString(), "C"); // ITEM CD
             String sub_category_cd = lb.getSubCategory(jTable1.getValueAt(i, 2).toString(), "C"); // ITEM CD
             String slab_category_cd = lb.getSlabCategory(jTable1.getValueAt(i, 3).toString(), "C"); // ITEM CD
-            double qty = lb.replaceAll(jTable1.getValueAt(i, 4).toString()); // QTY
-            double rate = lb.replaceAll(jTable1.getValueAt(i, 5).toString()); // RATE
-            double amount = lb.replaceAll(jTable1.getValueAt(i, 6).toString()); // AMOUNT
+            int slab = Integer.parseInt(jTable1.getValueAt(i, 4).toString()); // SLAB
+            double qty = lb.replaceAll(jTable1.getValueAt(i, 5).toString()); // QTY
+            double rate = lb.replaceAll(jTable1.getValueAt(i, 6).toString()); // RATE
+            double amount = lb.replaceAll(jTable1.getValueAt(i, 7).toString()); // AMOUNT
             if(!(slab_category_cd.equalsIgnoreCase("0") || slab_category_cd.equalsIgnoreCase(""))) {
                 if (qty > 0) { // CONDITION QTY
                     psLocal.setInt(1, i + 1); // SR NO
                     psLocal.setString(2, main_category_cd); // Main Category CD
                     psLocal.setString(3, sub_category_cd); // Sub Category CD
                     psLocal.setString(4, slab_category_cd); // Slab Category CD
-                    psLocal.setDouble(5, qty); // QTY
-                    psLocal.setDouble(6, rate); // RATE
-                    psLocal.setDouble(7, amount); // AMT
-                    psLocal.setString(8, ref_no); // REF NO
+                    psLocal.setInt(5, slab); // QTY
+                    psLocal.setDouble(6, qty); // QTY
+                    psLocal.setDouble(7, rate); // RATE
+                    psLocal.setDouble(8, amount); // AMT
+                    psLocal.setString(9, ref_no); // REF NO
                     change += psLocal.executeUpdate();
                 }
             }
@@ -537,18 +548,25 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jtxtSubCategory.setText("");
         jtxtGradeCategory.setText("");
         jtxtparticulars.setText("");
+        jtxtSlab.setText("0");
         jtxtQty.setText("0.00");
         jtxtRate.setText("0.00");
         jtxtAmt.setText("0.00");
     }
 
     private void updateLabel() {
+        int totalSlab = 0;
         double qty = 0.00, amt = 0.00;
         for (int i = 0; i < jTable1.getRowCount(); i++) {
+            int slab = 0;
             jTable1.setValueAt(i+1, i, 0);
-            qty += lb.replaceAll(jTable1.getValueAt(i, 4).toString());
-            amt += lb.replaceAll(jTable1.getValueAt(i, 6).toString());
+            slab = Integer.parseInt(jTable1.getValueAt(i, 4).toString());
+            qty += (slab * 10);
+            jTable1.setValueAt((slab * 10), i, 5);
+            amt += lb.replaceAll(jTable1.getValueAt(i, 7).toString());
+            totalSlab += slab;
         }
+        jlblSlab.setText(String.valueOf(totalSlab));
         jlblQty.setText(lb.Convert2DecFmt(qty));
         jlblAmt.setText(lb.getIndianFormat(amt));
 
@@ -565,8 +583,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }
 
     private void setTextfieldsAtBottom() {
-        JComponent[] header = new JComponent[]{null, jtxtMainCategory, jtxtSubCategory, jtxtGradeCategory, jtxtQty, jtxtRate, jtxtAmt};
-        JComponent[] footer = new JComponent[]{null, null, null, null, jlblQty, null, jlblAmt};
+        JComponent[] header = new JComponent[]{null, jtxtMainCategory, jtxtSubCategory, jtxtGradeCategory, jtxtSlab, jtxtQty, jtxtRate, jtxtAmt};
+        JComponent[] footer = new JComponent[]{null, null, null, null, jlblSlab, jlblQty, null, jlblAmt};
         lb.setTable(jPanel1, jTable1, header, footer);
     }
     /**
@@ -636,6 +654,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jbtnDelete = new javax.swing.JButton();
         jtxtSubCategory = new javax.swing.JTextField();
         jtxtMainCategory = new javax.swing.JTextField();
+        jtxtSlab = new javax.swing.JTextField();
+        jlblSlab = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(211, 226, 245));
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -660,11 +680,11 @@ public class SalesBill extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Sr No.", "Main Category", "Sub Category", "Grade Category", "Qty", "Rate", "Amount"
+                "Sr No.", "Main Category", "Sub Category", "Grade Category", "Slab", "Qty", "Rate", "Amount"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -694,11 +714,12 @@ public class SalesBill extends javax.swing.JInternalFrame {
             jTable1.getColumnModel().getColumn(3).setResizable(false);
             jTable1.getColumnModel().getColumn(3).setPreferredWidth(170);
             jTable1.getColumnModel().getColumn(4).setResizable(false);
-            jTable1.getColumnModel().getColumn(4).setPreferredWidth(60);
             jTable1.getColumnModel().getColumn(5).setResizable(false);
-            jTable1.getColumnModel().getColumn(5).setPreferredWidth(70);
+            jTable1.getColumnModel().getColumn(5).setPreferredWidth(60);
             jTable1.getColumnModel().getColumn(6).setResizable(false);
-            jTable1.getColumnModel().getColumn(6).setPreferredWidth(100);
+            jTable1.getColumnModel().getColumn(6).setPreferredWidth(70);
+            jTable1.getColumnModel().getColumn(7).setResizable(false);
+            jTable1.getColumnModel().getColumn(7).setPreferredWidth(100);
         }
 
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
@@ -1382,6 +1403,40 @@ public class SalesBill extends javax.swing.JInternalFrame {
             }
         });
 
+        jtxtSlab.setFont(new java.awt.Font("Arial Unicode MS", 0, 14)); // NOI18N
+        jtxtSlab.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtSlab.setMinimumSize(new java.awt.Dimension(2, 25));
+        jtxtSlab.setPreferredSize(new java.awt.Dimension(2, 25));
+        jtxtSlab.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtSlabFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtSlabFocusLost(evt);
+            }
+        });
+        jtxtSlab.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtSlabKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtSlabKeyTyped(evt);
+            }
+        });
+
+        jlblSlab.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        jlblSlab.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jlblSlab.setText("0.00");
+        jlblSlab.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jlblSlab.setMaximumSize(new java.awt.Dimension(24, 20));
+        jlblSlab.setMinimumSize(new java.awt.Dimension(24, 20));
+        jlblSlab.setPreferredSize(new java.awt.Dimension(24, 20));
+        jlblSlab.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentMoved(java.awt.event.ComponentEvent evt) {
+                jlblSlabComponentMoved(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -1393,20 +1448,24 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 168, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtGradeCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 195, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtGradeCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtQty, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtSlab, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtQty, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(jtxtparticulars, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jlblSlab, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jlblQty, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(259, 259, 259)
                         .addComponent(jlblAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 183, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1445,20 +1504,24 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtGradeCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtQty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtSlab, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtGradeCategory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 508, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jlblAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jlblQty, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jtxtparticulars, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jtxtparticulars, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jlblSlab, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jbtnClear, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -1507,9 +1570,10 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     jtxtMainCategory.setText(jTable1.getValueAt(rowSel, 1).toString());
                     jtxtSubCategory.setText(jTable1.getValueAt(rowSel, 2).toString());
                     jtxtGradeCategory.setText(jTable1.getValueAt(rowSel, 3).toString());
-                    jtxtQty.setText(jTable1.getValueAt(rowSel, 4).toString());
-                    jtxtRate.setText(jTable1.getValueAt(rowSel, 5).toString());
-                    jtxtAmt.setText(jTable1.getValueAt(rowSel, 6).toString());
+                    jtxtSlab.setText(jTable1.getValueAt(rowSel, 4).toString());
+                    jtxtQty.setText(jTable1.getValueAt(rowSel, 5).toString());
+                    jtxtRate.setText(jTable1.getValueAt(rowSel, 6).toString());
+                    jtxtAmt.setText(jTable1.getValueAt(rowSel, 7).toString());
                     jtxtMainCategory.requestFocusInWindow();
                 }
             }
@@ -1857,6 +1921,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 row.add(jtxtMainCategory.getText());
                 row.add(jtxtSubCategory.getText());
                 row.add(jtxtGradeCategory.getText());
+                row.add(Integer.parseInt(jtxtSlab.getText()));
                 row.add(lb.Convert2DecFmt(lb.replaceAll(jtxtQty.getText())));
                 row.add(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())));
                 row.add(lb.getIndianFormat(lb.replaceAll(jtxtAmt.getText())));
@@ -1865,9 +1930,10 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jTable1.setValueAt(jtxtMainCategory.getText(), rowSel, 1);
                 jTable1.setValueAt(jtxtSubCategory.getText(), rowSel, 2);
                 jTable1.setValueAt(jtxtGradeCategory.getText(), rowSel, 3);
-                jTable1.setValueAt(lb.Convert2DecFmt(lb.replaceAll(jtxtQty.getText())), rowSel, 4);
-                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())), rowSel, 5);
-                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtAmt.getText())), rowSel, 6);
+                jTable1.setValueAt(jtxtSlab.getText(), rowSel, 4);
+                jTable1.setValueAt(lb.Convert2DecFmt(lb.replaceAll(jtxtQty.getText())), rowSel, 5);
+                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtRate.getText())), rowSel, 6);
+                jTable1.setValueAt(lb.getIndianFormat(lb.replaceAll(jtxtAmt.getText())), rowSel, 7);
             }
             updateLabel();
             clear();
@@ -1990,6 +2056,26 @@ public class SalesBill extends javax.swing.JInternalFrame {
         lb.fixLength(evt, 255);
     }//GEN-LAST:event_jtxtMainCategoryKeyTyped
 
+    private void jtxtSlabFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSlabFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtSlabFocusGained
+
+    private void jtxtSlabFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSlabFocusLost
+        calculation();
+    }//GEN-LAST:event_jtxtSlabFocusLost
+
+    private void jtxtSlabKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSlabKeyPressed
+        lb.enterEvent(evt, jtxtRate);
+    }//GEN-LAST:event_jtxtSlabKeyPressed
+
+    private void jtxtSlabKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSlabKeyTyped
+        lb.onlyInteger(evt, 10);
+    }//GEN-LAST:event_jtxtSlabKeyTyped
+
+    private void jlblSlabComponentMoved(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jlblSlabComponentMoved
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jlblSlabComponentMoved
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBillDateBtn;
     private javax.swing.JButton jBillDateBtn1;
@@ -2027,6 +2113,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jlblAmt;
     private javax.swing.JLabel jlblEditNo;
     private javax.swing.JLabel jlblQty;
+    private javax.swing.JLabel jlblSlab;
     private javax.swing.JLabel jlblStart;
     private javax.swing.JLabel jlblTimeStamp;
     private javax.swing.JLabel jlblUser;
@@ -2044,6 +2131,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private javax.swing.JTextField jtxtQty;
     private javax.swing.JTextField jtxtRate;
     private javax.swing.JTextField jtxtRemarks;
+    private javax.swing.JTextField jtxtSlab;
     private javax.swing.JTextField jtxtSubCategory;
     private javax.swing.JLabel jtxtTotalAmt;
     private javax.swing.JTextField jtxtVDate;
