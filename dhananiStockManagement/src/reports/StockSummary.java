@@ -527,7 +527,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
                 params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
                 params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
                 crsMain.beforeFirst();
-                lb.reportGenerator("TotalStock.jasper", params, crsMain, jPanel1);
+                lb.reportGenerator("StockLedger.jasper", params, crsMain, jPanel1);
             }
         } catch (Exception ex) {
             lb.printToLogFile("Error at jbtnPreviewActionPerformed In Stock Summary", ex);
