@@ -492,7 +492,7 @@ public class BankPayment extends javax.swing.JInternalFrame {
 
         if (navLoad.getMode().equalsIgnoreCase("N")) {
             sql = "INSERT INTO bank_payment_receipt_head (voucher_date, total_bal, user_cd, ctype, fk_bank_cd, fix_time, id) VALUES (?, ?, ?, ?, ?, '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) +"', ?)";
-            id = lb.generateKey("bank_payment_receipt_head", "id", 7, initial); // GENERAE REF NO
+            id = lb.generateKey("bank_payment_receipt_head", "id", 8, initial); // GENERAE REF NO
         } else if (navLoad.getMode().equalsIgnoreCase("E")) {
             BankPayRcptUpdate bp = new BankPayRcptUpdate();
             bp.deleteEntry(id);

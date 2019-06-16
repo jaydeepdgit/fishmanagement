@@ -399,7 +399,7 @@ public class GeneralLedger extends javax.swing.JInternalFrame {
             params.put("digit", lb.getDigit());
             JRResultSetDataSource dataSource = new JRResultSetDataSource(crsMain);
             JasperPrint print = null;
-            if(lb.isExist("SELECT grp_cd FROM acnt_mst WHERE ac_name = '"+ jtxtAcName.getText() +"' AND grp_cd IN (SELECT grp_cd FROM group_mst WHERE head = 0 AND (grp_cd = 'G000012' OR grp_cd = 'G000013'))", dataConnection)) {
+            if(lb.isExist("SELECT fk_group_id FROM account_master WHERE name = '"+ jtxtAcName.getText() +"' AND fk_group_id IN (SELECT id FROM group_master WHERE head = 0 AND (id = 'G000012' OR id = 'G000013'))", dataConnection)) {
                 print = JasperFillManager.fillReport(System.getProperty("user.dir") + File.separatorChar + "Reports"+ File.separatorChar +"GeneralLedgerCash.jasper", params, dataSource);
             } else {
                 print = JasperFillManager.fillReport(System.getProperty("user.dir") + File.separatorChar + "Reports"+ File.separatorChar +"GeneralLedger.jasper", params, dataSource);

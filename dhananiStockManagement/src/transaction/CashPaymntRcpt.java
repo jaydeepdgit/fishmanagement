@@ -134,7 +134,7 @@ public class CashPaymntRcpt extends javax.swing.JInternalFrame {
         boolean flag = true;
 
         if (!lb.isBlank(jtxtAcntName)) {
-            if (!lb.isExist("account_master", "ac_name", jtxtAcntName.getText())) {
+            if (!lb.isExist("account_master", "name", jtxtAcntName.getText())) {
                 navLoad.setMessage(Constants.INVALID_ACCOUNT);
                 jtxtAcntName.requestFocusInWindow();
                 flag = flag && false;
@@ -467,7 +467,7 @@ public class CashPaymntRcpt extends javax.swing.JInternalFrame {
                     while (navLoad.viewData.next()) {
                         Vector row = new Vector();
                         row.add(lb.getAccountMstName(navLoad.viewData.getString("fk_account_master_id"), "N"));
-                        row.add(lb.getIndianFormat(navLoad.viewData.getDouble("ammount")));
+                        row.add(lb.getIndianFormat(navLoad.viewData.getDouble("amount")));
                         row.add(navLoad.viewData.getString("remark"));
                         model.addRow(row);
                     }
@@ -497,7 +497,7 @@ public class CashPaymntRcpt extends javax.swing.JInternalFrame {
         PreparedStatement psLocal = null;
         String sql = null;
         if (navLoad.getMode().equalsIgnoreCase("N")) {
-            id = lb.generateKey("cash_payment_receipt_head", "id", 7, initial); // GENERATE REF NO
+            id = lb.generateKey("cash_payment_receipt_head", "id", 8, initial); // GENERATE REF NO
             sql = "INSERT INTO cash_payment_receipt_head (voucher_date, total_bal, fk_account_master_id, remarks, ctype, is_del, user_cd, fix_time, id) VALUES (?, ?, ?, ?, ?, ?, ?, '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) +"', ?)";
         } else if (navLoad.getMode().equalsIgnoreCase("E")) {
             CashBankUpdate cu = new CashBankUpdate();
@@ -523,7 +523,7 @@ public class CashPaymntRcpt extends javax.swing.JInternalFrame {
             psLocal.executeUpdate();
         }
 
-        sql = "INSERT INTO cash_payment_receipt_details (id, sr_no, fk_account_master_id, total_bal, remark) VALUES (?, ?, ?, ?, ?)";
+        sql = "INSERT INTO cash_payment_receipt_details (id, sr_no, fk_account_master_id, amount, remark) VALUES (?, ?, ?, ?, ?)";
         psLocal = dataConnection.prepareStatement(sql);
         for (int i = 0; i < jtableDet.getRowCount(); i++) {
             String table = "", column = "";

@@ -146,7 +146,7 @@ public class GroupSummary extends javax.swing.JInternalFrame {
         try {
             String sql = null;
             PreparedStatement pstLocal = null;
-            sql = "SELECT a.name as ac_name, opb, cr, dr, bal, o.ac_cd FROM oldb2_1 o, account_master a WHERE a.grp_cd = o.grp_cd ";
+            sql = "SELECT a.name as ac_name, o.opb, cr, dr, bal, o.ac_cd FROM oldb2_1 o, account_master a WHERE a.fk_group_id = o.grp_cd ";
             if (!jtxtGroupName.getText().equalsIgnoreCase("")) {
                 sql += "AND (o.grp_cd = '"+ lb.getGroupName(jtxtGroupName.getText(), "C") +"' OR o.grp_cd "
                 +"IN(SELECT id FROM group_master WHERE head_grp = '"+ lb.getGroupName(jtxtGroupName.getText(), "C") +"')) ";

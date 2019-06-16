@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import support.Constants;
 import support.Library;
 
@@ -51,7 +53,7 @@ public class SalesBillUpdate {
                 psLocal.executeUpdate();
             }
             
-            String sqlUpdate = "INSERT INTO oldb2_2(doc_ref_no, doc_date, doc_cd, ac_cd, val, drcr, particular) VALUES(?, ?, ?, ?, ?, ?, ?)";
+            String sqlUpdate = "INSERT INTO oldb2_2(doc_ref_no, doc_date, doc_cd, ac_cd, val, drcr, particular, fix_time, opp_ac_cd) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstUpdate = null;
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.setString(1, refNo);
@@ -61,14 +63,36 @@ public class SalesBillUpdate {
             pstUpdate.setDouble(5, net_amt);
             pstUpdate.setString(6, "0");
             pstUpdate.setString(7, remarks);
+            pstUpdate.setString(8, new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()));
+            pstUpdate.setString(9, lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()));
             pstUpdate.executeUpdate();
 
+            pstUpdate = dataConnection.prepareStatement(sqlUpdate);
+            pstUpdate.setString(1, refNo);
+            pstUpdate.setString(2, date);
+            pstUpdate.setString(3, doc_cd);
+            pstUpdate.setString(4, lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()));
+            pstUpdate.setDouble(5, net_amt);
+            pstUpdate.setString(6, "1");
+            pstUpdate.setString(7, remarks);
+            pstUpdate.setString(8, new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()));
+            pstUpdate.setString(9, ac_cd);
+            pstUpdate.executeUpdate();
+
+            sqlUpdate = "UPDATE oldb2_1 SET cr = cr + ? WHERE ac_cd = ?";
+            pstUpdate = dataConnection.prepareStatement(sqlUpdate);
+            pstUpdate.setDouble(1, net_amt);
+            pstUpdate.setString(2, lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()));
+            pstUpdate.executeUpdate();
 
             sqlUpdate = "UPDATE oldb2_1 SET dr = dr + ? WHERE ac_cd = ?";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.setDouble(1, net_amt);
             pstUpdate.setString(2, ac_cd);
             pstUpdate.executeUpdate();
+            
+            lb.setBalance(ac_cd, dataConnection);
+            lb.setBalance(lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()), dataConnection);
         }
     }
 
@@ -88,19 +112,23 @@ public class SalesBillUpdate {
                 psLocal.setDouble(1, rsLocal.getDouble("qty"));
                 psLocal.setString(2, rsLocal.getString("fk_slab_category_id"));
                 psLocal.executeUpdate();
-
-                
             }
-                
+
             String sqlUpdate = "";
             PreparedStatement pstUpdate = null;
-            
+
             sql = "DELETE FROM stock0_2 WHERE doc_id = ? AND trns_id = ?";
             pstUpdate = dataConnection.prepareStatement(sql);
             pstUpdate.setString(1, refNo);
             pstUpdate.setInt(2, 4);
             pstUpdate.executeUpdate();
             
+            sqlUpdate = "UPDATE oldb2_1 SET cr = cr - ? WHERE ac_cd = ?";
+            pstUpdate = dataConnection.prepareStatement(sqlUpdate);
+            pstUpdate.setDouble(1, net_amt);
+            pstUpdate.setString(2, lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()));
+            pstUpdate.executeUpdate();
+
             sqlUpdate = "UPDATE oldb2_1 SET dr = dr - ? WHERE ac_cd = ?";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.setDouble(1, net_amt);
@@ -110,6 +138,9 @@ public class SalesBillUpdate {
             sqlUpdate = "DELETE FROM oldb2_2 WHERE doc_ref_no = '"+ refNo +"'";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.executeUpdate();
+            
+            lb.setBalance(ac_cd, dataConnection);
+            lb.setBalance(lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()), dataConnection);
         }
     }
 }

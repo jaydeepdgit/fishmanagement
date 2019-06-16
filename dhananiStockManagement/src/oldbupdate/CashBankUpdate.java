@@ -47,7 +47,7 @@ public class CashBankUpdate {
                     pstUpdate.setString(2, rsLocal.getString("fk_account_master_id"));
                     pstUpdate.executeUpdate();
 
-                    sql = "INSERT INTO oldb2_2 (doc_id, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    sql = "INSERT INTO oldb2_2 (doc_ref_no, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     pstLocal = dataConnection.prepareStatement(sql);
                     pstLocal.setString(1, id);
                     pstLocal.setString(2, Constants.CASH_PAYMENT_INITIAL);
@@ -70,7 +70,7 @@ public class CashBankUpdate {
                     }
                     pstUpdate.executeUpdate();
 
-                    sql = "INSERT INTO oldb2_2 (doc_id, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    sql = "INSERT INTO oldb2_2 (doc_ref_no, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     pstUpdate = dataConnection.prepareStatement(sql);
                     pstUpdate.setString(1, id);
                     pstUpdate.setString(2, Constants.CASH_PAYMENT_INITIAL);
@@ -96,7 +96,7 @@ public class CashBankUpdate {
                     pstUpdate.setString(2, rsLocal.getString("fk_account_master_id"));
                     pstUpdate.executeUpdate();
 
-                    sql = "INSERT INTO oldb2_2 (doc_id, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    sql = "INSERT INTO oldb2_2 (doc_ref_no, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     pstLocal = dataConnection.prepareStatement(sql);
                     pstLocal.setString(1, id);
                     pstLocal.setString(2, Constants.CASH_RECEIPT_INITIAL);
@@ -119,7 +119,7 @@ public class CashBankUpdate {
                     }
                     pstUpdate.executeUpdate();
 
-                    sql = "INSERT INTO oldb2_2 (doc_id, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    sql = "INSERT INTO oldb2_2 (doc_ref_no, doc_cd, doc_date, ac_cd, drcr, val, particular, fix_time, opp_ac_cd) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     pstUpdate = dataConnection.prepareStatement(sql);
                     pstUpdate.setString(1, id);
                     pstUpdate.setString(2, Constants.CASH_RECEIPT_INITIAL);
@@ -163,7 +163,7 @@ public class CashBankUpdate {
                     pstUpdate.setString(2, rsLocal.getString("fk_account_master_id"));
                     pstUpdate.executeUpdate();
 
-                    sql = "delete from oldb2_2 where doc_id = ?";
+                    sql = "delete from oldb2_2 where doc_ref_no = ?";
                     pstLocal = dataConnection.prepareStatement(sql);
                     pstLocal.setString(1, id);
                     pstLocal.executeUpdate();
@@ -184,7 +184,7 @@ public class CashBankUpdate {
                     pstUpdate.setString(2, rsLocal.getString("fk_account_master_id"));
                     pstUpdate.executeUpdate();
 
-                    sql = "DELETE FROM oldb2_2 WHERE doc_id = ?";
+                    sql = "DELETE FROM oldb2_2 WHERE doc_ref_no = ?";
                     pstLocal = dataConnection.prepareStatement(sql);
                     pstLocal.setString(1, id);
                     pstLocal.executeUpdate();

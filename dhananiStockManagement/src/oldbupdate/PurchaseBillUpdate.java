@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import support.Library;
 
 /**
@@ -36,7 +38,7 @@ public class PurchaseBillUpdate {
             double net_amt = rsLocal.getDouble("net_amt");
             
             String sqlUpdate = "insert into oldb2_2(DOC_REF_NO, DOC_DATE, DOC_CD, AC_CD,"
-                + "VAL, DRCR, PARTICULAR) values(?, ?, ?, ?, ?, ?, ?)";
+                + "VAL, DRCR, PARTICULAR, fix_time, opp_ac_cd) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstUpdate = null;
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.setString(1, id);
@@ -46,6 +48,8 @@ public class PurchaseBillUpdate {
             pstUpdate.setDouble(5, net_amt);
             pstUpdate.setString(6, "1");
             pstUpdate.setString(7, "Purchase Bill");
+            pstUpdate.setString(8, new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()));
+            pstUpdate.setString(9, lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()));
             pstUpdate.executeUpdate();
 
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
@@ -56,6 +60,8 @@ public class PurchaseBillUpdate {
             pstUpdate.setDouble(5, net_amt);
             pstUpdate.setString(6, "0");
             pstUpdate.setString(7, "Purchase Bill");
+            pstUpdate.setString(8, new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()));
+            pstUpdate.setString(9, ac_cd);
             pstUpdate.executeUpdate();
 
             sqlUpdate = "update oldb2_1 set DR = DR + ? where AC_CD = ?";
@@ -70,8 +76,8 @@ public class PurchaseBillUpdate {
             pstUpdate.setString(2, ac_cd);
             pstUpdate.executeUpdate();
 
-            //lb.setBalance(ac_cd, dataConnection);
-            //lb.setBalance(lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()), dataConnection);
+            lb.setBalance(ac_cd, dataConnection);
+            lb.setBalance(lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()), dataConnection);
         }
     }
 
@@ -98,12 +104,12 @@ public class PurchaseBillUpdate {
             pstUpdate.setString(2, ac_cd);
             pstUpdate.executeUpdate();
 
-            sqlUpdate = "delete from oldb2_2 where doc_ref_no = '"+id+"'";
+            sqlUpdate = "delete from oldb2_2 where doc_ref_no = '"+ id +"'";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.executeUpdate();
             
-            //lb.setBalance(ac_cd, dataConnection);
-            //lb.setBalance(lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()), dataConnection);
+            lb.setBalance(ac_cd, dataConnection);
+            lb.setBalance(lb.getDefaultCode("cash_ac_cd", dataConnection, DeskFrame.clSysEnv.getCMPN_NAME()), dataConnection);
         }
     }
 }

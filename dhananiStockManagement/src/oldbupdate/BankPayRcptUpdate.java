@@ -39,7 +39,7 @@ public class BankPayRcptUpdate {
                     if(remark.equalsIgnoreCase("")) {
                         remark = Constants.BANK_PAYMENT_FORM_NAME;
                     }
-                    String sqlUpdate = "INSERT INTO oldb2_2(doc_id, doc_date, doc_cd, ac_cd, " +
+                    String sqlUpdate = "INSERT INTO oldb2_2(doc_ref_no, doc_date, doc_cd, ac_cd, " +
                         "val, drcr, particular, fix_time, opp_ac_cd) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement pstUpdate = null;
                     pstUpdate = dataConnection.prepareStatement(sqlUpdate);
@@ -81,7 +81,7 @@ public class BankPayRcptUpdate {
                     if(remark.equalsIgnoreCase("")) {
                         remark = Constants.BANK_RECEIPT_FORM_NAME;
                     }
-                    String sqlUpdate = "INSERT INTO oldb2_2(doc_id, doc_date, doc_cd, ac_cd, " +
+                    String sqlUpdate = "INSERT INTO oldb2_2(doc_ref_no, doc_date, doc_cd, ac_cd, " +
                         "val, drcr, particular, fix_time, opp_ac_cd) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement pstUpdate = null;
                     pstUpdate = dataConnection.prepareStatement(sqlUpdate);
@@ -120,7 +120,7 @@ public class BankPayRcptUpdate {
                     pstUpdate.setString(2, rsLocal.getString("fk_account_master_id"));
                     pstUpdate.executeUpdate();
                 }
-                lb.setBalance(rsLocal.getString("ac_cd"), dataConnection);
+                lb.setBalance(rsLocal.getString("fk_account_master_id"), dataConnection);
             }
             lb.setBalance(bank_cd, dataConnection);
         }
@@ -138,7 +138,7 @@ public class BankPayRcptUpdate {
             rsLocal = pstLocal.executeQuery();
             while (rsLocal.next()) {
                 if(mode == 0) {
-                    String sqlUpdate = "DELETE FROM oldb2_2 WHERE doc_id = '"+ refNo +"'";
+                    String sqlUpdate = "DELETE FROM oldb2_2 WHERE doc_ref_no = '"+ refNo +"'";
 
                     PreparedStatement pstUpdate = null;
                     pstUpdate = dataConnection.prepareStatement(sqlUpdate);
@@ -156,7 +156,7 @@ public class BankPayRcptUpdate {
                     pstUpdate.setString(2, rsLocal.getString("fk_account_master_id"));
                     pstUpdate.executeUpdate();
                 } else {
-                    String sqlUpdate = "DELETE FROM oldb2_2 WHERE doc_id = '"+ refNo +"'";
+                    String sqlUpdate = "DELETE FROM oldb2_2 WHERE doc_ref_no = '"+ refNo +"'";
 
                     PreparedStatement pstUpdate = null;
                     pstUpdate = dataConnection.prepareStatement(sqlUpdate);

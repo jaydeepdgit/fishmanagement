@@ -6,16 +6,19 @@ package master;
 
 import dhananistockmanagement.DeskFrame;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.event.InternalFrameEvent;
 import support.Constants;
 import support.HeaderIntFrame1;
@@ -48,7 +51,32 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         setCompEnable(false);
         setVoucher("Last");
         makeChildTable();
+        setEnableLockDate(true);
+        setLockShortcut();
         setTitle(Constants.ACCOUNT_MASTER_FORM_NAME);
+    }
+
+    private void setLockShortcut() {
+        KeyStroke lockKeyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_K, KeyEvent.CTRL_MASK, false);
+        Action lockKeyAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getLockDate();
+            }
+        };
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(lockKeyStroke, "Lock");
+        this.getActionMap().put("Lock", lockKeyAction);
+    }
+
+    private void getLockDate() {
+        if(!navLoad.getMode().equalsIgnoreCase("")) {
+            String lock = JOptionPane.showInputDialog(this, "Enter Lock Date (DD/MM/YYYY) format", jtxtLockDate.getText());
+            String current = jtxtLockDate.getText();
+            jtxtLockDate.setText(lock);
+            if(!lb.checkDate2(jtxtLockDate)) {
+                jtxtLockDate.setText(current);
+            }
+        }
     }
 
     private void makeChildTable() {
@@ -66,7 +94,12 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         this.id = id;
         setVoucher("edit");
     }
-    
+
+    private void setEnableLockDate(boolean flag) {
+        jtxtLockDate.setVisible(flag);
+        jLabel18.setVisible(flag);
+    }
+
     private void setPickListView() {
         groupPickList = new PickList(dataConnection);
 
@@ -178,6 +211,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jcmbStatus.setEnabled(flag);
         jtxtOPB.setEnabled(flag);
         jcmbAmountType.setEnabled(flag);
+        jtxtLockDate.setEnabled(flag);
         jtxtName.requestFocusInWindow();
     }
 
@@ -188,6 +222,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jtxtExpense.setText(text);
         jcmbStatus.setSelectedIndex(0);
         jtxtOPB.setText(text);
+        jtxtLockDate.setText(text);
         jcmbAmountType.setSelectedIndex(0);
     }
 
@@ -208,6 +243,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 setSaveFlag(false);
                 setCompText("");
                 setCompEnable(true);
+                lb.setDateChooserProperty(jtxtLockDate);
             }
 
             @Override
@@ -315,9 +351,14 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                     jtxtOPB.setText(navLoad.viewData.getString("opb"));
                     jcmbAmountType.setSelectedIndex(navLoad.viewData.getInt("amount_type"));
                     jlblUserName.setText(lb.getUserName(navLoad.viewData.getString("user_cd"), "N"));
+                    if (viewData.getString("lock_date") != null) {
+                        jtxtLockDate.setText(lb.ConvertDateFormetForDBForConcurrency(navLoad.viewData.getString("lock_date")));
+                    } else {
+                        lb.setDateChooserProperty(jtxtLockDate);
+                    }
                     jlblEditNo.setText(navLoad.viewData.getString("edit_no"));
                     jlblLstUpdate.setText(lb.getTimeStamp(viewData.getTimestamp("time_stamp")));
-                } catch (SQLException ex) {
+                } catch (Exception ex) {
                     lb.printToLogFile("Error at setComponentTextFromResultSet In Account Master", ex);
                 }
             }
@@ -337,23 +378,25 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     
     private void oldbUpdateADD() throws SQLException {
         if (lb.getData("AC_CD", "oldb2_1", "AC_CD", ""+ id +"").equalsIgnoreCase("")) {
-            String sql = "insert into oldb2_1(ac_cd, opb, dr, cr, bal, amount_type) values(?, ?, ?, ?, ?, ?)";
+            String sql = "insert into oldb2_1(ac_cd, grp_cd, opb, dr, cr, bal, amount_type) values(?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
             pstUpdate.setString(1, id);
-            pstUpdate.setDouble(2, Double.parseDouble(jtxtOPB.getText()));
-            pstUpdate.setString(3, "0");
+            pstUpdate.setString(2, lb.getGroupName(jtxtGroup.getText(), "C")); // grp_cd
+            pstUpdate.setDouble(3, Double.parseDouble(jtxtOPB.getText()));
             pstUpdate.setString(4, "0");
-            pstUpdate.setDouble(5, 0);
-            pstUpdate.setInt(6, jcmbAmountType.getSelectedIndex());
+            pstUpdate.setString(5, "0");
+            pstUpdate.setDouble(6, 0);
+            pstUpdate.setInt(7, jcmbAmountType.getSelectedIndex());
             
             pstUpdate.executeUpdate();
             lb.closeStatement(pstUpdate);
         } else {
-            String sql = "update oldb2_1 set opb = ?, amount_type=? where AC_CD = ?";
+            String sql = "UPDATE oldb2_1 SET opb = ?, amount_type = ?, grp_cd = ? WHERE AC_CD = ?";
             PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
             pstUpdate.setDouble(1, Double.parseDouble(jtxtOPB.getText()));
             pstUpdate.setInt(2, jcmbAmountType.getSelectedIndex());
-            pstUpdate.setString(3, id);
+            pstUpdate.setString(3, lb.getGroupName(jtxtGroup.getText(), "C")); // grp_cd
+            pstUpdate.setString(4, id);
             pstUpdate.executeUpdate();
             lb.closeStatement(pstUpdate);
         }
@@ -363,30 +406,31 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         pstUpdate.setString(1, id);
         pstUpdate.executeUpdate();
 
-        sql = "insert into oldb2_2 (DOC_REF_NO, DOC_CD, DOC_DATE, AC_CD, DRCR, VAL, PARTICULAR)"
-                + "values(?, ?, ?, ?, ?, ?, ?)";
+        sql = "insert into oldb2_2 (DOC_REF_NO, DOC_CD, DOC_DATE, AC_CD, DRCR, VAL, PARTICULAR, opp_ac_cd)"
+                + "values(?, ?, ?, ?, ?, ?, ?, ?)";
         pstUpdate = dataConnection.prepareStatement(sql);
         pstUpdate.setString(1, "OPB");
         pstUpdate.setString(2, "OPB");
-        SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-        pstUpdate.setString(3, date.format(new Date()));
+        pstUpdate.setString(3, lb.ConvertDateFormetForDB(jtxtLockDate.getText())); // doc_date
         pstUpdate.setString(4, id);
         pstUpdate.setString(5, "0");
         pstUpdate.setDouble(6, Double.parseDouble(jtxtOPB.getText()));
         pstUpdate.setString(7, "");
+        pstUpdate.setString(8, "");
         pstUpdate.executeUpdate();
     }
     
     private void oldbUpdateEdit() throws SQLException {
-        String sql = "update oldb2_1 set OPB = ?, amount_type=? where AC_CD = ?";
+        String sql = "UPDATE oldb2_1 SET OPB = ?, amount_type = ?, grp_cd = ? WHERE AC_CD = ?";
         PreparedStatement pstUpdate = dataConnection.prepareStatement(sql);
         pstUpdate.setDouble(1, Double.parseDouble(jtxtOPB.getText()));
         pstUpdate.setInt(2, jcmbAmountType.getSelectedIndex());
-        pstUpdate.setString(3, id);
+        pstUpdate.setString(3, lb.getGroupName(jtxtGroup.getText(), "C")); // grp_cd
+        pstUpdate.setString(4, id);
         pstUpdate.executeUpdate();
         lb.closeStatement(pstUpdate);
              
-        sql = "update oldb2_2 set val = ? where DOC_REF_NO = 'OPB' AND AC_CD = ?";
+        sql = "UPDATE oldb2_2 SET val = ? WHERE DOC_REF_NO = 'OPB' AND AC_CD = ?";
         pstUpdate = dataConnection.prepareStatement(sql);
         pstUpdate.setDouble(1, Double.parseDouble(jtxtOPB.getText()));
         pstUpdate.setString(2, id);
@@ -436,7 +480,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
             PreparedStatement psLocal = null;
             dataConnection.setAutoCommit(false);
             if(navLoad.getMode().equalsIgnoreCase("N")) {
-                psLocal = dataConnection.prepareStatement("INSERT INTO account_master(name, fk_group_id, expense, status, opb, amount_type, user_cd, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                psLocal = dataConnection.prepareStatement("INSERT INTO account_master(name, fk_group_id, expense, status, opb, amount_type, lock_date, user_cd, id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 id = lb.generateKey("account_master", "id", Constants.ACCOUNT_MASTER_INITIAL, 8);
                 psLocal.setString(1, jtxtName.getText()); // name
                 psLocal.setString(2, lb.getGroupName(jtxtGroup.getText(), "C")); // group
@@ -444,26 +488,28 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 psLocal.setInt(4, jcmbStatus.getSelectedIndex()); // status
                 psLocal.setString(5, jtxtOPB.getText()); // opb
                 psLocal.setInt(6, jcmbAmountType.getSelectedIndex()); // amount type
-                psLocal.setInt(7, DeskFrame.user_id); // user_cd
-                psLocal.setString(8, id); // id
+                psLocal.setString(7, lb.ConvertDateFormetForDB(jtxtLockDate.getText())); // lock_date
+                psLocal.setInt(8, DeskFrame.user_id); // user_cd
+                psLocal.setString(9, id); // id
                 psLocal.executeUpdate();
                 
                 oldbUpdateADD();
             } else if(navLoad.getMode().equalsIgnoreCase("E")) {
-                psLocal = dataConnection.prepareStatement("UPDATE account_master SET name = ?, fk_group_id = ?, expense = ?, status = ?, opb = ?, amount_type = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
+                psLocal = dataConnection.prepareStatement("UPDATE account_master SET name = ?, fk_group_id = ?, expense = ?, status = ?, opb = ?, amount_type = ?, lock_date = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?");
                 psLocal.setString(1, jtxtName.getText()); // name
                 psLocal.setString(2, lb.getGroupName(jtxtGroup.getText(), "C")); // group
                 psLocal.setString(3, jtxtExpense.getText()); // expense
                 psLocal.setInt(4, jcmbStatus.getSelectedIndex()); // status
                 psLocal.setString(5, jtxtOPB.getText()); // opb
                 psLocal.setInt(6, jcmbAmountType.getSelectedIndex()); // amount type
-                psLocal.setInt(7, DeskFrame.user_id); // user_cd
-                psLocal.setString(8, id); // id
+                psLocal.setString(7, lb.ConvertDateFormetForDB(jtxtLockDate.getText())); // lock_date
+                psLocal.setInt(8, DeskFrame.user_id); // user_cd
+                psLocal.setString(9, id); // id
                 psLocal.executeUpdate();
                 
                 oldbUpdateEdit();
             }
-            
+            lb.setBalance(id);
             dataConnection.commit();
             dataConnection.setAutoCommit(true);
         } catch (SQLException ex) {
@@ -539,6 +585,8 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jcmbAmountType = new javax.swing.JComboBox();
         jtxtGroup = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        jtxtLockDate = new javax.swing.JTextField();
 
         setPreferredSize(new java.awt.Dimension(686, 535));
 
@@ -727,6 +775,28 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         jLabel3.setMinimumSize(new java.awt.Dimension(77, 25));
         jLabel3.setPreferredSize(new java.awt.Dimension(77, 25));
 
+        jLabel18.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel18.setForeground(new java.awt.Color(255, 0, 0));
+        jLabel18.setText("Lock Date");
+
+        jtxtLockDate.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtLockDate.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 0, 0)));
+        jtxtLockDate.setMinimumSize(new java.awt.Dimension(2, 20));
+        jtxtLockDate.setPreferredSize(new java.awt.Dimension(2, 20));
+        jtxtLockDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtLockDateFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtLockDateFocusLost(evt);
+            }
+        });
+        jtxtLockDate.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtLockDateKeyPressed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -738,20 +808,23 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, 89, Short.MAX_VALUE)
+                            .addComponent(jLabel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel18, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jlblUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jlblLstUpdate, javax.swing.GroupLayout.PREFERRED_SIZE, 323, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jlblEditNo, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jcmbAmountType, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jtxtOPB, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jcmbStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jtxtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jtxtExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jtxtLockDate, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jcmbAmountType, javax.swing.GroupLayout.Alignment.LEADING, 0, 103, Short.MAX_VALUE))))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -801,6 +874,10 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                     .addComponent(jcmbAmountType, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtLockDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jlblUserName, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
@@ -837,7 +914,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -911,9 +988,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jtxtOPBKeyTyped
 
     private void jcmbAmountTypeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jcmbAmountTypeKeyPressed
-        if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            navLoad.setSaveFocus();
-        }
+        lb.enterEvent(evt, jtxtLockDate);
     }//GEN-LAST:event_jcmbAmountTypeKeyPressed
 
     private void jtxtGroupFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtGroupFocusGained
@@ -948,9 +1023,25 @@ public class AccountMaster extends javax.swing.JInternalFrame {
         lb.onlyAlpha(evt, 255);
     }//GEN-LAST:event_jtxtGroupKeyTyped
 
+    private void jtxtLockDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtLockDateFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtLockDateFocusGained
+
+    private void jtxtLockDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtLockDateFocusLost
+        lb.setDateUsingJTextField(jtxtLockDate);
+    }//GEN-LAST:event_jtxtLockDateFocusLost
+
+    private void jtxtLockDateKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtLockDateKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            evt.consume();
+            navLoad.setSaveFocus();
+        }
+    }//GEN-LAST:event_jtxtLockDateKeyPressed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -969,6 +1060,7 @@ public class AccountMaster extends javax.swing.JInternalFrame {
     private javax.swing.JTextField jtxtExpense;
     private javax.swing.JTextField jtxtGroup;
     private javax.swing.JTextField jtxtID;
+    private javax.swing.JTextField jtxtLockDate;
     private javax.swing.JTextField jtxtName;
     private javax.swing.JTextField jtxtOPB;
     // End of variables declaration//GEN-END:variables
