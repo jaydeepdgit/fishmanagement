@@ -27,58 +27,14 @@ CREATE TABLE `account_master` (
   `opb` decimal(10,3) default '0.000',
   `amount_type` tinyint(1) default NULL,
   `fk_group_id` varchar(8) default NULL,
-  `lock_date` date default NULL,
   `edit_no` decimal(3,0) default '0',
   `user_cd` int(11) default NULL,
   `time_stamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `lock_date` date default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `account_master` */
-
-insert  into `account_master`(`id`,`name`,`expense`,`status`,`opb`,`amount_type`,`fk_group_id`,`lock_date`,`edit_no`,`user_cd`,`time_stamp`) values ('AM000003','CASH',0.00,0,0.000,NULL,NULL,'2018-01-01',0,1,'2018-12-22 14:38:25');
-insert  into `account_master`(`id`,`name`,`expense`,`status`,`opb`,`amount_type`,`fk_group_id`,`lock_date`,`edit_no`,`user_cd`,`time_stamp`) values ('AM000005','CHECK ACCOUNT',0.00,0,0.000,NULL,NULL,'2018-01-01',0,1,'2018-12-22 19:11:06');
-insert  into `account_master`(`id`,`name`,`expense`,`status`,`opb`,`amount_type`,`fk_group_id`,`lock_date`,`edit_no`,`user_cd`,`time_stamp`) values ('AM000006','TEST OPB',100.00,0,200.000,0,NULL,'2018-01-01',4,1,'2019-01-07 22:29:07');
-
-/*Table structure for table `appconfig` */
-
-DROP TABLE IF EXISTS `appconfig`;
-
-CREATE TABLE `appconfig` (
-  `client_id` varchar(20) collate utf8_unicode_ci default NULL,
-  `issue_date` date default NULL,
-  `act_date` date default NULL,
-  `due_date` date default NULL,
-  `act_cd` varchar(20) collate utf8_unicode_ci default NULL,
-  `license_no` varchar(20) collate utf8_unicode_ci default NULL,
-  `email` varchar(50) collate utf8_unicode_ci default NULL,
-  `server` varchar(100) collate utf8_unicode_ci default NULL,
-  `act1` varchar(4) collate utf8_unicode_ci default '',
-  `act2` varchar(4) collate utf8_unicode_ci default '',
-  `act3` varchar(4) collate utf8_unicode_ci default '',
-  `act4` varchar(4) collate utf8_unicode_ci default '',
-  `user_nm` varchar(50) collate utf8_unicode_ci default NULL,
-  `pass` varchar(20) collate utf8_unicode_ci default NULL,
-  `status` int(11) default NULL,
-  `months` int(11) default NULL,
-  `days` int(11) default NULL,
-  `haddr` varchar(20) collate utf8_unicode_ci default NULL,
-  `iaddr` varchar(40) collate utf8_unicode_ci default NULL,
-  `laststart` date default NULL,
-  `def` varchar(20) collate utf8_unicode_ci default '',
-  `app_limit` smallint(6) default '0',
-  `cur_limit` smallint(6) default '0',
-  `tmode` smallint(6) default '0',
-  `proj_mode` smallint(6) default '0',
-  `mlt_mac` smallint(6) default '0',
-  `mac_lmt` int(10) default '1',
-  `is_tax` smallint(6) default NULL,
-  `theme_cd` int(11) default NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-/*Data for the table `appconfig` */
-
-insert  into `appconfig`(`client_id`,`issue_date`,`act_date`,`due_date`,`act_cd`,`license_no`,`email`,`server`,`act1`,`act2`,`act3`,`act4`,`user_nm`,`pass`,`status`,`months`,`days`,`haddr`,`iaddr`,`laststart`,`def`,`app_limit`,`cur_limit`,`tmode`,`proj_mode`,`mlt_mac`,`mac_lmt`,`is_tax`,`theme_cd`) values ('STOCK MANAGEMENT SOF','2018-09-20','2018-09-20','2019-01-01',NULL,'SMS-000001-15-06',NULL,NULL,'0000','1111','2222','3333','LG','LG123',-1,0,0,'90-4C-E5-07-79-87','192.168.0.108','2018-09-19','',0,0,0,1,0,1,0,4);
 
 /*Table structure for table `bank_payment_receipt_details` */
 
@@ -154,33 +110,6 @@ CREATE TABLE `cash_payment_receipt_head` (
 
 /*Data for the table `cash_payment_receipt_head` */
 
-/*Table structure for table `change_themes` */
-
-DROP TABLE IF EXISTS `change_themes`;
-
-CREATE TABLE `change_themes` (
-  `id` int(11) NOT NULL auto_increment,
-  `theme_name` varchar(255) default NULL,
-  `theme_link` varchar(500) default NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
-
-/*Data for the table `change_themes` */
-
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (1,'TextureLookAndFeel ','com.jtattoo.plaf.texture.TextureLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (2,'SmartLookAndFeel','com.jtattoo.plaf.smart.SmartLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (3,'NoireLookAndFeel','com.jtattoo.plaf.noire.NoireLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (4,'AcrylLookAndFeel','com.jtattoo.plaf.acryl.AcrylLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (5,'AeroLookAndFeel','com.jtattoo.plaf.aero.AeroLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (6,'AluminiumLookAndFeel','com.jtattoo.plaf.aluminium.AluminiumLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (7,'BernsteinLookAndFeel','com.jtattoo.plaf.bernstein.BernsteinLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (8,'FastLookAndFeel','com.jtattoo.plaf.fast.FastLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (9,'GraphiteLookAndFeel','com.jtattoo.plaf.graphite.GraphiteLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (10,'HiFiLookAndFeel','com.jtattoo.plaf.hifi.HiFiLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (11,'LunaLookAndFeel','com.jtattoo.plaf.luna.LunaLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (12,'McWinLookAndFeel ','com.jtattoo.plaf.mcwin.McWinLookAndFeel');
-insert  into `change_themes`(`id`,`theme_name`,`theme_link`) values (13,'MintLookAndFeel','com.jtattoo.plaf.mint.MintLookAndFeel');
-
 /*Table structure for table `cmpny_mst` */
 
 DROP TABLE IF EXISTS `cmpny_mst`;
@@ -240,23 +169,6 @@ CREATE TABLE `cmpny_mst` (
 /*Data for the table `cmpny_mst` */
 
 insert  into `cmpny_mst`(`cmpn_cd`,`cmpn_code`,`branch_code`,`cmpn_name`,`ac_year`,`mnth`,`sh_name`,`digit`,`invoice_type`,`image_path`,`add1`,`add2`,`area_cd`,`city_cd`,`pincode`,`mob_no`,`phone_no`,`licence_no`,`email`,`fax_no`,`pan_no`,`tin_no`,`cst_no`,`tax_no`,`bank_name`,`ac_no`,`branch_name`,`cash_ac_cd`,`lab_inc_ac`,`lab_exp_ac`,`sale_ac`,`purchase_ac`,`mypwd`,`contact_person`,`website`,`edit_no`,`user_cd`,`time_stamp`,`sls_chr_lbl`,`delete_pwd`,`ifsc_code`,`bill_supply_type`,`bill_supply`,`bill_supply_desc`,`is_retail`,`multiple_company_data`,`corraddress1`,`corraddress2`) values ('C000001','01','001','DHANANI FROZAL','2017','01','SE',2,0,'','ahmedabad','ahmedabad','','','','9727397009','7405116442','','dhameliya.jaydeep@gmail.com','','ACNFS5720D','24060305663ABC','24560305663123','','STATE BANK OF INDIA','30425911901','BAPUNAGAR BR.','AM000003','0','0','0','0','','','',0,1,'2016-01-10 22:04:45','Loading Charge','123','SBI29051693',0,'BILL OF SUPPLY','Composition Taxable Person, Not Eligible to Collect Tax on Supplies',0,0,'ahmedabad','ahmedabad');
-
-/*Table structure for table `dbmst` */
-
-DROP TABLE IF EXISTS `dbmst`;
-
-CREATE TABLE `dbmst` (
-  `cmp_name` varchar(100) collate utf8_unicode_ci NOT NULL,
-  `db_year` varchar(4) collate utf8_unicode_ci NOT NULL,
-  `db_name` varchar(30) collate utf8_unicode_ci NOT NULL,
-  `dbmonth` smallint(6) default '0',
-  `dbname` varchar(30) collate utf8_unicode_ci default '',
-  `dbyear` varchar(4) collate utf8_unicode_ci default NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-/*Data for the table `dbmst` */
-
-insert  into `dbmst`(`cmp_name`,`db_year`,`db_name`,`dbmonth`,`dbname`,`dbyear`) values ('DHANANI FROZAL','2018','dhananiforzal',5,'dhananiforzal','2018');
 
 /*Table structure for table `form_mst` */
 
@@ -324,15 +236,6 @@ CREATE TABLE `grade_main` (
 
 /*Data for the table `grade_main` */
 
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000001','2018-12-24','AM000005','MC000001','SC000001',0.00000,40.000,0.000,325.000,650.000,16.000,'22:04:58',1,1,'2018-12-24 22:04:58');
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000002','2018-12-24','AM000005','MC000001','SC000001',0.00000,7.000,0.000,25.000,250.000,7.000,'22:26:05',0,1,'2018-12-24 22:26:05');
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000003','2019-01-07','AM000006','MC000001','SC000001',0.00000,20.000,0.000,50.000,3750.000,12.000,'01:30:36',1,1,'2019-03-17 01:30:36');
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000004','2019-04-14','AM000006','MC000001','SC000001',20.00000,81.000,0.000,11500.000,0.000,11.000,'16:42:23',0,1,'2019-04-14 16:42:23');
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000005','2019-04-19','AM000006','MC000001','SC000001',15.00000,30.000,25.000,1000.000,0.000,154.000,'23:05:44',0,1,'2019-04-19 23:05:44');
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000006','2019-04-19','AM000006','MC000001','SC000001',15.00000,20.000,80.000,0.000,0.000,283.000,'23:08:47',0,1,'2019-04-19 23:08:47');
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000007','2019-04-20','AM000006','MC000001','SC000001',30.00000,20.000,86.000,5000.000,0.000,450.000,'10:59:07',1,1,'2019-04-20 10:59:07');
-insert  into `grade_main`(`id`,`v_date`,`fk_account_master_id`,`fk_main_category_id`,`fk_sub_category_id`,`total_slabqty`,`total_kgs`,`total_blockused`,`total_usd`,`total_inr`,`total_block`,`fix_time`,`edit_no`,`user_cd`,`time_stamp`) values ('BK000008','2019-05-17','AM000005','MC000004','SC000008',2.00000,5.000,0.000,15.000,15.000,0.000,'23:45:37',0,1,'2019-05-17 23:45:37');
-
 /*Table structure for table `grade_sub` */
 
 DROP TABLE IF EXISTS `grade_sub`;
@@ -353,23 +256,6 @@ CREATE TABLE `grade_sub` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `grade_sub` */
-
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000001',1,'SL000001',NULL,15.000,NULL,5.000,75.000,10.000,150.000,7.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000001',2,'SL000003',NULL,25.000,NULL,10.000,250.000,20.000,500.000,9.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000002',1,'SL000001',NULL,3.000,NULL,3.000,9.000,30.000,90.000,3.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000002',2,'SL000003',NULL,4.000,NULL,4.000,16.000,40.000,160.000,4.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000003',1,'SL000001',2.000,10.000,NULL,1.000,20.000,75.000,1500.000,7.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000003',2,'SL000003',3.000,10.000,NULL,1.000,30.000,75.000,2250.000,5.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000004',1,'SL000001',10.000,47.000,0.000,10.000,4700.000,0.000,0.000,7.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000004',2,'SL000003',10.000,34.000,0.000,20.000,6800.000,0.000,0.000,4.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000005',1,'SL000001',10.000,10.000,15.000,0.000,0.000,0.000,0.000,102.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000005',2,'SL000003',5.000,20.000,10.000,10.000,1000.000,0.000,0.000,52.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000006',1,'SL000001',10.000,10.000,50.000,0.000,0.000,0.000,0.000,189.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000006',2,'SL000003',5.000,10.000,30.000,0.000,0.000,0.000,0.000,94.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000007',1,'SL000001',10.000,10.000,78.000,10.000,1000.000,0.000,0.000,250.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000007',2,'SL000003',20.000,10.000,8.000,20.000,4000.000,0.000,0.000,150.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000008',1,'SL000009',1.000,2.000,0.000,3.000,6.000,3.000,6.000,0.000);
-insert  into `grade_sub`(`id`,`sr_no`,`fk_slab_category_id`,`grad_qty`,`kgs`,`block_used`,`rate_usd`,`total_usd`,`rate_inr`,`total_inr`,`block`) values ('BK000008',2,'SL000010',1.000,3.000,0.000,3.000,9.000,3.000,9.000,0.000);
 
 /*Table structure for table `group_master` */
 
@@ -429,11 +315,6 @@ CREATE TABLE `main_category` (
 
 /*Data for the table `main_category` */
 
-insert  into `main_category`(`id`,`name`,`short_name`,`status`,`edit_no`,`user_cd`,`time_stamp`) values ('MC000001','M1','',0,0,1,'2018-12-24 21:24:31');
-insert  into `main_category`(`id`,`name`,`short_name`,`status`,`edit_no`,`user_cd`,`time_stamp`) values ('MC000002','M2','',0,0,1,'2018-12-24 21:24:37');
-insert  into `main_category`(`id`,`name`,`short_name`,`status`,`edit_no`,`user_cd`,`time_stamp`) values ('MC000003','M3','M3',0,0,1,'2019-04-14 18:14:04');
-insert  into `main_category`(`id`,`name`,`short_name`,`status`,`edit_no`,`user_cd`,`time_stamp`) values ('MC000004','1','1',0,0,1,'2019-05-17 23:39:54');
-
 /*Table structure for table `manage_email` */
 
 DROP TABLE IF EXISTS `manage_email`;
@@ -485,9 +366,6 @@ CREATE TABLE `oldb2_1` (
 
 /*Data for the table `oldb2_1` */
 
-insert  into `oldb2_1`(`ac_cd`,`grp_cd`,`opb`,`dr`,`cr`,`bal`,`amount_type`) values ('AM000005',NULL,0.000,5412.000,24001.000,2.000,0);
-insert  into `oldb2_1`(`ac_cd`,`grp_cd`,`opb`,`dr`,`cr`,`bal`,`amount_type`) values ('AM000006',NULL,200.000,8800.000,32800.000,0.000,0);
-
 /*Table structure for table `oldb2_2` */
 
 DROP TABLE IF EXISTS `oldb2_2`;
@@ -501,28 +379,11 @@ CREATE TABLE `oldb2_2` (
   `val` decimal(15,5) default NULL,
   `particular` varchar(100) character set utf8 collate utf8_unicode_ci default NULL,
   `fix_time` varchar(10) default NULL,
-  `opp_ac_cd` varchar(8) default NULL
+  `opp_ac_cd` varchar(8) default NULL,
+  `amount_type` int(11) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `oldb2_2` */
-
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('OPB','OPB','2018-12-22','AM000005','0',0.00000,'',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000001','PB','2018-12-24','AM000005','1',24000.00000,'Purchase Bill',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000001','PB','2018-12-24','AM000003','0',24000.00000,'Purchase Bill',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('SL00002','SL','2018-12-30','AM000005','0',3000.00000,'SALES BILL',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('OPB','OPB','2018-12-30','AM000006','0',200.00000,'',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('SL00003','SL','2019-01-07','AM000005','0',1200.00000,'SALES BILL',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('SL00004','SL','2019-01-07','AM000005','0',1200.00000,'SALES BILL',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000002','PB','2019-01-07','AM000006','1',1800.00000,'Purchase Bill',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000002','PB','2019-01-07','AM000003','0',1800.00000,'Purchase Bill',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('SL00005','SL','2019-01-07','AM000006','0',1800.00000,'SALES BILL',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000003','PB','2019-04-14','AM000006','1',31000.00000,'Purchase Bill',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000003','PB','2019-04-14','AM000003','0',31000.00000,'Purchase Bill',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('SL00005','SL','2019-04-20','AM000006','0',3000.00000,'SALES BILL',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('SL00006','SL','2019-04-20','AM000006','0',4000.00000,'SALES BILL',NULL,'');
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000004','PB','2019-05-17','AM000005','1',1.00000,'Purchase Bill',NULL,NULL);
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('PB000004','PB','2019-05-17','AM000003','0',1.00000,'Purchase Bill',NULL,NULL);
-insert  into `oldb2_2`(`doc_ref_no`,`doc_cd`,`doc_date`,`ac_cd`,`drcr`,`val`,`particular`,`fix_time`,`opp_ac_cd`) values ('SL00007','SL','2019-05-17','AM000005','0',12.00000,'SALES BILL',NULL,NULL);
 
 /*Table structure for table `purchase_bill_details` */
 
@@ -541,12 +402,6 @@ CREATE TABLE `purchase_bill_details` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `purchase_bill_details` */
-
-insert  into `purchase_bill_details`(`id`,`sr_no`,`tali_no`,`fk_main_category_id`,`fk_sub_category_id`,`weight`,`rate`,`amount`) values ('PB000001',1,NULL,'MC000001','SC000001',200.000,20.000,4000.000);
-insert  into `purchase_bill_details`(`id`,`sr_no`,`tali_no`,`fk_main_category_id`,`fk_sub_category_id`,`weight`,`rate`,`amount`) values ('PB000002',1,NULL,'MC000001','0',12.000,50.000,600.000);
-insert  into `purchase_bill_details`(`id`,`sr_no`,`tali_no`,`fk_main_category_id`,`fk_sub_category_id`,`weight`,`rate`,`amount`) values ('PB000003',1,NULL,'MC000001','SC000001',100.000,10.000,1000.000);
-insert  into `purchase_bill_details`(`id`,`sr_no`,`tali_no`,`fk_main_category_id`,`fk_sub_category_id`,`weight`,`rate`,`amount`) values ('PB000003',2,NULL,'MC000001','SC000002',200.000,0.000,0.000);
-insert  into `purchase_bill_details`(`id`,`sr_no`,`tali_no`,`fk_main_category_id`,`fk_sub_category_id`,`weight`,`rate`,`amount`) values ('PB000004',1,NULL,'MC000004','SC000008',1.000,1.000,1.000);
 
 /*Table structure for table `purchase_bill_head` */
 
@@ -573,11 +428,6 @@ CREATE TABLE `purchase_bill_head` (
 
 /*Data for the table `purchase_bill_head` */
 
-insert  into `purchase_bill_head`(`id`,`fk_account_master_id`,`v_date`,`expense`,`total_expense`,`other_expense`,`net_amt`,`total_weight`,`total_amount`,`description`,`fix_time`,`edit_no`,`talli_no`,`user_cd`,`time_stamp`) values ('PB000001','AM000005','2018-12-24',100.000,20000.000,0.000,24000.000,200.000,4000.000,'','21:47:40',0,'12345',1,'2018-12-24 21:47:40');
-insert  into `purchase_bill_head`(`id`,`fk_account_master_id`,`v_date`,`expense`,`total_expense`,`other_expense`,`net_amt`,`total_weight`,`total_amount`,`description`,`fix_time`,`edit_no`,`talli_no`,`user_cd`,`time_stamp`) values ('PB000002','AM000006','2019-01-07',100.000,1200.000,0.000,1800.000,12.000,600.000,'','22:31:12',0,'12',1,'2019-01-07 22:31:12');
-insert  into `purchase_bill_head`(`id`,`fk_account_master_id`,`v_date`,`expense`,`total_expense`,`other_expense`,`net_amt`,`total_weight`,`total_amount`,`description`,`fix_time`,`edit_no`,`talli_no`,`user_cd`,`time_stamp`) values ('PB000003','AM000006','2019-04-14',100.000,30000.000,0.000,31000.000,300.000,1000.000,'','17:49:17',0,'T0001',1,'2019-04-14 17:49:17');
-insert  into `purchase_bill_head`(`id`,`fk_account_master_id`,`v_date`,`expense`,`total_expense`,`other_expense`,`net_amt`,`total_weight`,`total_amount`,`description`,`fix_time`,`edit_no`,`talli_no`,`user_cd`,`time_stamp`) values ('PB000004','AM000005','2019-05-17',0.000,0.000,0.000,1.000,1.000,1.000,'','23:43:33',0,'1',1,'2019-05-17 23:43:33');
-
 /*Table structure for table `sale_bill_detail` */
 
 DROP TABLE IF EXISTS `sale_bill_detail`;
@@ -591,18 +441,11 @@ CREATE TABLE `sale_bill_detail` (
   `qty` decimal(15,5) default NULL,
   `rate` decimal(15,5) NOT NULL,
   `amt` decimal(15,5) NOT NULL,
+  `slab` int(11) default '0',
   PRIMARY KEY  (`ref_no`,`sr_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `sale_bill_detail` */
-
-insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_main_category_id`,`fk_sub_category_id`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values ('SL00001',1,NULL,NULL,'SL000001',10.00000,100.00000,1000.00000);
-insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_main_category_id`,`fk_sub_category_id`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values ('SL00002',1,NULL,NULL,'SL000003',15.00000,200.00000,3000.00000);
-insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_main_category_id`,`fk_sub_category_id`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values ('SL00003',1,NULL,NULL,'SL000001',12.00000,100.00000,1200.00000);
-insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_main_category_id`,`fk_sub_category_id`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values ('SL00004',1,NULL,NULL,'SL000001',12.00000,100.00000,1200.00000);
-insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_main_category_id`,`fk_sub_category_id`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values ('SL00005',1,'MC000001','SC000001','SL000001',30.00000,100.00000,3000.00000);
-insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_main_category_id`,`fk_sub_category_id`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values ('SL00006',1,'MC000001','SC000001','SL000001',40.00000,100.00000,4000.00000);
-insert  into `sale_bill_detail`(`ref_no`,`sr_no`,`fk_main_category_id`,`fk_sub_category_id`,`fk_slab_category_id`,`qty`,`rate`,`amt`) values ('SL00007',1,'MC000004','SC000008','SL000009',12.00000,1.00000,12.00000);
 
 /*Table structure for table `sale_bill_head` */
 
@@ -634,14 +477,6 @@ CREATE TABLE `sale_bill_head` (
 
 /*Data for the table `sale_bill_head` */
 
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values ('SL00001','2018-12-26','1',NULL,'AM000005',10.00000,0.00000,1000.00000,0.000,0.000,1000.000,1000.000,0.000,1000.000,'','2018-12-01',0,1,0,'2018-12-26 08:08:04');
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values ('SL00002','2018-12-30','2',0,'AM000005',15.00000,0.00000,3000.00000,0.000,0.000,3000.000,3000.000,0.000,3000.000,'','2018-12-01',0,1,1,'2018-12-30 18:50:46');
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values ('SL00003','2019-01-07','3',0,'AM000005',12.00000,0.00000,1200.00000,0.000,0.000,1200.000,1200.000,0.000,1200.000,'',NULL,0,1,0,'2019-01-07 08:34:33');
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values ('SL00004','2019-01-07','4',1,'AM000005',12.00000,0.00000,1200.00000,0.000,0.000,1200.000,1200.000,0.000,1200.000,'',NULL,0,1,0,'2019-01-07 08:34:46');
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values ('SL00005','2019-04-20','5',0,'AM000006',30.00000,0.00000,3000.00000,0.000,0.000,3000.000,3000.000,0.000,3000.000,'','2019-04-15',0,1,0,'2019-04-20 10:59:55');
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values ('SL00006','2019-04-20','6',0,'AM000006',40.00000,0.00000,4000.00000,0.000,0.000,4000.000,4000.000,0.000,4000.000,'','2019-04-16',0,1,1,'2019-04-20 11:01:20');
-insert  into `sale_bill_head`(`ref_no`,`voucher_date`,`bill_no`,`amount_type`,`fk_account_id`,`total_qty`,`total_rate`,`total_amt`,`disc_per`,`disc_rs`,`amount_total`,`bill_amount`,`adj_amount`,`net_amount`,`remark`,`p_date`,`chck`,`user_cd`,`edit_no`,`time_stamp`) values ('SL00007','2019-05-17','7',0,'AM000005',12.00000,0.00000,12.00000,0.000,0.000,12.000,12.000,0.000,12.000,'',NULL,0,1,0,'2019-05-17 23:43:58');
-
 /*Table structure for table `slab_category` */
 
 DROP TABLE IF EXISTS `slab_category`;
@@ -661,19 +496,6 @@ CREATE TABLE `slab_category` (
 
 /*Data for the table `slab_category` */
 
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000001','SL1','sl',100.000,0,'SC000001',0,1,'2018-12-24 21:41:32');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000002','SL3','SL',300.000,0,'SC000002',0,1,'2018-12-24 21:43:23');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000003','SL2','SL',200.000,0,'SC000001',0,1,'2018-12-24 21:43:48');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000004','SL4','SL',400.000,0,'SC000002',0,1,'2018-12-24 21:44:06');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000005','SL5','SL',500.000,0,'SC000002',0,1,'2018-12-24 21:44:17');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000006','SLAB7','SL7',30.000,0,'SC000006',0,1,'2019-04-14 18:56:08');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000007','SLAB7_2','SL7_2',50.000,0,'SC000006',0,1,'2019-04-14 18:57:04');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000008','SLAB8','SL8',80.000,0,'SC000007',0,1,'2019-04-14 18:57:23');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000009','1.1.1','1',1.000,0,'SC000008',0,1,'2019-05-17 23:40:30');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000010','1.1.2','2',2.000,0,'SC000008',1,1,'2019-05-17 23:40:50');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000011','1.2.1','1.1',3.000,0,'SC000009',0,1,'2019-05-17 23:41:05');
-insert  into `slab_category`(`id`,`name`,`short_name`,`rate`,`status`,`fk_sub_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SL000012','1.2.2','13',4.000,0,'SC000009',0,1,'2019-05-17 23:41:19');
-
 /*Table structure for table `stock0_1` */
 
 DROP TABLE IF EXISTS `stock0_1`;
@@ -690,22 +512,9 @@ CREATE TABLE `stock0_1` (
   `bal` decimal(10,3) default NULL,
   `time_stamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`stk01_cd`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `stock0_1` */
-
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (3,'SL000002',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2018-12-24 21:43:29');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (5,'SL000004',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2018-12-24 21:44:06');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (6,'SL000005',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2018-12-24 21:44:17');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (7,'SL000001',0.000,28.000,106.000,930.000,250.000,0.000,NULL,'2018-12-24 21:59:33');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (8,'SL000003',0.000,39.000,18.000,770.000,150.000,0.000,NULL,'2018-12-24 21:59:47');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (16,'SL000006',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2019-04-14 18:56:08');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (17,'SL000007',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2019-04-14 18:57:04');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (18,'SL000008',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2019-04-14 18:57:23');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (19,'SL000009',0.000,0.000,12.000,2.000,0.000,0.000,0.000,'2019-05-17 23:40:30');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (20,'SL000010',0.000,0.000,0.000,3.000,0.000,0.000,0.000,'2019-05-17 23:40:45');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (21,'SL000011',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2019-05-17 23:41:05');
-insert  into `stock0_1`(`stk01_cd`,`fk_slab_category_id`,`opb`,`pur`,`sal`,`qty`,`block`,`block_used`,`bal`,`time_stamp`) values (22,'SL000012',0.000,0.000,0.000,0.000,0.000,0.000,0.000,'2019-05-17 23:41:19');
 
 /*Table structure for table `stock0_2` */
 
@@ -726,27 +535,9 @@ CREATE TABLE `stock0_2` (
   `block_used` decimal(10,2) default NULL,
   `time_stamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
   PRIMARY KEY  (`stock2_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `stock0_2` */
-
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (6,NULL,'SL000002',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2018-12-24 21:43:32');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (8,NULL,'SL000004',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2018-12-24 21:44:06');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (9,NULL,'SL000005',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2018-12-24 21:44:17');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (29,NULL,'SL000006',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2019-04-14 18:56:08');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (30,NULL,'SL000007',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2019-04-14 18:57:04');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (31,NULL,'SL000008',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2019-04-14 18:57:23');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (42,'BK000007','SL000001',2,NULL,NULL,NULL,NULL,NULL,100.00,0.00,78.00,'2019-04-20 10:59:07');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (43,'BK000007','SL000003',2,NULL,NULL,NULL,NULL,NULL,200.00,0.00,8.00,'2019-04-20 10:59:07');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (44,'SL00005','SL000001',4,NULL,NULL,NULL,30.00,NULL,NULL,NULL,NULL,'2019-04-20 10:59:56');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (46,'SL00006','SL000001',4,NULL,NULL,NULL,40.00,NULL,NULL,NULL,NULL,'2019-04-20 11:01:20');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (47,NULL,'SL000009',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2019-05-17 23:40:30');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (48,NULL,'SL000010',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2019-05-17 23:40:45');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (49,NULL,'SL000011',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2019-05-17 23:41:05');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (50,NULL,'SL000012',0,0.00,0.00,0.00,0.00,0.00,NULL,NULL,NULL,'2019-05-17 23:41:19');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (51,'SL00007','SL000009',4,NULL,NULL,NULL,12.00,NULL,NULL,NULL,NULL,'2019-05-17 23:43:58');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (52,'BK000008','SL000009',2,NULL,NULL,NULL,NULL,NULL,2.00,0.00,0.00,'2019-05-17 23:45:37');
-insert  into `stock0_2`(`stock2_id`,`doc_id`,`fk_slab_category_id`,`trns_id`,`opb`,`pur`,`pur_r`,`sal`,`sal_r`,`qty`,`block`,`block_used`,`time_stamp`) values (53,'BK000008','SL000010',2,NULL,NULL,NULL,NULL,NULL,3.00,0.00,0.00,'2019-05-17 23:45:37');
 
 /*Table structure for table `sub_category` */
 
@@ -765,16 +556,6 @@ CREATE TABLE `sub_category` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*Data for the table `sub_category` */
-
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000001','S1','',0,'MC000001',0,1,'2018-12-24 21:24:59');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000002','S2','',0,'MC000001',0,1,'2018-12-24 21:25:14');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000003','S3','',0,'MC000001',0,1,'2018-12-24 21:25:28');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000004','S4','',0,'MC000002',0,1,'2018-12-24 21:25:49');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000005','s5','',0,'MC000002',0,1,'2018-12-24 21:25:59');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000006','S7','S7',0,'MC000003',0,1,'2019-04-14 18:49:44');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000007','S8','S8',0,'MC000003',0,1,'2019-04-14 18:49:54');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000008','1.1','1',0,'MC000004',0,1,'2019-05-17 23:40:09');
-insert  into `sub_category`(`id`,`name`,`short_name`,`status`,`fk_main_category_id`,`edit_no`,`user_cd`,`time_stamp`) values ('SC000009','1.2','2',0,'MC000004',0,1,'2019-05-17 23:40:16');
 
 /*Table structure for table `unt_mst` */
 
