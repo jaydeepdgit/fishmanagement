@@ -30,7 +30,7 @@ import support.PickList;
  */
 public class PurchaseAverage extends javax.swing.JInternalFrame {
     private Library lb = new Library();
-    private PickList acntPickListView = null, mainCategoryPickListView = null;
+    private PickList acntPickListView = null, mainCategoryPickListView = null, subCategoryPickListView = null;
     private Connection dataConnection = DeskFrame.connMpAdmin;
     private DefaultTableModel model = null;
     private String form_id = Constants.PURCHASE_AVERAGE_FORM_ID;
@@ -46,6 +46,7 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
         model = (DefaultTableModel) jTable1.getModel();
         acntPickListView = new PickList(dataConnection);
         mainCategoryPickListView = new PickList(dataConnection);
+        subCategoryPickListView = new PickList(dataConnection);
         setPickListView();
         registerShortKeys();
         setPermission();
@@ -89,7 +90,11 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
 
         mainCategoryPickListView.setLayer(getLayeredPane());
         mainCategoryPickListView.setPickListComponent(jtxtMainCategory);
-        mainCategoryPickListView.setNextComponent(jbtnView);
+        mainCategoryPickListView.setNextComponent(jtxtSubCategory);
+        
+        subCategoryPickListView.setLayer(getLayeredPane());
+        subCategoryPickListView.setPickListComponent(jtxtSubCategory);
+        subCategoryPickListView.setNextComponent(jbtnView);
     }
 
     private boolean validateForm() {
@@ -126,15 +131,18 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
         String fromDate = jtxtFromDate.getText();
         String toDate = jtxtToDate.getText();
         try {
-            sql = "SELECT pbh.id, pbh.v_date, am.name AS account_name, mc.name AS main_category, " +
+            sql = "SELECT pbh.id, pbh.v_date, am.name AS account_name, mc.name AS main_category, sc.name as sub_category, " +
                 "pbd.weight, pbd.rate, pbd.amount, pbh.total_expense " +
-                "FROM purchase_bill_head pbh, purchase_bill_details pbd, account_master am, main_category mc " +
-                "WHERE pbh.id = pbd.id AND am.id = pbh.fk_account_master_id AND mc.id = pbd.fk_main_category_id"; 
+                "FROM purchase_bill_head pbh, purchase_bill_details pbd, account_master am, main_category mc, sub_category sc " +
+                "WHERE pbh.id = pbd.id AND am.id = pbh.fk_account_master_id AND mc.id = pbd.fk_main_category_id AND sc.id = pbd.fk_sub_category_id"; 
             if(!jtxtAccountName.getText().equalsIgnoreCase("")) {
                 sql +=" AND am.name = \""+ jtxtAccountName.getText() +"\"";
             }
             if(!jtxtMainCategory.getText().equalsIgnoreCase("")) {
                 sql +=" AND mc.name = \""+ jtxtMainCategory.getText() +"\"";
+            }
+            if(!jtxtSubCategory.getText().equalsIgnoreCase("")) {
+                sql +=" AND sc.name = \""+ jtxtSubCategory.getText() +"\"";
             }
             if(jcmDate.isSelected()) {
                 sql += " AND ((pbh.v_date >= '"+ lb.ConvertDateFormetForDB(fromDate) +"' AND "
@@ -158,7 +166,7 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
     }
 
     private void setTextfieldsAtBottom() {
-        JComponent[] footer = new JComponent[]{null, null, null, null, null, jlblTotalAmt};
+        JComponent[] footer = new JComponent[]{null, null, null, null, null, null, jlblTotalAmt};
         lb.setTable(jPanel1, jTable1, null, footer);
     }
     /**
@@ -189,6 +197,8 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
         jLabel4 = new javax.swing.JLabel();
         jtxtToDate = new javax.swing.JTextField();
         jBillDateBtn1 = new javax.swing.JButton();
+        jLabel5 = new javax.swing.JLabel();
+        jtxtSubCategory = new javax.swing.JTextField();
 
         jPanel1.setBackground(new java.awt.Color(253, 243, 243));
         jPanel1.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 3, 3, new java.awt.Color(53, 154, 141)));
@@ -207,11 +217,11 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Ref No", "SR No", "Product Name", "Weight", "Rate", "Amount"
+                "Ref No", "SR No", "Product Name", "Sub Category", "Weight", "Rate", "Amount"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false
+                false, false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -225,21 +235,23 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
             }
         });
         jScrollPane1.setViewportView(jTable1);
-        jTable1.getColumnModel().getColumn(0).setMinWidth(0);
-        jTable1.getColumnModel().getColumn(0).setPreferredWidth(0);
-        jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
-        jTable1.getColumnModel().getColumn(1).setMinWidth(70);
-        jTable1.getColumnModel().getColumn(1).setPreferredWidth(70);
-        jTable1.getColumnModel().getColumn(1).setMaxWidth(70);
-        jTable1.getColumnModel().getColumn(3).setMinWidth(120);
-        jTable1.getColumnModel().getColumn(3).setPreferredWidth(120);
-        jTable1.getColumnModel().getColumn(3).setMaxWidth(120);
-        jTable1.getColumnModel().getColumn(4).setMinWidth(120);
-        jTable1.getColumnModel().getColumn(4).setPreferredWidth(120);
-        jTable1.getColumnModel().getColumn(4).setMaxWidth(120);
-        jTable1.getColumnModel().getColumn(5).setMinWidth(150);
-        jTable1.getColumnModel().getColumn(5).setPreferredWidth(150);
-        jTable1.getColumnModel().getColumn(5).setMaxWidth(150);
+        if (jTable1.getColumnModel().getColumnCount() > 0) {
+            jTable1.getColumnModel().getColumn(0).setMinWidth(0);
+            jTable1.getColumnModel().getColumn(0).setPreferredWidth(0);
+            jTable1.getColumnModel().getColumn(0).setMaxWidth(0);
+            jTable1.getColumnModel().getColumn(1).setMinWidth(70);
+            jTable1.getColumnModel().getColumn(1).setPreferredWidth(70);
+            jTable1.getColumnModel().getColumn(1).setMaxWidth(70);
+            jTable1.getColumnModel().getColumn(4).setMinWidth(120);
+            jTable1.getColumnModel().getColumn(4).setPreferredWidth(120);
+            jTable1.getColumnModel().getColumn(4).setMaxWidth(120);
+            jTable1.getColumnModel().getColumn(5).setMinWidth(120);
+            jTable1.getColumnModel().getColumn(5).setPreferredWidth(120);
+            jTable1.getColumnModel().getColumn(5).setMaxWidth(120);
+            jTable1.getColumnModel().getColumn(6).setMinWidth(150);
+            jTable1.getColumnModel().getColumn(6).setPreferredWidth(150);
+            jTable1.getColumnModel().getColumn(6).setMaxWidth(150);
+        }
 
         jPanel1.add(jScrollPane1);
 
@@ -408,6 +420,31 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel5.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel5.setText("Sub Category:");
+
+        jtxtSubCategory.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtSubCategory.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtSubCategory.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtSubCategoryFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtSubCategoryFocusLost(evt);
+            }
+        });
+        jtxtSubCategory.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtSubCategoryKeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -427,11 +464,15 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
                         .addComponent(jbtnPreview, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jbtnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jtxtMainCategory)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jcmDate)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(2, 2, 2)
                         .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jtxtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -471,8 +512,10 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
                     .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jBillDateBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jtxtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(7, 7, 7))
+                    .addComponent(jtxtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jbtnClose, jbtnPreview, jbtnView, jtxtAccountName});
@@ -486,7 +529,7 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 870, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -500,7 +543,7 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 508, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jlblTotalAmt, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -523,6 +566,7 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
                     row.add(rsLocal.getString("id"));
                     row.add(i+"");
                     row.add(rsLocal.getString("main_category"));
+                    row.add(rsLocal.getString("sub_category"));
                     row.add(lb.Convert2DecFmt(rsLocal.getDouble("weight")));
                     row.add(lb.getIndianFormat(rsLocal.getDouble("rate")));
                     row.add(lb.getIndianFormat(rsLocal.getDouble("amount")));
@@ -710,6 +754,38 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
         odc.showDialog(jp, Constants.SELECT_DATE);
     }//GEN-LAST:event_jBillDateBtn1ActionPerformed
 
+    private void jtxtSubCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtSubCategoryFocusGained
+
+    private void jtxtSubCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusLost
+        subCategoryPickListView.setVisible(false);
+    }//GEN-LAST:event_jtxtSubCategoryFocusLost
+
+    private void jtxtSubCategoryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyPressed
+        subCategoryPickListView.setReturnComponent(new JTextField[]{jtxtSubCategory});
+        subCategoryPickListView.setLocation(jtxtSubCategory.getX() + jPanel2.getX(), jtxtSubCategory.getY() + jtxtSubCategory.getHeight()+ jPanel2.getY());
+        subCategoryPickListView.pickListKeyPress(evt);
+    }//GEN-LAST:event_jtxtSubCategoryKeyPressed
+
+    private void jtxtSubCategoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyReleased
+        try {
+            String sql = "SELECT name FROM sub_category WHERE fk_main_category_id = '"+ lb.getMainCategory(jtxtMainCategory.getText(), "C") 
+                +"' AND status = 0 AND name LIKE '%"+ jtxtSubCategory.getText() +"%'";
+            subCategoryPickListView.setReturnComponent(new JTextField[]{jtxtSubCategory});
+            PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
+            subCategoryPickListView.setValidation(dataConnection.prepareStatement("SELECT * FROM sub_category WHERE name = ?"));
+            subCategoryPickListView.setPreparedStatement(pstLocal);
+            subCategoryPickListView.pickListKeyRelease(evt);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at jtxtMainCategoryKeyReleased In Purchase Average", ex);
+        }
+    }//GEN-LAST:event_jtxtSubCategoryKeyReleased
+
+    private void jtxtSubCategoryKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyTyped
+        lb.fixLength(evt, 200);
+    }//GEN-LAST:event_jtxtSubCategoryKeyTyped
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBillDateBtn;
     private javax.swing.JButton jBillDateBtn1;
@@ -717,6 +793,7 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -729,6 +806,7 @@ public class PurchaseAverage extends javax.swing.JInternalFrame {
     private javax.swing.JTextField jtxtAccountName;
     private javax.swing.JTextField jtxtFromDate;
     private javax.swing.JTextField jtxtMainCategory;
+    private javax.swing.JTextField jtxtSubCategory;
     private javax.swing.JTextField jtxtToDate;
     // End of variables declaration//GEN-END:variables
 }

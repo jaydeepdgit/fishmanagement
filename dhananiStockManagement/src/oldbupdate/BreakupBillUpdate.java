@@ -32,7 +32,6 @@ public class BreakupBillUpdate {
         ResultSet rsLocal = pstLocal.executeQuery();
         while (rsLocal.next()) {
             String slab_id = rsLocal.getString("fk_slab_category_id");
-            double grad_qty = rsLocal.getDouble("grad_qty");
             double kgs = rsLocal.getDouble("kgs");
             double block = rsLocal.getDouble("block");
             double block_used = rsLocal.getDouble("block_used");
@@ -43,14 +42,14 @@ public class BreakupBillUpdate {
             pstUpdate.setString(1, id);
             pstUpdate.setString(2, slab_id);
             pstUpdate.setInt(3, 2);
-            pstUpdate.setDouble(4, kgs * grad_qty);
+            pstUpdate.setDouble(4, kgs);
             pstUpdate.setDouble(5, 0.00);
             pstUpdate.setDouble(6, block_used);
             pstUpdate.executeUpdate();
 
             sqlUpdate = "UPDATE stock0_1 SET qty = qty + ?, block = ?, block_used = ? WHERE fk_slab_category_id = ?";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
-            pstUpdate.setDouble(1, kgs * grad_qty);
+            pstUpdate.setDouble(1, kgs);
             pstUpdate.setDouble(2, block);
             pstUpdate.setDouble(3, 0.00);
             pstUpdate.setString(4, slab_id);
@@ -64,17 +63,15 @@ public class BreakupBillUpdate {
         ResultSet rsLocal = pstLocal.executeQuery();
         while (rsLocal.next()) {
             String slab_id = rsLocal.getString("fk_slab_category_id");
-            double grad_qty = rsLocal.getDouble("grad_qty");
             double kgs = rsLocal.getDouble("kgs");
             double block = rsLocal.getDouble("block");
-            double block_used = rsLocal.getDouble("block_used");
 
             String sqlUpdate = "";
             PreparedStatement pstUpdate = null;
 
             sqlUpdate = "UPDATE stock0_1 SET qty = qty - ?, block = block - ?, block_used = ? WHERE fk_slab_category_id = ?";
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
-            pstUpdate.setDouble(1, kgs * grad_qty);
+            pstUpdate.setDouble(1, kgs);
             pstUpdate.setDouble(2, block);
             pstUpdate.setDouble(3, 0.000);
             pstUpdate.setString(4, slab_id);

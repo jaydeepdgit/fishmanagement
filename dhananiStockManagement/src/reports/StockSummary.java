@@ -156,8 +156,17 @@ public class StockSummary extends javax.swing.JInternalFrame {
         PreparedStatement psLocal = null;
         try {
             String sql = "SELECT sc.id AS slabid, sc.name AS slabCategory, sc.rate AS rate, (st.qty - st.sal) AS pcs, st.block as block" 
-                + " FROM stock0_1 st LEFT JOIN slab_category sc ON st.fk_slab_category_id = sc.id"
-                + " WHERE sc.fk_sub_category_id = '"+ lb.getSubCategory(jtxtSubCategory.getText(), "C") +"' ORDER BY slabid";
+                + " FROM stock0_1 st LEFT JOIN slab_category sc ON st.fk_slab_category_id = sc.id LEFT JOIN sub_category sbc ON sc.fk_sub_category_id = sbc.id "
+                + " WHERE st.fk_slab_category_id IS NOT NULL";
+            
+            if(!jtxtMainItemName.getText().equalsIgnoreCase("")) {
+              sql += " AND sbc.fk_main_category_id = '"+ lb.getMainCategory(jtxtMainItemName.getText(), "C") +"' ";
+            }
+            
+            if(!jtxtSubCategory.getText().equalsIgnoreCase("")) {
+              sql += " AND sc.fk_sub_category_id = '"+ lb.getSubCategory(jtxtSubCategory.getText(), "C") +"' ";
+            }  
+            sql += " ORDER BY slabid";
             psLocal = dataConnection.prepareStatement(sql);
             rsLocal = psLocal.executeQuery();
             crsMain = lb.getBlankCachedRowSet(colname, column);

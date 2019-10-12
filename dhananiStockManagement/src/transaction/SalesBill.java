@@ -535,6 +535,9 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }
 
     private void delete() throws SQLException {
+        SalesBillUpdate sb = new SalesBillUpdate();
+        sb.deleteEntry(ref_no);
+        
         PreparedStatement psLocal = dataConnection.prepareStatement("DELETE FROM sale_bill_head WHERE ref_no = '"+ ref_no +"'");
         psLocal.executeUpdate();
 
