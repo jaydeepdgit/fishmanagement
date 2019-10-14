@@ -26,7 +26,7 @@ public class BreakupBillUpdate {
         dataConMain = DeskFrame.connMpMain;
     }
     
-    public void addEntry(String id) throws SQLException {
+    public void addEntry(String id, String doc_date) throws SQLException {
         String sql = "SELECT * FROM grade_sub WHERE id='" + id + "'";
         PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
         ResultSet rsLocal = pstLocal.executeQuery();
@@ -35,16 +35,17 @@ public class BreakupBillUpdate {
             double kgs = rsLocal.getDouble("kgs");
             double block = rsLocal.getDouble("block");
             double block_used = rsLocal.getDouble("block_used");
-
-            String sqlUpdate = "INSERT INTO stock0_2(doc_id, fk_slab_category_id, trns_id, qty, block, block_used) VALUES(?, ?, ?, ?, ?, ?)";
+            
+            String sqlUpdate = "INSERT INTO stock0_2(doc_id, doc_date, fk_slab_category_id, trns_id, qty, block, block_used) VALUES(?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstUpdate = null;
             pstUpdate = dataConnection.prepareStatement(sqlUpdate);
             pstUpdate.setString(1, id);
-            pstUpdate.setString(2, slab_id);
-            pstUpdate.setInt(3, 2);
-            pstUpdate.setDouble(4, kgs);
-            pstUpdate.setDouble(5, 0.00);
-            pstUpdate.setDouble(6, block_used);
+            pstUpdate.setString(2, doc_date);
+            pstUpdate.setString(3, slab_id);
+            pstUpdate.setInt(4, 4);
+            pstUpdate.setDouble(5, kgs);
+            pstUpdate.setDouble(6, 0.00);
+            pstUpdate.setDouble(7, block_used);
             pstUpdate.executeUpdate();
 
             sqlUpdate = "UPDATE stock0_1 SET qty = qty + ?, block = ?, block_used = ? WHERE fk_slab_category_id = ?";

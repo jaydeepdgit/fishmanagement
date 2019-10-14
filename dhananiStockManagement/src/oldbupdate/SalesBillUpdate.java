@@ -22,7 +22,7 @@ public class SalesBillUpdate {
     Connection dataConnection = DeskFrame.connMpAdmin;
     Library lb = new Library();
 
-    public void addEntry(String refNo) throws SQLException {
+    public void addEntry(String refNo, String doc_date) throws SQLException {
         String sql = "SELECT * FROM sale_bill_head WHERE ref_no = '"+ refNo +"'";
         PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
         ResultSet rsLocal = pstLocal.executeQuery();
@@ -44,12 +44,13 @@ public class SalesBillUpdate {
                 psLocal.setString(2, rsLocal.getString("fk_slab_category_id"));
                 psLocal.executeUpdate();
 
-                sql = "INSERT INTO stock0_2(doc_id, fk_slab_category_id, trns_id, sal) VALUES(?, ?, ?, ?)";
+                sql = "INSERT INTO stock0_2(doc_id, doc_date, fk_slab_category_id, trns_id, sal) VALUES(?, ?, ?, ?, ?)";
                 psLocal = dataConnection.prepareStatement(sql);
                 psLocal.setString(1, refNo);
-                psLocal.setString(2, rsLocal.getString("fk_slab_category_id"));
-                psLocal.setInt(3, 4);
-                psLocal.setString(4, rsLocal.getString("qty"));
+                psLocal.setString(2, doc_date);
+                psLocal.setString(3, rsLocal.getString("fk_slab_category_id"));
+                psLocal.setInt(4, 4);
+                psLocal.setString(5, rsLocal.getString("qty"));
                 psLocal.executeUpdate();
             }
             

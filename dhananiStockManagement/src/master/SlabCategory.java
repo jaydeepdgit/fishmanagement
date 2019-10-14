@@ -365,8 +365,8 @@ public class SlabCategory extends javax.swing.JInternalFrame {
         pstUpdate.setDouble(8, 0);
         pstUpdate.executeUpdate();
         
-        sql = "insert into stock0_2 (fk_slab_category_id, trns_id, opb, pur, pur_r, sal, sal_r)"
-                + "values(?, ?, ?, ?, ?, ?, ?)";
+        sql = "insert into stock0_2 (fk_slab_category_id, trns_id, opb, pur, pur_r, sal, sal_r, qty)"
+                + "values(?, ?, ?, ?, ?, ?, ?, ?)";
         pstUpdate = dataConnection.prepareStatement(sql);
         pstUpdate.setString(1, id);
         pstUpdate.setDouble(2, 0);
@@ -375,6 +375,7 @@ public class SlabCategory extends javax.swing.JInternalFrame {
         pstUpdate.setDouble(5, 0);
         pstUpdate.setDouble(6, 0);
         pstUpdate.setDouble(7, 0);
+        pstUpdate.setDouble(8, 0);
         pstUpdate.executeUpdate();
         lb.closeStatement(pstUpdate);
     }

@@ -21,6 +21,7 @@
 	<field name="rate" class="java.lang.Double"/>
 	<field name="amount" class="java.lang.Double"/>
 	<field name="total_expense" class="java.lang.Double"/>
+	<field name="sub_category" class="java.lang.String"/>
 	<variable name="amount" class="java.lang.Double" resetType="Group" resetGroup="account_name" calculation="Sum">
 		<variableExpression><![CDATA[$F{amount}]]></variableExpression>
 	</variable>
@@ -38,7 +39,7 @@
 		<groupHeader>
 			<band height="40">
 				<staticText>
-					<reportElement uuid="05c682e9-1473-4842-a471-9e1a043e60e3" x="45" y="20" width="216" height="20"/>
+					<reportElement uuid="05c682e9-1473-4842-a471-9e1a043e60e3" x="25" y="20" width="125" height="20"/>
 					<box topPadding="0" leftPadding="2">
 						<pen lineWidth="1.0"/>
 						<topPen lineWidth="0.0"/>
@@ -52,7 +53,7 @@
 					<text><![CDATA[PRODUCT NAME]]></text>
 				</staticText>
 				<staticText>
-					<reportElement uuid="19acdfa2-a4a3-4628-aad6-70abde3f1250" mode="Transparent" x="0" y="20" width="45" height="20"/>
+					<reportElement uuid="19acdfa2-a4a3-4628-aad6-70abde3f1250" mode="Transparent" x="0" y="20" width="25" height="20"/>
 					<box>
 						<pen lineWidth="1.0"/>
 						<topPen lineWidth="0.0" lineStyle="Solid"/>
@@ -122,6 +123,20 @@
 					</textElement>
 					<textFieldExpression><![CDATA["> "+$F{account_name}]]></textFieldExpression>
 				</textField>
+				<staticText>
+					<reportElement uuid="05c682e9-1473-4842-a471-9e1a043e60e3" x="150" y="20" width="111" height="20"/>
+					<box topPadding="0" leftPadding="2">
+						<pen lineWidth="1.0"/>
+						<topPen lineWidth="0.0"/>
+						<leftPen lineWidth="0.0"/>
+						<bottomPen lineWidth="1.5"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="12" isBold="true"/>
+					</textElement>
+					<text><![CDATA[SUB CATEGORY]]></text>
+				</staticText>
 			</band>
 		</groupHeader>
 		<groupFooter>
@@ -286,7 +301,7 @@
 	<detail>
 		<band height="20" splitType="Stretch">
 			<textField>
-				<reportElement uuid="368165fd-7102-48f3-a73b-1b1450947e2b" x="45" y="0" width="216" height="20"/>
+				<reportElement uuid="368165fd-7102-48f3-a73b-1b1450947e2b" x="25" y="0" width="125" height="20"/>
 				<box topPadding="0" leftPadding="2">
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
@@ -300,7 +315,7 @@
 				<textFieldExpression><![CDATA[$F{main_category}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" pattern="" isBlankWhenNull="true">
-				<reportElement uuid="33a82e33-fb83-4421-a1b3-0d9632db4d33" stretchType="RelativeToTallestObject" x="0" y="0" width="45" height="20"/>
+				<reportElement uuid="33a82e33-fb83-4421-a1b3-0d9632db4d33" stretchType="RelativeToTallestObject" x="0" y="0" width="25" height="20"/>
 				<box topPadding="0">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="0.0"/>
@@ -355,6 +370,20 @@
 				</textElement>
 				<textFieldExpression><![CDATA[new com.ibm.icu.text.DecimalFormat(" #,##,##0.00").format($F{amount})]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement uuid="368165fd-7102-48f3-a73b-1b1450947e2b" x="150" y="0" width="111" height="20"/>
+				<box topPadding="0" leftPadding="2">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sub_category}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<columnFooter>
@@ -367,7 +396,7 @@
 				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
-				<reportElement uuid="a4f679a3-bafe-4edd-8b1a-6549e85b25d2" x="312" y="0" width="40" height="20"/>
+				<reportElement uuid="a4f679a3-bafe-4edd-8b1a-6549e85b25d2" x="110" y="-236" width="40" height="20"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial"/>
 				</textElement>

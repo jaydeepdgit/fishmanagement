@@ -430,7 +430,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
             }
         }
         
-        breakupBillUpdate.addEntry(id);
+        breakupBillUpdate.addEntry(id, lb.tempConvertFormatForDBorConcurrency(jtxtVDate.getText()));
         return change;
     }
 

@@ -530,7 +530,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
             }
         }
         SalesBillUpdate sb = new SalesBillUpdate();
-        sb.addEntry(ref_no);
+        sb.addEntry(ref_no, lb.tempConvertFormatForDBorConcurrency(jtxtVDate.getText()));
         return change;
     }
 

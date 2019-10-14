@@ -4,10 +4,10 @@
  */
 package reports;
 
+import dhananistockmanagement.DeskFrame;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import dhananistockmanagement.DeskFrame;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.sql.Connection;
@@ -19,6 +19,7 @@ import javax.sql.rowset.CachedRowSet;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.RowFilter;
@@ -31,6 +32,7 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import support.Constants;
 import support.Library;
+import support.OurDateChooser;
 import support.PickList;
 
 /**
@@ -45,8 +47,8 @@ public class StockSummary extends javax.swing.JInternalFrame {
     private ResultSet rsLocal = null;
     private TableRowSorter<TableModel> rowSorter;
     private CachedRowSet crsMain = null;
-    String colname[] = new String[]{"mnitm_name", "itm_name", "pcs", "slab", "block", "rate"};
-    int column[] = new int[]{0, 0, 0, 1, 0, 2};
+    String colname[] = new String[]{"mnitm_name", "itm_name", "pcs", "slab", "block", "rate_inr", "total_inr", "rate_usd", "total_usd"};
+    int column[] = new int[]{0, 0, 0, 1, 0, 2, 2, 2, 2};
     String Syspath = System.getProperty("user.dir");
 
     /**
@@ -61,12 +63,16 @@ public class StockSummary extends javax.swing.JInternalFrame {
         registerShortKeys();
         setPermission();
         setIconToPnael();
+        setcheckEnableDisable(false);
         rowSorter = new TableRowSorter<>(jTable1.getModel());
         jTable1.setRowSorter(rowSorter);
         jTable1.getColumnModel().getColumn(2).setCellRenderer(new StatusColumnCellRenderer());
         jTable1.getColumnModel().getColumn(3).setCellRenderer(new StatusColumnCellRenderer());
         jTable1.getColumnModel().getColumn(4).setCellRenderer(new StatusColumnCellRenderer());
         jTable1.getColumnModel().getColumn(5).setCellRenderer(new StatusColumnCellRenderer());
+        jTable1.getColumnModel().getColumn(6).setCellRenderer(new StatusColumnCellRenderer());
+        jTable1.getColumnModel().getColumn(7).setCellRenderer(new StatusColumnCellRenderer());
+        jTable1.getColumnModel().getColumn(8).setCellRenderer(new StatusColumnCellRenderer());
         jTable1.setBackground(new Color(253, 243, 243));
         setTitle(Constants.STOCK_SUMMARY_FORM_NAME);
     }
@@ -78,7 +84,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
             JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
             l.setHorizontalAlignment(SwingConstants.RIGHT);
             //Get the status for the current row.
-            if(col == 2 || col == 3 || col ==4 || col == 5) {
+            if(col == 2 || col == 3 || col ==4 || col == 5 || col == 6 || col == 7 || col == 8) {
                 double val = Double.parseDouble(lb.getDeCustomFormat(jTable1.getValueAt(row, col).toString()));
                 if(val >= 0) {
                     if(!isSelected) {
@@ -154,10 +160,16 @@ public class StockSummary extends javax.swing.JInternalFrame {
 
     private void makeQuery() {
         PreparedStatement psLocal = null;
+        String fromDate = jtxtFromDate.getText();
+        String toDate = jtxtToDate.getText();
         try {
-            String sql = "SELECT sc.id AS slabid, sc.name AS slabCategory, sc.rate AS rate, (st.qty - st.sal) AS pcs, st.block as block" 
-                + " FROM stock0_1 st LEFT JOIN slab_category sc ON st.fk_slab_category_id = sc.id LEFT JOIN sub_category sbc ON sc.fk_sub_category_id = sbc.id "
-                + " WHERE st.fk_slab_category_id IS NOT NULL";
+            String sql = "SELECT sc.id AS slabid, sc.name AS slabCategory, SUM((st.opb + st.pur + st.sal_r + st.qty) - st.sal - st.pur_r) AS pcs,\n" +
+                "AVG(gs.rate_inr) AS rate_inr, AVG(gs.rate_usd) AS rate_usd, \n" +
+                "st.block AS block FROM stock0_2 st \n" +
+                "LEFT JOIN grade_sub gs ON st.doc_id = gs.id AND st.fk_slab_category_id = gs.fk_slab_category_id\n" +
+                "LEFT JOIN slab_category sc ON st.fk_slab_category_id = sc.id \n" +
+                "LEFT JOIN sub_category sbc ON sc.fk_sub_category_id = sbc.id \n" + 
+                "WHERE st.fk_slab_category_id IS NOT NULL";
             
             if(!jtxtMainItemName.getText().equalsIgnoreCase("")) {
               sql += " AND sbc.fk_main_category_id = '"+ lb.getMainCategory(jtxtMainItemName.getText(), "C") +"' ";
@@ -166,23 +178,34 @@ public class StockSummary extends javax.swing.JInternalFrame {
             if(!jtxtSubCategory.getText().equalsIgnoreCase("")) {
               sql += " AND sc.fk_sub_category_id = '"+ lb.getSubCategory(jtxtSubCategory.getText(), "C") +"' ";
             }  
-            sql += " ORDER BY slabid";
+            
+            if(jcmDate.isSelected()) {
+                sql += " AND ((st.doc_date >= '"+ lb.ConvertDateFormetForDB(fromDate) +"' AND "
+                + " st.doc_date <= '"+ lb.ConvertDateFormetForDB(toDate) +"') OR st.doc_date IS NULL)";
+            }
+            
+            sql += " GROUP BY slabid ORDER BY slabid";
             psLocal = dataConnection.prepareStatement(sql);
             rsLocal = psLocal.executeQuery();
             crsMain = lb.getBlankCachedRowSet(colname, column);
-            String arr[] = new String[6];
-            double pcs = 0.00, slab = 0.00, block = 0.00;
+            String arr[] = new String[9];
+            double pcs = 0.00, slab = 0.00, block = 0.00, total_inr = 0.00, total_usd = 0.00;
             while (rsLocal.next()) {
                 arr[0] = "";
                 arr[1] = rsLocal.getString("slabCategory");
                 arr[2] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
                 arr[3] = lb.Convert2DecFmt(rsLocal.getDouble("pcs") / 10);
                 arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("block"));
-                arr[5] = lb.getIndianFormat(rsLocal.getDouble("rate"));
+                arr[5] = lb.getIndianFormat(rsLocal.getDouble("rate_inr"));
+                arr[6] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
+                arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_usd"));
+                arr[8] = lb.getIndianFormat(rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
                 lb.appendColumnToCacheRowSet(crsMain, arr, column);
                 pcs += rsLocal.getDouble("pcs");
                 slab += rsLocal.getDouble("pcs") / 10;
                 block += rsLocal.getDouble("block");
+                total_inr += (rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
+                total_usd += (rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
             }
             arr[0] = "";
             arr[1] = "Total";
@@ -190,6 +213,9 @@ public class StockSummary extends javax.swing.JInternalFrame {
             arr[3] = lb.Convert2DecFmt(slab);
             arr[4] = lb.Convert2DecFmt(block);
             arr[5] = "";
+            arr[6] = lb.Convert2DecFmt(total_inr);
+            arr[7] = "";
+            arr[8] = lb.Convert2DecFmt(total_usd);
             lb.appendColumnToCacheRowSet(crsMain, arr, column);
         } catch(Exception ex) {
             lb.printToLogFile("Exception at MakeQuery In Stock Summary", ex);
@@ -248,6 +274,13 @@ public class StockSummary extends javax.swing.JInternalFrame {
         jLabel1 = new javax.swing.JLabel();
         jtxtSubCategory = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jcmDate = new javax.swing.JCheckBox();
+        jtxtFromDate = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jtxtToDate = new javax.swing.JTextField();
+        jBillDateBtn = new javax.swing.JButton();
+        jBillDateBtn1 = new javax.swing.JButton();
         jtxtSearch = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(211, 226, 245));
@@ -268,11 +301,11 @@ public class StockSummary extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "SR No", "Item Name", "Stock", "Slab", "Block", "Rate"
+                "SR No", "Item Name", "Stock", "Slab", "Block", "Rate_INR", "Price_INR", "Rate_USD", "Price_USD"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, true, false, false
+                false, false, false, true, false, false, false, false, true
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -407,25 +440,102 @@ public class StockSummary extends javax.swing.JInternalFrame {
         jLabel2.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jLabel2.setText("Sub Item Name");
 
+        jLabel3.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel3.setText("From");
+
+        jcmDate.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jcmDate.setText("Check Date");
+        jcmDate.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jcmDateItemStateChanged(evt);
+            }
+        });
+
+        jtxtFromDate.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtFromDate.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtFromDate.setMinimumSize(new java.awt.Dimension(6, 25));
+        jtxtFromDate.setPreferredSize(new java.awt.Dimension(6, 25));
+        jtxtFromDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtFromDateFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtFromDateFocusLost(evt);
+            }
+        });
+        jtxtFromDate.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtFromDateKeyPressed(evt);
+            }
+        });
+
+        jLabel4.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel4.setText("To");
+
+        jtxtToDate.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtToDate.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtToDate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtToDateFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtToDateFocusLost(evt);
+            }
+        });
+        jtxtToDate.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtToDateKeyPressed(evt);
+            }
+        });
+
+        jBillDateBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBillDateBtnActionPerformed(evt);
+            }
+        });
+
+        jBillDateBtn1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jBillDateBtn1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jcmDate))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jtxtMainItemName, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbtnView, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbtnPreview, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jbtnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtFromDate, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jBillDateBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtToDate, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jBillDateBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jtxtMainItemName, javax.swing.GroupLayout.PREFERRED_SIZE, 241, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbtnView, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbtnPreview, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbtnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
@@ -445,7 +555,19 @@ public class StockSummary extends javax.swing.JInternalFrame {
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jbtnPreview)
                     .addComponent(jbtnClose))
-                .addGap(7, 7, 7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jtxtToDate)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jcmDate, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jtxtFromDate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jBillDateBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jBillDateBtn1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGap(6, 6, 6))
         );
 
         jPanel2Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel1, jbtnClose, jbtnPreview, jbtnView, jtxtMainItemName});
@@ -477,117 +599,15 @@ public class StockSummary extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(2, 2, 2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jtxtSearch, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(2, 2, 2)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 573, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 533, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jbtnViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnViewActionPerformed
-        try {
-            model.setRowCount(0);
-            if (validateForm()) {
-                makeQuery();
-                jPanel1.removeAll();
-                jPanel1.add(jScrollPane1);
-                crsMain.beforeFirst();
-                int i = 1;
-                while(crsMain.next()) {
-                    Vector row = new Vector();
-                    row.add(i+"");
-                    row.add(crsMain.getString(2));
-                    row.add(crsMain.getString(3));
-                    row.add(crsMain.getString(4));
-                    row.add(crsMain.getString(5));
-                    row.add(crsMain.getString(6));
-                    model.addRow(row);
-                    i++;
-                }
-            }
-        } catch (Exception ex) {
-            lb.printToLogFile("Error at jbtnViewActionPerformed In Stock Summary", ex);
-        }
-    }//GEN-LAST:event_jbtnViewActionPerformed
-
-    private void jbtnViewKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jbtnViewKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            jbtnView.doClick();
-            jbtnPreview.requestFocusInWindow();
-        }
-    }//GEN-LAST:event_jbtnViewKeyPressed
-
-    private void jbtnPreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnPreviewActionPerformed
-        try {
-            if (validateForm()) {
-                makeQuery();
-                jPanel1.removeAll();
-                jPanel1.add(jScrollPane1);
-                HashMap params = new HashMap();
-                params.put("dir", System.getProperty("user.dir"));
-                params.put("digit", lb.getDigit());
-                params.put("cname", DeskFrame.clSysEnv.getCMPN_NAME());
-                params.put("cadd1", DeskFrame.clSysEnv.getADD1());
-                params.put("cadd2", DeskFrame.clSysEnv.getADD2());
-                params.put("ccorradd1", DeskFrame.clSysEnv.getCORRADD1());
-                params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
-                params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
-                crsMain.beforeFirst();
-                lb.reportGenerator("StockLedger.jasper", params, crsMain, jPanel1);
-            }
-        } catch (Exception ex) {
-            lb.printToLogFile("Error at jbtnPreviewActionPerformed In Stock Summary", ex);
-        }
-    }//GEN-LAST:event_jbtnPreviewActionPerformed
-
-    private void jbtnPreviewKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jbtnPreviewKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            jbtnPreview.doClick();
-        }
-    }//GEN-LAST:event_jbtnPreviewKeyPressed
-
-    private void jbtnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnCloseActionPerformed
-        this.dispose();
-    }//GEN-LAST:event_jbtnCloseActionPerformed
-
-    private void jbtnCloseKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jbtnCloseKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            jbtnClose.doClick();
-        }
-    }//GEN-LAST:event_jbtnCloseKeyPressed
-
-    private void jtxtMainItemNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtMainItemNameFocusGained
-        lb.selectAll(evt);
-    }//GEN-LAST:event_jtxtMainItemNameFocusGained
-
-    private void jtxtMainItemNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtMainItemNameFocusLost
-        jtxtMainItemName.setText(jtxtMainItemName.getText().toUpperCase());
-    }//GEN-LAST:event_jtxtMainItemNameFocusLost
-
-    private void jtxtMainItemNameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainItemNameKeyPressed
-        mainCategoryPickListView.setLocation(jtxtMainItemName.getX() + jPanel2.getX(), jtxtMainItemName.getY() + jPanel2.getY() + jtxtMainItemName.getHeight());
-        mainCategoryPickListView.pickListKeyPress(evt);
-        mainCategoryPickListView.setReturnComponent(new JTextField[]{jtxtMainItemName});
-    }//GEN-LAST:event_jtxtMainItemNameKeyPressed
-
-    private void jtxtMainItemNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainItemNameKeyReleased
-        try {
-            mainCategoryPickListView.setReturnComponent(new JTextField[]{jtxtMainItemName});
-            PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT name FROM main_category WHERE name LIKE '%" + jtxtMainItemName.getText().toUpperCase() + "%'");
-            mainCategoryPickListView.setPreparedStatement(pstLocal);
-            mainCategoryPickListView.setValidation(dataConnection.prepareStatement("SELECT * FROM main_category WHERE name = ?"));
-            mainCategoryPickListView.pickListKeyRelease(evt);
-        } catch (Exception ex) {
-            lb.printToLogFile("Exception at jtxtMainItemNameKeyReleased In Stock Summary", ex);
-        }
-    }//GEN-LAST:event_jtxtMainItemNameKeyReleased
-
-    private void jtxtMainItemNameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainItemNameKeyTyped
-        lb.fixLength(evt, 100);
-    }//GEN-LAST:event_jtxtMainItemNameKeyTyped
 
     private void jtxtSearchKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSearchKeyPressed
         searchOnTextFields();
@@ -615,22 +635,54 @@ public class StockSummary extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void jtxtSubCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusGained
+    private void jtxtToDateKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtToDateKeyPressed
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            jbtnView.requestFocusInWindow();
+        }
+    }//GEN-LAST:event_jtxtToDateKeyPressed
+
+    private void jtxtToDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtToDateFocusLost
+        lb.setDateUsingJTextField(jtxtToDate, jbtnView);
+    }//GEN-LAST:event_jtxtToDateFocusLost
+
+    private void jtxtToDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtToDateFocusGained
         lb.selectAll(evt);
-    }//GEN-LAST:event_jtxtSubCategoryFocusGained
+    }//GEN-LAST:event_jtxtToDateFocusGained
 
-    private void jtxtSubCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusLost
-        subCategoryPickList.setVisible(false);
-    }//GEN-LAST:event_jtxtSubCategoryFocusLost
+    private void jtxtFromDateKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtFromDateKeyPressed
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            jtxtToDate.requestFocusInWindow();
+        }
+    }//GEN-LAST:event_jtxtFromDateKeyPressed
 
-    private void jtxtSubCategoryComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jtxtSubCategoryComponentResized
-        //setTextfieldsAtBottom();
-    }//GEN-LAST:event_jtxtSubCategoryComponentResized
+    private void jtxtFromDateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtFromDateFocusLost
+        lb.setDateUsingJTextField(jtxtFromDate);
+    }//GEN-LAST:event_jtxtFromDateFocusLost
 
-    private void jtxtSubCategoryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyPressed
-        subCategoryPickList.setLocation(jtxtSubCategory.getX() + jPanel2.getX(), jtxtSubCategory.getY() + jtxtSubCategory.getHeight() + jPanel2.getY());
-        subCategoryPickList.pickListKeyPress(evt);
-    }//GEN-LAST:event_jtxtSubCategoryKeyPressed
+    private void jtxtFromDateFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtFromDateFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtFromDateFocusGained
+
+    private void jcmDateItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jcmDateItemStateChanged
+        if(jcmDate.isSelected()) {
+            setcheckEnableDisable(true);
+        } else {
+            setcheckEnableDisable(false);
+        }
+    }//GEN-LAST:event_jcmDateItemStateChanged
+
+    private void setcheckEnableDisable(boolean flag) {
+        jLabel3.setEnabled(flag);
+        jtxtFromDate.setEnabled(flag);
+        jBillDateBtn.setEnabled(flag);
+        jLabel4.setEnabled(flag);
+        jtxtToDate.setEnabled(flag);
+        jBillDateBtn1.setEnabled(flag);
+    }
+    
+    private void jtxtSubCategoryKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyTyped
+        lb.fixLength(evt, 255);
+    }//GEN-LAST:event_jtxtSubCategoryKeyTyped
 
     private void jtxtSubCategoryKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyReleased
         try {
@@ -648,17 +700,161 @@ public class StockSummary extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_jtxtSubCategoryKeyReleased
 
-    private void jtxtSubCategoryKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyTyped
-        lb.fixLength(evt, 255);
-    }//GEN-LAST:event_jtxtSubCategoryKeyTyped
+    private void jtxtSubCategoryKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtSubCategoryKeyPressed
+        subCategoryPickList.setLocation(jtxtSubCategory.getX() + jPanel2.getX(), jtxtSubCategory.getY() + jtxtSubCategory.getHeight() + jPanel2.getY());
+        subCategoryPickList.pickListKeyPress(evt);
+    }//GEN-LAST:event_jtxtSubCategoryKeyPressed
+
+    private void jtxtSubCategoryComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jtxtSubCategoryComponentResized
+        //setTextfieldsAtBottom();
+    }//GEN-LAST:event_jtxtSubCategoryComponentResized
+
+    private void jtxtSubCategoryFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusLost
+        subCategoryPickList.setVisible(false);
+    }//GEN-LAST:event_jtxtSubCategoryFocusLost
+
+    private void jtxtSubCategoryFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtSubCategoryFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtSubCategoryFocusGained
+
+    private void jtxtMainItemNameKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainItemNameKeyTyped
+        lb.fixLength(evt, 100);
+    }//GEN-LAST:event_jtxtMainItemNameKeyTyped
+
+    private void jtxtMainItemNameKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainItemNameKeyReleased
+        try {
+            mainCategoryPickListView.setReturnComponent(new JTextField[]{jtxtMainItemName});
+            PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT name FROM main_category WHERE name LIKE '%" + jtxtMainItemName.getText().toUpperCase() + "%'");
+            mainCategoryPickListView.setPreparedStatement(pstLocal);
+            mainCategoryPickListView.setValidation(dataConnection.prepareStatement("SELECT * FROM main_category WHERE name = ?"));
+            mainCategoryPickListView.pickListKeyRelease(evt);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at jtxtMainItemNameKeyReleased In Stock Summary", ex);
+        }
+    }//GEN-LAST:event_jtxtMainItemNameKeyReleased
+
+    private void jtxtMainItemNameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtMainItemNameKeyPressed
+        mainCategoryPickListView.setLocation(jtxtMainItemName.getX() + jPanel2.getX(), jtxtMainItemName.getY() + jPanel2.getY() + jtxtMainItemName.getHeight());
+        mainCategoryPickListView.pickListKeyPress(evt);
+        mainCategoryPickListView.setReturnComponent(new JTextField[]{jtxtMainItemName});
+    }//GEN-LAST:event_jtxtMainItemNameKeyPressed
 
     private void jtxtMainItemNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtxtMainItemNameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jtxtMainItemNameActionPerformed
 
+    private void jtxtMainItemNameFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtMainItemNameFocusLost
+        jtxtMainItemName.setText(jtxtMainItemName.getText().toUpperCase());
+    }//GEN-LAST:event_jtxtMainItemNameFocusLost
+
+    private void jtxtMainItemNameFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtMainItemNameFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtMainItemNameFocusGained
+
+    private void jbtnViewKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jbtnViewKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            jbtnView.doClick();
+            jbtnPreview.requestFocusInWindow();
+        }
+    }//GEN-LAST:event_jbtnViewKeyPressed
+
+    private void jbtnViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnViewActionPerformed
+        try {
+            model.setRowCount(0);
+            if (validateForm()) {
+                makeQuery();
+                jPanel1.removeAll();
+                jPanel1.add(jScrollPane1);
+                crsMain.beforeFirst();
+                int i = 1;
+                while(crsMain.next()) {
+                    Vector row = new Vector();
+                    row.add(i+"");
+                    row.add(crsMain.getString(2));
+                    row.add(crsMain.getString(3));
+                    row.add(crsMain.getString(4));
+                    row.add(crsMain.getString(5));
+                    row.add(crsMain.getString(6));
+                    row.add(crsMain.getString(7));
+                    row.add(crsMain.getString(8));
+                    row.add(crsMain.getString(9));
+                    model.addRow(row);
+                    i++;
+                }
+            }
+        } catch (Exception ex) {
+            lb.printToLogFile("Error at jbtnViewActionPerformed In Stock Summary", ex);
+        }
+    }//GEN-LAST:event_jbtnViewActionPerformed
+
+    private void jbtnPreviewKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jbtnPreviewKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            jbtnPreview.doClick();
+        }
+    }//GEN-LAST:event_jbtnPreviewKeyPressed
+
+    private void jbtnPreviewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnPreviewActionPerformed
+        try {
+            if (validateForm()) {
+                makeQuery();
+                jPanel1.removeAll();
+                jPanel1.add(jScrollPane1);
+                HashMap params = new HashMap();
+                params.put("dir", System.getProperty("user.dir"));
+                params.put("digit", lb.getDigit());
+                params.put("cname", DeskFrame.clSysEnv.getCMPN_NAME());
+                params.put("cadd1", DeskFrame.clSysEnv.getADD1());
+                params.put("cadd2", DeskFrame.clSysEnv.getADD2());
+                params.put("ccorradd1", DeskFrame.clSysEnv.getCORRADD1());
+                params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
+                params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
+                crsMain.beforeFirst();
+                lb.reportGenerator("StockLedger.jasper", params, crsMain, jPanel1);
+            }
+        } catch (Exception ex) {
+            lb.printToLogFile("Error at jbtnPreviewActionPerformed In Stock Summary", ex);
+        }
+    }//GEN-LAST:event_jbtnPreviewActionPerformed
+
+    private void jbtnCloseKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jbtnCloseKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+            jbtnClose.doClick();
+        }
+    }//GEN-LAST:event_jbtnCloseKeyPressed
+
+    private void jbtnCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnCloseActionPerformed
+        this.dispose();
+    }//GEN-LAST:event_jbtnCloseActionPerformed
+
+    private void jBillDateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBillDateBtnActionPerformed
+        OurDateChooser odc = new OurDateChooser();
+        odc.setnextFocus(jtxtFromDate);
+        odc.setFormat("dd/MM/yyyy");
+        JPanel jp = new JPanel();
+        this.add(jp);
+        jp.setBounds(jtxtFromDate.getX() - 200, jtxtFromDate.getY() + 125, jtxtFromDate.getX() + odc.getWidth(), jtxtFromDate.getY() + odc.getHeight());
+        odc.setLocation(0, 0);
+        odc.showDialog(jp, Constants.SELECT_DATE);
+    }//GEN-LAST:event_jBillDateBtnActionPerformed
+
+    private void jBillDateBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jBillDateBtn1ActionPerformed
+        OurDateChooser odc = new OurDateChooser();
+        odc.setnextFocus(jtxtToDate);
+        odc.setFormat("dd/MM/yyyy");
+        JPanel jp = new JPanel();
+        this.add(jp);
+        jp.setBounds(jtxtToDate.getX() - 200, jtxtToDate.getY() + 125, jtxtToDate.getX() + odc.getWidth(), jtxtToDate.getY() + odc.getHeight());
+        odc.setLocation(0, 0);
+        odc.showDialog(jp, Constants.SELECT_DATE);
+    }//GEN-LAST:event_jBillDateBtn1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jBillDateBtn;
+    private javax.swing.JButton jBillDateBtn1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
@@ -666,8 +862,11 @@ public class StockSummary extends javax.swing.JInternalFrame {
     private javax.swing.JButton jbtnClose;
     private javax.swing.JButton jbtnPreview;
     private javax.swing.JButton jbtnView;
+    private javax.swing.JCheckBox jcmDate;
+    private javax.swing.JTextField jtxtFromDate;
     private javax.swing.JTextField jtxtMainItemName;
     private javax.swing.JTextField jtxtSearch;
     private javax.swing.JTextField jtxtSubCategory;
+    private javax.swing.JTextField jtxtToDate;
     // End of variables declaration//GEN-END:variables
 }
