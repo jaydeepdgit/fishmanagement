@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockLedger" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="a50ebf51-a1ba-41f9-9bd7-692f6413258b">
-	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="2670"/>
+	<property name="ireport.y" value="154"/>
 	<property name="language" value="java"/>
 	<parameter name="ITM_NAME" class="java.lang.String"/>
 	<parameter name="Title" class="java.lang.String"/>
@@ -15,7 +15,7 @@
 	<parameter name="cadd1" class="java.lang.String"/>
 	<parameter name="cadd2" class="java.lang.String"/>
 	<parameter name="cmobno" class="java.lang.String"/>
-	<field name="mnitm_name" class="java.lang.String"/>
+	<field name="sub_cat" class="java.lang.String"/>
 	<field name="itm_name" class="java.lang.String"/>
 	<field name="pcs" class="java.lang.Double"/>
 	<field name="slab" class="java.lang.Double"/>
@@ -24,9 +24,54 @@
 	<field name="total_inr" class="java.lang.String"/>
 	<field name="rate_usd" class="java.lang.Double"/>
 	<field name="total_usd" class="java.lang.String"/>
+	<field name="main_cat" class="java.lang.String"/>
 	<variable name="stock" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{pcs}]]></variableExpression>
 	</variable>
+	<group name="maincat">
+		<groupExpression><![CDATA[$F{main_cat}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<printWhenExpression><![CDATA[$F{main_cat} != ""]]></printWhenExpression>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement uuid="19688756-bfd2-46e2-b3b8-2de5cb1dd401" stretchType="RelativeToTallestObject" x="0" y="0" width="555" height="20"/>
+					<box topPadding="0" leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="11"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Main Category: "+$F{main_cat}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
+	<group name="sub_cat">
+		<groupExpression><![CDATA[$F{sub_cat}]]></groupExpression>
+		<groupHeader>
+			<band height="20">
+				<printWhenExpression><![CDATA[$F{sub_cat} != ""]]></printWhenExpression>
+				<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+					<reportElement uuid="19688756-bfd2-46e2-b3b8-2de5cb1dd401" stretchType="RelativeToTallestObject" x="5" y="0" width="550" height="20"/>
+					<box topPadding="0" leftPadding="2">
+						<pen lineWidth="0.0"/>
+						<topPen lineWidth="1.0"/>
+						<leftPen lineWidth="1.0"/>
+						<bottomPen lineWidth="1.0"/>
+						<rightPen lineWidth="1.0"/>
+					</box>
+					<textElement verticalAlignment="Middle">
+						<font fontName="Arial" size="11"/>
+					</textElement>
+					<textFieldExpression><![CDATA["Sub Category: "+$F{sub_cat}]]></textFieldExpression>
+				</textField>
+			</band>
+		</groupHeader>
+	</group>
 	<background>
 		<band height="802" splitType="Stretch"/>
 	</background>
@@ -47,14 +92,6 @@
 					<font fontName="Arial" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA["Print Date :"]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement uuid="02b3875e-3fd0-4f9c-b2bd-c6a35db5d8e8" x="0" y="59" width="325" height="20"/>
-				<box topPadding="0" leftPadding="2"/>
-				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Stock Ledger of "+ $P{ITM_NAME}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement uuid="df4a9e96-289c-45a3-a074-30f170aef744" x="0" y="0" width="555" height="22"/>
@@ -80,7 +117,7 @@
 				<box topPadding="0" leftPadding="2">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
-					<leftPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
 					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
@@ -96,7 +133,7 @@
 					<topPen lineWidth="1.0"/>
 					<leftPen lineWidth="0.0"/>
 					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="0.0"/>
+					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="true"/>
@@ -192,12 +229,12 @@
 	<detail>
 		<band height="20">
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="19688756-bfd2-46e2-b3b8-2de5cb1dd401" stretchType="RelativeToTallestObject" x="0" y="0" width="168" height="20"/>
+				<reportElement uuid="19688756-bfd2-46e2-b3b8-2de5cb1dd401" stretchType="RelativeToTallestObject" x="10" y="0" width="158" height="20"/>
 				<box topPadding="0" leftPadding="2">
 					<pen lineWidth="0.0"/>
 					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement verticalAlignment="Middle">
@@ -211,7 +248,7 @@
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -225,7 +262,7 @@
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -239,8 +276,8 @@
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
-					<rightPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
 					<font fontName="Arial" size="11"/>
@@ -253,7 +290,7 @@
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -267,7 +304,7 @@
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -281,7 +318,7 @@
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -295,7 +332,7 @@
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
 					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
@@ -306,10 +343,6 @@
 		</band>
 	</detail>
 	<columnFooter>
-		<band height="1">
-			<line>
-				<reportElement uuid="2aa0b0f8-08b1-4a88-8e27-355c7e303cbf" x="0" y="0" width="555" height="1"/>
-			</line>
-		</band>
+		<band height="1"/>
 	</columnFooter>
 </jasperReport>

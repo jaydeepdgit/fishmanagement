@@ -47,8 +47,8 @@ public class StockSummary extends javax.swing.JInternalFrame {
     private ResultSet rsLocal = null;
     private TableRowSorter<TableModel> rowSorter;
     private CachedRowSet crsMain = null;
-    String colname[] = new String[]{"mnitm_name", "itm_name", "pcs", "slab", "block", "rate_inr", "total_inr", "rate_usd", "total_usd"};
-    int column[] = new int[]{0, 0, 0, 1, 0, 2, 2, 2, 2};
+    String colname[] = new String[]{"main_cat", "sub_cat", "itm_name", "pcs", "slab", "block", "rate_inr", "total_inr", "rate_usd", "total_usd"};
+    int column[] = new int[]{0, 0, 0, 0, 1, 0, 2, 2, 2, 2};
     String Syspath = System.getProperty("user.dir");
 
     /**
@@ -84,7 +84,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
             JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
             l.setHorizontalAlignment(SwingConstants.RIGHT);
             //Get the status for the current row.
-            if(col == 2 || col == 3 || col ==4 || col == 5 || col == 6 || col == 7 || col == 8) {
+            if(col == 3 || col == 4 || col == 5 || col == 6 || col == 7 || col == 8 || col == 9) {
                 double val = Double.parseDouble(lb.getDeCustomFormat(jTable1.getValueAt(row, col).toString()));
                 if(val >= 0) {
                     if(!isSelected) {
@@ -163,12 +163,13 @@ public class StockSummary extends javax.swing.JInternalFrame {
         String fromDate = jtxtFromDate.getText();
         String toDate = jtxtToDate.getText();
         try {
-            String sql = "SELECT sc.id AS slabid, sc.name AS slabCategory, SUM((st.opb + st.pur + st.sal_r + st.qty) - st.sal - st.pur_r) AS pcs,\n" +
+            String sql = "SELECT sc.id AS slabid, sbc.name as sub_category, mc.name as main_category, sc.name AS slabCategory, SUM((st.opb + st.pur + st.sal_r + st.qty) - st.sal - st.pur_r) AS pcs,\n" +
                 "AVG(gs.rate_inr) AS rate_inr, AVG(gs.rate_usd) AS rate_usd, \n" +
                 "st.block AS block FROM stock0_2 st \n" +
                 "LEFT JOIN grade_sub gs ON st.doc_id = gs.id AND st.fk_slab_category_id = gs.fk_slab_category_id\n" +
                 "LEFT JOIN slab_category sc ON st.fk_slab_category_id = sc.id \n" +
                 "LEFT JOIN sub_category sbc ON sc.fk_sub_category_id = sbc.id \n" + 
+                "LEFT JOIN main_category mc ON sbc.fk_main_category_id = mc.id \n" + 
                 "WHERE st.fk_slab_category_id IS NOT NULL";
             
             if(!jtxtMainItemName.getText().equalsIgnoreCase("")) {
@@ -188,18 +189,19 @@ public class StockSummary extends javax.swing.JInternalFrame {
             psLocal = dataConnection.prepareStatement(sql);
             rsLocal = psLocal.executeQuery();
             crsMain = lb.getBlankCachedRowSet(colname, column);
-            String arr[] = new String[9];
+            String arr[] = new String[10];
             double pcs = 0.00, slab = 0.00, block = 0.00, total_inr = 0.00, total_usd = 0.00;
             while (rsLocal.next()) {
-                arr[0] = "";
-                arr[1] = rsLocal.getString("slabCategory");
-                arr[2] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
-                arr[3] = lb.Convert2DecFmt(rsLocal.getDouble("pcs") / 10);
-                arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("block"));
-                arr[5] = lb.getIndianFormat(rsLocal.getDouble("rate_inr"));
-                arr[6] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
-                arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_usd"));
-                arr[8] = lb.getIndianFormat(rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
+                arr[0] = rsLocal.getString("main_category");
+                arr[1] = rsLocal.getString("sub_category");
+                arr[2] = rsLocal.getString("slabCategory");
+                arr[3] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
+                arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("pcs") / 10);
+                arr[5] = lb.Convert2DecFmt(rsLocal.getDouble("block"));
+                arr[6] = lb.getIndianFormat(rsLocal.getDouble("rate_inr"));
+                arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
+                arr[8] = lb.getIndianFormat(rsLocal.getDouble("rate_usd"));
+                arr[9] = lb.getIndianFormat(rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
                 lb.appendColumnToCacheRowSet(crsMain, arr, column);
                 pcs += rsLocal.getDouble("pcs");
                 slab += rsLocal.getDouble("pcs") / 10;
@@ -208,14 +210,15 @@ public class StockSummary extends javax.swing.JInternalFrame {
                 total_usd += (rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
             }
             arr[0] = "";
-            arr[1] = "Total";
-            arr[2] = lb.Convert2DecFmt(pcs);
-            arr[3] = lb.Convert2DecFmt(slab);
-            arr[4] = lb.Convert2DecFmt(block);
-            arr[5] = "";
-            arr[6] = lb.Convert2DecFmt(total_inr);
-            arr[7] = "";
-            arr[8] = lb.Convert2DecFmt(total_usd);
+            arr[1] = "";
+            arr[2] = "Total";
+            arr[3] = lb.Convert2DecFmt(pcs);
+            arr[4] = lb.Convert2DecFmt(slab);
+            arr[5] = lb.Convert2DecFmt(block);
+            arr[6] = "";
+            arr[7] = lb.Convert2DecFmt(total_inr);
+            arr[8] = "";
+            arr[9] = lb.Convert2DecFmt(total_usd);
             lb.appendColumnToCacheRowSet(crsMain, arr, column);
         } catch(Exception ex) {
             lb.printToLogFile("Exception at MakeQuery In Stock Summary", ex);
