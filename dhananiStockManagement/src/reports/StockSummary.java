@@ -304,7 +304,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "SR No", "Item Name", "Stock", "Slab", "Block", "Rate_INR", "Price_INR", "Rate_USD", "Price_USD"
+                "SR No", "Sub Category", "Slab Category", "Stock", "Slab", "Rate_INR", "Price_INR", "Rate_USD", "Price_USD"
             }
         ) {
             boolean[] canEdit = new boolean [] {

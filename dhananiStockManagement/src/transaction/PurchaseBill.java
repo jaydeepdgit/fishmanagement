@@ -141,14 +141,16 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
         double qty = lb.replaceAll(jtxtWeight.getText());
         double amt = 0.00;
         double amtDollar = 0.00;
-        if(rate > 0) {
-            rateDollar = rate / rateDollarRs;
-        } else if(rateDollar > 0) {
-            rate = rateDollar * rateDollarRs;
+        if(rateDollarRs > 0) {
+            if(rate > 0) {
+                rateDollar = rate / rateDollarRs;
+            } else if(rateDollar > 0) {
+                rate = rateDollar * rateDollarRs;
+            }    
         }
         
-        amt = (qty * rate);
         amtDollar = (qty * rateDollar);
+        amt = (qty * rate);
         
         jtxtWeight.setText(lb.Convert2DecFmt(qty));
         jtxtRateDollarRs.setText(lb.getIndianFormat(rateDollarRs));
@@ -1452,7 +1454,7 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
                     jtxtAmount.setText(jTable1.getValueAt(rowSel, 5).toString());
                     jtxtRateDollar.setText(jTable1.getValueAt(rowSel, 6).toString());
                     jtxtAmountDollar.setText(jTable1.getValueAt(rowSel, 7).toString());
-                    jtxtMainCategory.requestFocusInWindow();
+                    jtxtWeight.requestFocusInWindow();
                 }
             }
         }

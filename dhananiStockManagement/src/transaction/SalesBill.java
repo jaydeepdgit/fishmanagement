@@ -140,10 +140,12 @@ public class SalesBill extends javax.swing.JInternalFrame {
         double rateDollarRs = lb.replaceAll(jtxtRateDollarRs.getText());
         double amt = 0.00;
         double amtDollar = 0.00;
-        if(rateDollar > 0) {
-            rate = rateDollar * rateDollarRs;
-        } else if(rate > 0) {
-            rateDollar = rate / rateDollarRs;
+        if(rateDollarRs > 0) {
+            if(rateDollar > 0) {
+                rate = rateDollar * rateDollarRs;
+            } else if(rate > 0) {
+                rateDollar = rate / rateDollarRs;
+            }
         }
         
         amt = (qty * rate);
