@@ -133,29 +133,46 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }
 
     private void calculation() {
-        int slab = Integer.parseInt(jtxtSlab.getText());
-        double qty = slab * 10;
-        double rate = lb.replaceAll(jtxtRate.getText());
-        double rateDollar = lb.replaceAll(jtxtRateDollar.getText());
+        
         double rateDollarRs = lb.replaceAll(jtxtRateDollarRs.getText());
         double amt = 0.00;
         double amtDollar = 0.00;
         if(rateDollarRs > 0) {
-            if(rateDollar > 0) {
-                rate = rateDollar * rateDollarRs;
-            } else if(rate > 0) {
-                rateDollar = rate / rateDollarRs;
+            for (int i = 0; i < jTable1.getRowCount(); i++) {
+                jTable1.setValueAt(i+1, i, 0);
+                double rowWeight = lb.replaceAll(jTable1.getValueAt(i, 5).toString());
+                double rowRate = lb.replaceAll(jTable1.getValueAt(i, 6).toString());
+                if(rowRate > 0) {
+                    double rowRateDollar = rowRate / rateDollarRs;
+                    jTable1.setValueAt((rowWeight * rowRate), i, 7);
+                    jTable1.setValueAt(rowRateDollar, i, 8);
+                    jTable1.setValueAt((rowWeight * rowRateDollar), i, 9);
+                }
             }
         }
         
-        amt = (qty * rate);
-        amtDollar = (qty * rateDollar);
+        double rate = lb.replaceAll(jtxtRate.getText());
+        double rateDollar = lb.replaceAll(jtxtRateDollar.getText());
+        if(rate > 0 || rateDollar > 0) {
+            int slab = Integer.parseInt(jtxtSlab.getText());
+            double qty = slab * 10;
+            if(rateDollarRs > 0) {
+                if(rateDollar > 0) {
+                    rate = rateDollar * rateDollarRs;
+                } else if(rate > 0) {
+                    rateDollar = rate / rateDollarRs;
+                }
+            }
         
-        jtxtQty.setText(lb.Convert2DecFmt(qty));
-        jtxtRate.setText(lb.getIndianFormat(rate));
-        jtxtRateDollar.setText(lb.getIndianFormat(rateDollar));
-        jtxtAmt.setText(lb.getIndianFormat(amt));
-        jtxtAmtDollar.setText(lb.getIndianFormat(amtDollar));
+            amt = (qty * rate);
+            amtDollar = (qty * rateDollar);
+        
+            jtxtQty.setText(lb.Convert2DecFmt(qty));
+            jtxtRate.setText(lb.getIndianFormat(rate));
+            jtxtRateDollar.setText(lb.getIndianFormat(rateDollar));
+            jtxtAmt.setText(lb.getIndianFormat(amt));
+            jtxtAmtDollar.setText(lb.getIndianFormat(amtDollar));
+        }
     }
 
     private boolean reValidate(){
@@ -2221,6 +2238,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
 
     private void jtxtRateDollarRsFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtRateDollarRsFocusLost
         rateDollarRs = Double.valueOf(jtxtRateDollarRs.getText());
+        calculation();
     }//GEN-LAST:event_jtxtRateDollarRsFocusLost
 
     private void jtxtRateDollarRsKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtRateDollarRsKeyTyped
