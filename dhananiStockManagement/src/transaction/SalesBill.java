@@ -32,6 +32,7 @@ import support.OurDateChooser;
 import support.PickList;
 import support.ReportTable;
 import support.Constants;
+import support.VoucherDisplay;
 
 /**
  *
@@ -277,7 +278,12 @@ public class SalesBill extends javax.swing.JInternalFrame {
 
             @Override
             public void callPrint() {
-                onPrintVoucher();
+                try {
+                    VoucherDisplay vd = new VoucherDisplay(ref_no, Constants.SALES_BILL_INITIAL);
+                    DeskFrame.addOnScreen(vd, Constants.SALES_BILL_FORM_NAME +" PRINT");
+                } catch(Exception ex) {
+                    lb.printToLogFile("Exception at callPrint In Purchase Master", ex);
+                }
             }
 
             @Override
@@ -457,11 +463,6 @@ public class SalesBill extends javax.swing.JInternalFrame {
         navLoad = new navPanel();
         jPanel2.add(navLoad);
         navLoad.setVisible(true);
-    }
-
-    private void onPrintVoucher() {
-        PopUpPrintType ds = new PopUpPrintType(MainClass.df, true, ref_no, initial, view_title, 1);
-        ds.show();
     }
 
     public void setID(String ref_no) {

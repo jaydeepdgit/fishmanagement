@@ -26,6 +26,8 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import dhananistockmanagement.MainClass;
 import java.sql.ResultSet;
+import java.util.HashMap;
+import javax.sql.rowset.CachedRowSet;
 import oldbupdate.PurchaseBillUpdate;
 import support.Constants;
 import support.HeaderIntFrame1;
@@ -34,6 +36,7 @@ import support.NavigationPanel1;
 import support.OurDateChooser;
 import support.PickList;
 import support.ReportTable;
+import support.VoucherDisplay;
 
 /**
  *
@@ -44,6 +47,7 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
     Library lb = new Library();
     DefaultTableModel dtm = null;
     private String id = "";
+    private CachedRowSet crsMain = null;
     private ReportTable purchaseBillView = null;
     Connection dataConnection = DeskFrame.connMpAdmin;
     private String initial = Constants.PURCHASE_BILL_INITIAL;
@@ -51,7 +55,7 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
     String Syspath = System.getProperty("user.dir");
     double expense = 0.00;
     double rateDollarRs = 0.00;
-
+  
     /**
      * Creates new form PurchaseBill
      */
@@ -89,7 +93,7 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
         setIconToPnael();
         jTable1.setBackground(new Color(253, 243, 243));
         setTitle(Constants.PURCHASE_BILL_FORM_NAME);
-        navLoad.jbtnPrint.setVisible(false);
+        navLoad.jbtnPrint.setVisible(true);
     }
 
     private void setIconToPnael() {
@@ -271,7 +275,12 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
 
             @Override
             public void callPrint() {
-                onPrintVoucher();
+                try {
+                    VoucherDisplay vd = new VoucherDisplay(id, Constants.PURCHASE_BILL_INITIAL);
+                    DeskFrame.addOnScreen(vd, Constants.PURCHASE_BILL_FORM_NAME +" PRINT");
+                } catch(Exception ex) {
+                    lb.printToLogFile("Exception at callPrint In Purchase Master", ex);
+                }
             }
 
             @Override
@@ -436,11 +445,6 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
         navLoad = new navPanel();
         jPanel2.add(navLoad);
         navLoad.setVisible(true);
-    }
-
-    private void onPrintVoucher() {
-        PopUpPrintType ds = new PopUpPrintType(MainClass.df, true, id, initial, Constants.PURCHASE_BILL_FORM_NAME, 0);
-        ds.show();
     }
 
     public void setID(String id) {

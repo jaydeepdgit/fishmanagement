@@ -122,6 +122,72 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
             checkPrintReport(ref_no);
         } else if(tag.equalsIgnoreCase("UR")) {
             userRightsReport(ref_no);
+        } else if(tag.equalsIgnoreCase(Constants.PURCHASE_BILL_INITIAL)) {
+            purchaseBillReport(ref_no);
+        } else if(tag.equalsIgnoreCase(Constants.SALES_BILL_INITIAL)) {
+            saleBillReport(ref_no);
+        }
+    }
+    
+    private void saleBillReport(String ref_no) {
+        String sql = "SELECT mc.hs_code as bsn_code, sc.name as itm_name, am.name as ac_name, sh.voucher_date as v_date, "
+                + "sd.qty, sd.rate AS rate_inr, sd.rate_dollar AS rate_usd \n" +
+                "FROM `sale_bill_head` sh \n" +
+                "LEFT JOIN `sale_bill_detail` sd ON sh.ref_no = sd.ref_no\n" +
+                "LEFT JOIN `slab_category` sc ON sc.id = sd.fk_slab_category_id\n" +
+                "LEFT JOIN `main_category` mc ON mc.id = sd.fk_main_category_id\n" +
+                "LEFT JOIN `account_master` am ON sh.fk_account_id = am.id\n" +
+                "WHERE sh.ref_no = '"+ ref_no +"'";
+        
+        HashMap params = new HashMap();
+        params.put("dir", System.getProperty("user.dir"));
+        params.put("digit", lb.getDigit());
+        params.put("cname", DeskFrame.clSysEnv.getCMPN_NAME());
+        params.put("cadd1", DeskFrame.clSysEnv.getADD1());
+        params.put("cadd2", DeskFrame.clSysEnv.getADD2());
+        params.put("ccorradd1", DeskFrame.clSysEnv.getCORRADD1());
+        params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
+        params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
+        params.put("bill_no", ref_no);
+            
+        try {
+            PreparedStatement pstLocal = dataConnecrtion.prepareStatement(sql);
+            ResultSet rsLocal = pstLocal.executeQuery();
+            print = lb.reportGenerator("SaleBill.jasper", params, rsLocal, jPanel1);
+            lb.closeResultSet(rsLocal);
+            lb.closeStatement(pstLocal);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at Sale bill Report In Voucher Display", ex);
+        }
+    }
+    
+    private void purchaseBillReport(String ref_no) {
+        String sql = "SELECT mc.hs_code as bsn_code, sc.name as itm_name, am.name as ac_name, ph.v_date, pd.weight AS qty, pd.rate AS rate_inr, pd.rate_dollar AS rate_usd \n" +
+                "FROM `purchase_bill_head` ph \n" +
+                "LEFT JOIN `purchase_bill_details` pd ON ph.id = pd.id\n" +
+                "LEFT JOIN `sub_category` sc ON sc.id = pd.fk_sub_category_id\n" +
+                "LEFT JOIN `main_category` mc ON mc.id = sc.fk_main_category_id\n" +
+                "LEFT JOIN `account_master` am ON ph.fk_account_master_id = am.id\n" +
+                "WHERE ph.id = '"+ ref_no +"'";
+        HashMap params = new HashMap();
+        params.put("dir", System.getProperty("user.dir"));
+        params.put("digit", lb.getDigit());
+        params.put("cname", DeskFrame.clSysEnv.getCMPN_NAME());
+        params.put("cadd1", DeskFrame.clSysEnv.getADD1());
+        params.put("cadd2", DeskFrame.clSysEnv.getADD2());
+        params.put("ccorradd1", DeskFrame.clSysEnv.getCORRADD1());
+        params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
+        params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
+        params.put("bill_no", ref_no);
+            
+        try {
+            PreparedStatement pstLocal = dataConnecrtion.prepareStatement(sql);
+            ResultSet rsLocal = pstLocal.executeQuery();
+            print = lb.reportGenerator("PurchaseBill.jasper", params, rsLocal, jPanel1);
+            lb.closeResultSet(rsLocal);
+            lb.closeStatement(pstLocal);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at Purchase bill Report In Voucher Display", ex);
         }
     }
 
