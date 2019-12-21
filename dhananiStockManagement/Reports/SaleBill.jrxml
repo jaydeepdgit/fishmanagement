@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockLedger" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="a50ebf51-a1ba-41f9-9bd7-692f6413258b">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="345"/>
+	<property name="ireport.y" value="96"/>
 	<property name="language" value="java"/>
 	<parameter name="ITM_NAME" class="java.lang.String"/>
 	<parameter name="Title" class="java.lang.String"/>
@@ -27,6 +27,7 @@
 	<field name="rate_usd" class="java.lang.Double"/>
 	<field name="ac_name" class="java.lang.String"/>
 	<field name="v_date" class="java.lang.String"/>
+	<field name="rate_dollar_rs" class="java.lang.Double"/>
 	<variable name="total_qty" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{qty}]]></variableExpression>
 	</variable>
@@ -190,7 +191,7 @@
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial" size="11"/>
 				</textElement>
-				<textFieldExpression><![CDATA[" : "+$P{ex_rate}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[" : "+$F{rate_dollar_rs}]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="370" y="118" width="64" height="30"/>

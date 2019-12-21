@@ -195,8 +195,8 @@ public class StockSummary extends javax.swing.JInternalFrame {
                 arr[0] = rsLocal.getString("main_category");
                 arr[1] = rsLocal.getString("sub_category");
                 arr[2] = rsLocal.getString("slabCategory");
-                arr[3] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
-                arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("pcs") / 10);
+                arr[3] = lb.Convert2DecFmt(rsLocal.getDouble("pcs") / 10);                
+                arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
                 arr[5] = lb.Convert2DecFmt(rsLocal.getDouble("block"));
                 arr[6] = lb.getIndianFormat(rsLocal.getDouble("rate_inr"));
                 arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
@@ -304,7 +304,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "SR No", "Sub Category", "Slab Category", "Stock", "Slab", "Rate_INR", "Price_INR", "Rate_USD", "Price_USD"
+                "SR No", "Sub Category", "Slab Category", "Slab", "Quantity", "Rate_INR", "Price_INR", "Rate_USD", "Price_USD"
             }
         ) {
             boolean[] canEdit = new boolean [] {
@@ -777,10 +777,10 @@ public class StockSummary extends javax.swing.JInternalFrame {
                     row.add(crsMain.getString(3));
                     row.add(crsMain.getString(4));
                     row.add(crsMain.getString(5));
-                    row.add(crsMain.getString(6));
                     row.add(crsMain.getString(7));
                     row.add(crsMain.getString(8));
                     row.add(crsMain.getString(9));
+                    row.add(crsMain.getString(10));
                     model.addRow(row);
                     i++;
                 }

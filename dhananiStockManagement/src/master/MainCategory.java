@@ -449,7 +449,7 @@ public class MainCategory extends javax.swing.JInternalFrame {
 
         jLabel2.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 0, 0));
-        jLabel2.setText("Name");
+        jLabel2.setText("Main Category");
         jLabel2.setMaximumSize(new java.awt.Dimension(77, 25));
         jLabel2.setMinimumSize(new java.awt.Dimension(77, 25));
         jLabel2.setPreferredSize(new java.awt.Dimension(77, 25));

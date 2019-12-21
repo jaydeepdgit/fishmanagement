@@ -74,7 +74,7 @@
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jPanel1" pref="681" max="32767" attributes="0"/>
+              <Component id="jPanel1" pref="677" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jlblKgs" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
@@ -340,8 +340,12 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jLabel26" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jtxtPackagingWeight" pref="159" max="32767" attributes="0"/>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="jtxtPackagingWeight" min="-2" pref="112" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jLabel27" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jtxtRateDollarRs" min="-2" pref="112" max="-2" attributes="0"/>
+                          <EmptySpace pref="83" max="32767" attributes="0"/>
                           <Component id="jbtnAdd" min="-2" pref="64" max="-2" attributes="0"/>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
@@ -381,17 +385,23 @@
                       <Component id="jBillDateBtn" linkSize="25" alignment="0" max="32767" attributes="0"/>
                       <Component id="jlblDay" linkSize="25" alignment="0" max="32767" attributes="0"/>
                       <Component id="jtxtAccountName" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="jLabel25" alignment="0" max="32767" attributes="0"/>
+                      <Component id="jLabel25" alignment="0" pref="29" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jbtnAdd" linkSize="25" alignment="0" min="-2" pref="25" max="-2" attributes="0"/>
+                      <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                          <Component id="jbtnAdd" linkSize="25" alignment="3" min="-2" pref="25" max="-2" attributes="0"/>
+                          <Group type="103" alignment="3" groupAlignment="3" attributes="0">
+                              <Component id="jLabel27" alignment="3" max="32767" attributes="0"/>
+                              <Component id="jtxtRateDollarRs" alignment="3" pref="0" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
                       <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                           <Component id="jtxtMainCategory" linkSize="19" alignment="3" max="32767" attributes="0"/>
                           <Component id="jLabel24" linkSize="19" alignment="3" max="32767" attributes="0"/>
                           <Component id="jtxtSubCategory" linkSize="19" alignment="3" max="32767" attributes="0"/>
                           <Component id="jLabel26" alignment="3" max="32767" attributes="0"/>
-                          <Component id="jtxtPackagingWeight" alignment="3" pref="0" max="32767" attributes="0"/>
+                          <Component id="jtxtPackagingWeight" alignment="3" pref="29" max="32767" attributes="0"/>
                       </Group>
                       <Component id="jLabel23" linkSize="19" alignment="0" max="32767" attributes="0"/>
                   </Group>
@@ -644,6 +654,35 @@
             <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jtxtPackagingWeightFocusLost"/>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtxtPackagingWeightActionPerformed"/>
             <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="jtxtPackagingWeightKeyPressed"/>
+          </Events>
+        </Component>
+        <Component class="javax.swing.JLabel" name="jLabel27">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="SansSerif" size="14" style="0"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Rate Dollar:"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JTextField" name="jtxtRateDollarRs">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="SansSerif" size="14" style="0"/>
+            </Property>
+            <Property name="autoscrolls" type="boolean" value="false"/>
+            <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+              <Border info="org.netbeans.modules.form.compat2.border.MatteColorBorderInfo">
+                <MatteColorBorder>
+                  <Color PropertyName="color" blue="0" green="0" red="ff" type="rgb"/>
+                </MatteColorBorder>
+              </Border>
+            </Property>
+          </Properties>
+          <Events>
+            <EventHandler event="focusGained" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jtxtRateDollarRsFocusGained"/>
+            <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="jtxtRateDollarRsFocusLost"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jtxtRateDollarRsActionPerformed"/>
+            <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="jtxtRateDollarRsKeyPressed"/>
           </Events>
         </Component>
       </SubComponents>

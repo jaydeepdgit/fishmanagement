@@ -225,6 +225,15 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 dtm.setRowCount(0);
                 jtxtVoucher.setText("");
                 jlblKgs.setText("0.00");
+                jtxtAccountName.setText("");
+                jtxtMainCategory.setText("");
+                jtxtSubCategory.setText("");
+                jtxtPackagingWeight.setText("0.000");
+                jtxtRateDollarRs.setText("0.000");
+                jlblINR.setText("0.000");
+                jlblUSD.setText("0.000");
+                jlblKgs.setText("0.000");
+                jlblSlabQty.setText("0.000");
                 lb.setDateChooserProperty(jtxtVDate);
                 jtxtVDate.requestFocusInWindow();
                 jtxtVDate.selectAll();
@@ -243,6 +252,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
             public void setComponentEditable(boolean bFlag) {
                 jtxtVDate.setEnabled(bFlag);
                 jtxtPackagingWeight.setEnabled(bFlag);
+                jtxtRateDollarRs.setEnabled(bFlag);
                 jtxtVoucher.setEnabled(!bFlag);
                 jTable1.setEnabled(bFlag);
                 jtxtMainCategory.setEnabled(bFlag);
@@ -288,6 +298,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
                     jtxtSubCategory.setText(lb.getSubCategory(sub_category_id, "N"));
                     jlblDay.setText(lb.setDay(jtxtVDate));
                     jtxtPackagingWeight.setText(viewDataRs.getString("packaging_weight"));
+                    jtxtRateDollarRs.setText(viewDataRs.getString("rate_dollar_rs"));
                     jlblSlabQty.setText(lb.getIndianFormat(viewDataRs.getDouble("total_slabqty")));
                     jlblKgs.setText(lb.getIndianFormat(viewDataRs.getDouble("total_kgs")));
                     jlblBlockUsed.setText(lb.getIndianFormat(viewDataRs.getDouble("total_blockused")));
@@ -371,7 +382,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
         PreparedStatement psLocal = null;
         int change = 0;
         if (navLoad.getMode().equalsIgnoreCase("N")) {
-            sql = "INSERT INTO grade_main (fk_account_master_id, v_date, fk_main_category_id, fk_sub_category_id, packaging_weight, total_slabqty, total_kgs, total_blockused, total_usd, total_inr, total_block, fix_time, user_cd, id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) +"', ?, ?)";
+            sql = "INSERT INTO grade_main (fk_account_master_id, v_date, fk_main_category_id, fk_sub_category_id, packaging_weight, rate_dollar_rs, total_slabqty, total_kgs, total_blockused, total_usd, total_inr, total_block, fix_time, user_cd, id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) +"', ?, ?)";
             id = lb.generateKey("grade_main", "id", 8, initial); // GENERATE REF NO
         } else if (navLoad.getMode().equalsIgnoreCase("E")) {
             breakupBillUpdate.deleteEntry(id);
@@ -380,7 +391,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
             psLocal = dataConnection.prepareStatement(sql);
             change += psLocal.executeUpdate();
 
-            sql = "UPDATE grade_main SET fk_account_master_id = ?, v_date = ?, fk_main_category_id = ?, fk_sub_category_id = ?, packaging_weight = ?, total_slabqty = ?, total_kgs = ?, total_blockused = ?, total_usd = ?, total_inr = ?, total_block = ?, fix_time = '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) 
+            sql = "UPDATE grade_main SET fk_account_master_id = ?, v_date = ?, fk_main_category_id = ?, fk_sub_category_id = ?, packaging_weight = ?, rate_dollar_rs = ?, total_slabqty = ?, total_kgs = ?, total_blockused = ?, total_usd = ?, total_inr = ?, total_block = ?, fix_time = '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) 
                 +"', user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?";
         }
         
@@ -391,14 +402,15 @@ public class BreakUp extends javax.swing.JInternalFrame {
         psLocal.setString(3, lb.getMainCategory(jtxtMainCategory.getText(), "C")); // Main Category
         psLocal.setString(4, sub_category_id); // Sub Category
         psLocal.setDouble(5, lb.replaceAll(jtxtPackagingWeight.getText())); // packaging weight
-        psLocal.setDouble(6, lb.replaceAll(jlblSlabQty.getText())); // total_slabqty
-        psLocal.setDouble(7, lb.replaceAll(jlblKgs.getText())); // total_kgs
-        psLocal.setDouble(8, lb.replaceAll(jlblBlockUsed.getText())); // total_blockused
-        psLocal.setDouble(9, lb.replaceAll(jlblUSD.getText())); // total_USD
-        psLocal.setDouble(10, lb.replaceAll(jlblINR.getText())); // total_INT
-        psLocal.setDouble(11, lb.replaceAll(jlblBlock.getText())); // total_Block
-        psLocal.setInt(12, DeskFrame.user_id); // user_cd
-        psLocal.setString(13, id); // id
+        psLocal.setDouble(6, lb.replaceAll(jtxtRateDollarRs.getText())); // rate dollar rs
+        psLocal.setDouble(7, lb.replaceAll(jlblSlabQty.getText())); // total_slabqty
+        psLocal.setDouble(8, lb.replaceAll(jlblKgs.getText())); // total_kgs
+        psLocal.setDouble(9, lb.replaceAll(jlblBlockUsed.getText())); // total_blockused
+        psLocal.setDouble(10, lb.replaceAll(jlblUSD.getText())); // total_USD
+        psLocal.setDouble(11, lb.replaceAll(jlblINR.getText())); // total_INT
+        psLocal.setDouble(12, lb.replaceAll(jlblBlock.getText())); // total_Block
+        psLocal.setInt(13, DeskFrame.user_id); // user_cd
+        psLocal.setString(14, id); // id
         change += psLocal.executeUpdate();
 
         sql = "INSERT INTO grade_sub (sr_no, fk_slab_category_id, grad_qty, kgs, block_used, rate_usd, total_usd, rate_inr, total_inr, block, id) VALUES (?, ?, ?, ?, ?, ? ,? ,?, ?, ?, ?)";
@@ -452,10 +464,10 @@ public class BreakUp extends javax.swing.JInternalFrame {
     }
 
     private void setJtableTotal() {
-        double tSlabQty = 0.000, tKgs = 0.000, tBlockUsed = 0.000, tUSD = 0.000, tINR = 0.000, tBlock = 0.000;
+        double tUSD = 0.000, tINR = 0.000, tSlabQty = 0.000, tKgs = 0.000, tBlockUsed = 0.000, tBlock = 0.000;
         
         for (int i = 0; i < jTable1.getRowCount(); i++) {
-            double slabQty = 0.000, kgs = 0.00, blockUsed = 0.000, editBlockUsed = 0.000, rateUSD = 0.00, totalUSD = 0.00, rateINR = 0.00, totalINR = 0.00, block = 0.00;
+            double slabQty = 0.000, kgs = 0.00, blockUsed = 0.000, editBlockUsed = 0.000, block = 0.00;
             
             slabQty = lb.replaceAll(jTable1.getValueAt(i, 2).toString());
             tSlabQty += slabQty;
@@ -466,22 +478,45 @@ public class BreakUp extends javax.swing.JInternalFrame {
 
             blockUsed = lb.replaceAll(jTable1.getValueAt(i, 4).toString());
             tBlockUsed += blockUsed;
-
-            rateUSD = lb.replaceAll(jTable1.getValueAt(i, 5).toString());
-            totalUSD = rateUSD * kgs * slabQty;
-            tUSD += totalUSD;
-            jTable1.setValueAt(totalUSD, i, 6);
-
-            rateINR = lb.replaceAll(jTable1.getValueAt(i, 7).toString());
-            totalINR = rateINR * kgs * slabQty;
-            tINR += totalINR;
-            jTable1.setValueAt(totalINR, i, 8);
-
+            
             block = lb.replaceAll(jTable1.getValueAt(i, 10).toString());
             editBlockUsed = lb.replaceAll(jTable1.getValueAt(i, 11).toString());
             jTable1.setValueAt(((block + editBlockUsed) - blockUsed), i, 9);
             tBlock += block;
         }
+        
+        
+        double rateDollarRs = lb.replaceAll(jtxtRateDollarRs.getText());
+        if(rateDollarRs > 0) {
+            for (int i = 0; i < jTable1.getRowCount(); i++) {
+                double totalUSD = 0.00, totalINR = 0.00;
+                jTable1.setValueAt(i+1, i, 0);
+                double rowWeight = lb.replaceAll(jTable1.getValueAt(i, 3).toString());
+                double rowDollarRate = lb.replaceAll(jTable1.getValueAt(i, 5).toString());
+                if(rowDollarRate > 0) {
+                    double rowRate = rowDollarRate * rateDollarRs;
+                    jTable1.setValueAt((rowWeight * rateDollarRs), i, 6);
+                    jTable1.setValueAt(rowRate, i, 7);
+                    jTable1.setValueAt((rowWeight * rowRate), i, 8);
+                }
+                
+                double rowRate = lb.replaceAll(jTable1.getValueAt(i, 7).toString());
+                if(rowRate > 0) {
+                    rowDollarRate = rowRate / rateDollarRs;
+                    jTable1.setValueAt(rowDollarRate, i, 5);
+                    jTable1.setValueAt((rowWeight * rowDollarRate), i, 6);
+                    jTable1.setValueAt((rowWeight * rowRate), i, 8);
+                }
+                
+                totalUSD = lb.replaceAll(jTable1.getValueAt(i, 6).toString());
+                tUSD += totalUSD;
+            
+                totalINR = lb.replaceAll(jTable1.getValueAt(i, 8).toString());
+                tINR += totalINR;
+            }
+        }
+       
+        
         jlblSlabQty.setText(tSlabQty+"");
         jlblKgs.setText(tKgs+"");
         jlblBlockUsed.setText(tBlockUsed+"");
@@ -525,6 +560,8 @@ public class BreakUp extends javax.swing.JInternalFrame {
         jLabel25 = new javax.swing.JLabel();
         jLabel26 = new javax.swing.JLabel();
         jtxtPackagingWeight = new javax.swing.JTextField();
+        jLabel27 = new javax.swing.JLabel();
+        jtxtRateDollarRs = new javax.swing.JTextField();
         jlblKgs = new javax.swing.JLabel();
         jbtnEmail = new javax.swing.JButton();
         jlblUSD = new javax.swing.JLabel();
@@ -810,6 +847,31 @@ public class BreakUp extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel27.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel27.setText("Rate Dollar:");
+
+        jtxtRateDollarRs.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtRateDollarRs.setAutoscrolls(false);
+        jtxtRateDollarRs.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 0, 0)));
+        jtxtRateDollarRs.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtRateDollarRsFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtRateDollarRsFocusLost(evt);
+            }
+        });
+        jtxtRateDollarRs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jtxtRateDollarRsActionPerformed(evt);
+            }
+        });
+        jtxtRateDollarRs.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtRateDollarRsKeyPressed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -828,8 +890,12 @@ public class BreakUp extends javax.swing.JInternalFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel26)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.DEFAULT_SIZE, 159, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel27)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 83, Short.MAX_VALUE)
                         .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -864,16 +930,20 @@ public class BreakUp extends javax.swing.JInternalFrame {
                     .addComponent(jBillDateBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jlblDay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jtxtAccountName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel25, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLabel25, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jtxtMainCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jtxtSubCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE))
                     .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(7, 7, 7))
         );
@@ -1015,7 +1085,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 681, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 677, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jlblKgs, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1266,7 +1336,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jlblBlockUsedComponentResized
 
     private void jtxtPackagingWeightFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtPackagingWeightFocusLost
-        // TODO add your handling code here:
+        setJtableTotal();
     }//GEN-LAST:event_jtxtPackagingWeightFocusLost
 
     private void jtxtPackagingWeightFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtPackagingWeightFocusGained
@@ -1274,12 +1344,28 @@ public class BreakUp extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jtxtPackagingWeightFocusGained
 
     private void jtxtPackagingWeightKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtPackagingWeightKeyPressed
-        lb.enterEvent(evt, jbtnAdd);
+        lb.enterEvent(evt, jtxtRateDollarRs);
     }//GEN-LAST:event_jtxtPackagingWeightKeyPressed
 
     private void jtxtPackagingWeightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtxtPackagingWeightActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jtxtPackagingWeightActionPerformed
+
+    private void jtxtRateDollarRsFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtRateDollarRsFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtRateDollarRsFocusGained
+
+    private void jtxtRateDollarRsFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtRateDollarRsFocusLost
+        setJtableTotal();
+    }//GEN-LAST:event_jtxtRateDollarRsFocusLost
+
+    private void jtxtRateDollarRsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtxtRateDollarRsActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jtxtRateDollarRsActionPerformed
+
+    private void jtxtRateDollarRsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtRateDollarRsKeyPressed
+        lb.enterEvent(evt, jbtnAdd);
+    }//GEN-LAST:event_jtxtRateDollarRsKeyPressed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBillDateBtn;
@@ -1292,6 +1378,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -1313,6 +1400,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
     private javax.swing.JTextField jtxtAccountName;
     private javax.swing.JTextField jtxtMainCategory;
     private javax.swing.JTextField jtxtPackagingWeight;
+    private javax.swing.JTextField jtxtRateDollarRs;
     private javax.swing.JTextField jtxtSubCategory;
     private javax.swing.JTextField jtxtVDate;
     private javax.swing.JTextField jtxtVoucher;
