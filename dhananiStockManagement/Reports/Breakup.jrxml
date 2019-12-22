@@ -2,7 +2,7 @@
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockLedger" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="a50ebf51-a1ba-41f9-9bd7-692f6413258b">
 	<property name="ireport.zoom" value="2.0"/>
 	<property name="ireport.x" value="0"/>
-	<property name="ireport.y" value="26"/>
+	<property name="ireport.y" value="0"/>
 	<property name="language" value="java"/>
 	<parameter name="ITM_NAME" class="java.lang.String"/>
 	<parameter name="Title" class="java.lang.String"/>
@@ -21,13 +21,15 @@
 	<parameter name="date" class="java.lang.String"/>
 	<parameter name="ex_rate" class="java.lang.String"/>
 	<field name="itm_name" class="java.lang.String"/>
-	<field name="bsn_code" class="java.lang.String"/>
+	<field name="grad_qty" class="java.lang.Double"/>
 	<field name="qty" class="java.lang.Double"/>
 	<field name="rate_inr" class="java.lang.Double"/>
 	<field name="rate_usd" class="java.lang.Double"/>
 	<field name="ac_name" class="java.lang.String"/>
 	<field name="v_date" class="java.lang.String"/>
 	<field name="rate_dollar_rs" class="java.lang.Double"/>
+	<field name="main_cat_name" class="java.lang.String"/>
+	<field name="sub_cat_name" class="java.lang.String"/>
 	<variable name="total_qty" class="java.lang.Double" calculation="Sum">
 		<variableExpression><![CDATA[$F{qty}]]></variableExpression>
 	</variable>
@@ -54,7 +56,7 @@
 		</band>
 	</background>
 	<title>
-		<band height="148" splitType="Stretch">
+		<band height="166" splitType="Stretch">
 			<textField>
 				<reportElement uuid="df4a9e96-289c-45a3-a074-30f170aef744" mode="Opaque" x="0" y="0" width="555" height="22" backcolor="#999999"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
@@ -94,7 +96,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[PURC. BILL]]></text>
+				<text><![CDATA[Breakup]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="df0e7318-3f9b-491f-a46e-514872733431" x="370" y="58" width="185" height="20"/>
@@ -207,6 +209,62 @@
 				</textElement>
 				<text><![CDATA[Ex. Rate]]></text>
 			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="19688756-bfd2-46e2-b3b8-2de5cb1dd401" stretchType="RelativeToTallestObject" x="88" y="148" width="189" height="18"/>
+				<box topPadding="0" leftPadding="2">
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{main_cat_name}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="277" y="148" width="88" height="18"/>
+				<box topPadding="0" leftPadding="5" rightPadding="0">
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sub Category :]]></text>
+			</staticText>
+			<staticText>
+				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="0" y="148" width="88" height="18"/>
+				<box topPadding="0" leftPadding="5" rightPadding="0">
+					<pen lineWidth="1.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="1.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="0.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Main Category :]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="19688756-bfd2-46e2-b3b8-2de5cb1dd401" stretchType="RelativeToTallestObject" x="365" y="148" width="190" height="18"/>
+				<box topPadding="0" leftPadding="2">
+					<pen lineWidth="0.0"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="11" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{sub_cat_name}]]></textFieldExpression>
+			</textField>
 		</band>
 	</title>
 	<pageHeader>
@@ -251,7 +309,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
-				<text><![CDATA[BSN Code]]></text>
+				<text><![CDATA[Slab Qty]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="263" y="0" width="55" height="40"/>
@@ -265,7 +323,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Qty]]></text>
+				<text><![CDATA[Total KGs]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="318" y="0" width="52" height="40"/>
@@ -351,7 +409,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Arial" size="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{bsn_code}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{grad_qty}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
 				<reportElement uuid="d704a586-167c-444a-b063-641695477c8b" stretchType="RelativeToTallestObject" x="263" y="0" width="55" height="20"/>

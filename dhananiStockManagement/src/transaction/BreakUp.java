@@ -5,6 +5,7 @@
 package transaction;
 
 import dhananistockmanagement.DeskFrame;
+import dhananistockmanagement.MainClass;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.KeyEvent;
@@ -13,6 +14,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -24,8 +26,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-import dhananistockmanagement.MainClass;
-import java.sql.ResultSet;
 import oldbupdate.BreakupBillUpdate;
 import support.Constants;
 import support.EmailSelect;
@@ -35,6 +35,7 @@ import support.NavigationPanel1;
 import support.OurDateChooser;
 import support.PickList;
 import support.ReportTable;
+import support.VoucherDisplay;
 
 /**
  *
@@ -180,7 +181,12 @@ public class BreakUp extends javax.swing.JInternalFrame {
 
             @Override
             public void callPrint() {
-                onPrintVoucher();
+                try {
+                    VoucherDisplay vd = new VoucherDisplay(id, Constants.BREAK_UP_INITIAL);
+                    DeskFrame.addOnScreen(vd, Constants.BREAK_UP_FORM_NAME +" PRINT");
+                } catch(Exception ex) {
+                    lb.printToLogFile("Exception at callPrint In Breakup Master", ex);
+                }
             }
 
             @Override
@@ -336,11 +342,6 @@ public class BreakUp extends javax.swing.JInternalFrame {
         navLoad = new navPanel();
         jPanel2.add(navLoad);
         navLoad.setVisible(true);
-    }
-
-    private void onPrintVoucher() {
-        PopUpPrintType ds = new PopUpPrintType(MainClass.df, true, id, initial, Constants.BREAK_UP_FORM_NAME, 0);
-        ds.show();
     }
 
     public void setID(String id) {
@@ -934,10 +935,9 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)))
+                        .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jtxtMainCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

@@ -126,6 +126,41 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
             purchaseBillReport(ref_no);
         } else if(tag.equalsIgnoreCase(Constants.SALES_BILL_INITIAL)) {
             saleBillReport(ref_no);
+        } else if(tag.equalsIgnoreCase(Constants.BREAK_UP_INITIAL)) {
+            breakUpReport(ref_no);
+        }
+    }
+    
+    private void breakUpReport(String ref_no) {
+        String sql = "SELECT gm.rate_dollar_rs, gs.grad_qty, sc.name AS itm_name, am.name AS ac_name, gm.v_date, \n" +
+                "gs.kgs AS qty, gs.rate_inr, gs.rate_usd, subc.name as sub_cat_name, mc.name as main_cat_name \n" +
+                "FROM `grade_main` gm \n" +
+                "LEFT JOIN `grade_sub` gs ON gm.id = gs.id\n" +
+                "LEFT JOIN `slab_category` sc ON sc.id = gs.fk_slab_category_id\n" +
+                "LEFT JOIN `sub_category` subc ON subc.id = sc.fk_sub_category_id\n" +
+                "LEFT JOIN `main_category` mc ON mc.id = subc.fk_main_category_id\n" +
+                "LEFT JOIN `account_master` am ON gm.fk_account_master_id = am.id\n" +
+                "WHERE gm.id = '"+ ref_no +"'";
+        
+        HashMap params = new HashMap();
+        params.put("dir", System.getProperty("user.dir"));
+        params.put("digit", lb.getDigit());
+        params.put("cname", DeskFrame.clSysEnv.getCMPN_NAME());
+        params.put("cadd1", DeskFrame.clSysEnv.getADD1());
+        params.put("cadd2", DeskFrame.clSysEnv.getADD2());
+        params.put("ccorradd1", DeskFrame.clSysEnv.getCORRADD1());
+        params.put("ccorradd2", DeskFrame.clSysEnv.getCORRADD2());
+        params.put("cmobno", DeskFrame.clSysEnv.getMOB_NO());
+        params.put("bill_no", ref_no);
+            
+        try {
+            PreparedStatement pstLocal = dataConnecrtion.prepareStatement(sql);
+            ResultSet rsLocal = pstLocal.executeQuery();
+            print = lb.reportGenerator("Breakup.jasper", params, rsLocal, jPanel1);
+            lb.closeResultSet(rsLocal);
+            lb.closeStatement(pstLocal);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at Breakup Report In Voucher Display", ex);
         }
     }
     
