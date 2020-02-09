@@ -165,7 +165,7 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
     }
     
     private void saleBillReport(String ref_no) {
-        String sql = "SELECT sh.rate_dollar_rs, sd.slab, mc.hs_code as bsn_code, sc.name as itm_name, am.name as ac_name, sh.voucher_date as v_date, "
+        String sql = "SELECT sh.voucher_no, sh.rate_dollar_rs, sd.slab, mc.hs_code as bsn_code, sc.name as itm_name, am.name as ac_name, sh.voucher_date as v_date, "
                 + "sd.qty, sd.rate AS rate_inr, sd.rate_dollar AS rate_usd \n" +
                 "FROM `sale_bill_head` sh \n" +
                 "LEFT JOIN `sale_bill_detail` sd ON sh.ref_no = sd.ref_no\n" +
@@ -197,11 +197,11 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
     }
     
     private void purchaseBillReport(String ref_no) {
-        String sql = "SELECT ph.rate_dollar_rs, mc.hs_code as bsn_code, sc.name as itm_name, am.name as ac_name, ph.v_date, pd.weight AS qty, pd.rate AS rate_inr, pd.rate_dollar AS rate_usd \n" +
+        String sql = "SELECT ph.rate_dollar_rs, mc.hs_code as bsn_code, mc.name as main_cat_name, sc.name as itm_name, am.name as ac_name, ph.v_date, pd.weight AS qty, pd.rate AS rate_inr, pd.rate_dollar AS rate_usd \n" +
                 "FROM `purchase_bill_head` ph \n" +
                 "LEFT JOIN `purchase_bill_details` pd ON ph.id = pd.id\n" +
                 "LEFT JOIN `sub_category` sc ON sc.id = pd.fk_sub_category_id\n" +
-                "LEFT JOIN `main_category` mc ON mc.id = sc.fk_main_category_id\n" +
+                "LEFT JOIN `main_category` mc ON mc.id = pd.fk_main_category_id\n" +
                 "LEFT JOIN `account_master` am ON ph.fk_account_master_id = am.id\n" +
                 "WHERE ph.id = '"+ ref_no +"'";
         HashMap params = new HashMap();

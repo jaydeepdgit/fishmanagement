@@ -218,6 +218,13 @@ public class SalesBill extends javax.swing.JInternalFrame {
             jtxtVDate.requestFocusInWindow();
             flag = false;
         }
+        
+        if (lb.isBlank(jtxtVoucherNo)) {
+            navLoad.setMessage("Voucher no should not blank");
+            jtxtVoucherNo.requestFocusInWindow();
+            flag = false;
+                
+        }
         return flag;
     }
 
@@ -326,6 +333,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
             @Override
             public void setComponentText() {
                 dtm.setRowCount(0);
+                jtxtVoucherNo.setText("");
                 jtxtVoucher.setText("");
                 jtxtACAlias.setText("");
                 jtxtInvoiceNo.setText("");
@@ -341,8 +349,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jtxtPDate.setText("");
                 jtxtInvoiceNo.setText(lb.getInvNo("sale_bill_head", "", "") + "");
                 lb.setDateChooserProperty(jtxtVDate);
-                jtxtVDate.requestFocusInWindow();
-                jtxtVDate.selectAll();
+                jtxtVoucherNo.requestFocusInWindow();
                 jtxtRateDollarRs.setText("0.00");
             }
 
@@ -358,7 +365,9 @@ public class SalesBill extends javax.swing.JInternalFrame {
             @Override
             public void setComponentEditable(boolean bFlag) {
                 jtxtVDate.setEnabled(bFlag);
-                jtxtVoucher.setEnabled(!bFlag);
+                jtxtVoucher.setVisible(false);
+                jlblStart.setVisible(false);
+                jtxtVoucherNo.setEnabled(bFlag);
                 jtxtInvoiceNo.setEnabled(false);
                 jtxtRemarks.setEnabled(bFlag);
                 jtxtRateDollarRs.setEnabled(bFlag);
@@ -380,22 +389,26 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jtxtDiscRs.setEnabled(bFlag);
                 jtxtAdjustAmt.setEnabled(bFlag);
                 jbtnAdd.setEnabled(bFlag);
-                jtxtVDate.requestFocusInWindow();
-                jtxtVDate.selectAll();
+                jtxtVoucherNo.requestFocusInWindow();
+                jtxtVoucherNo.selectAll();
             }
 
             public int valueUpdateToDatabase(boolean bPrepareStatement) {
                 try {
-                    dataConnection.setAutoCommit(false);
-                    updateLabel();
-                    saveVoucher();
-                    dataConnection.commit();
-                    dataConnection.setAutoCommit(true);
-                    if (navLoad.getMode().equalsIgnoreCase("N")) {
-                        setVoucher("last");
-                    } else if (navLoad.getMode().equalsIgnoreCase("E")) {
-                        setVoucher("Edit");
+                    boolean valid = validateForm();
+                    if(valid) {
+                        dataConnection.setAutoCommit(false);
+                        updateLabel();
+                        saveVoucher();
+                        dataConnection.commit();
+                        dataConnection.setAutoCommit(true);
+                        if (navLoad.getMode().equalsIgnoreCase("N")) {
+                            setVoucher("last");
+                        } else if (navLoad.getMode().equalsIgnoreCase("E")) {
+                            setVoucher("Edit");
+                        }
                     }
+                    
                 } catch (Exception ex) {
                     try {
                         dataConnection.rollback();
@@ -413,6 +426,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 try {
                     ref_no = viewDataRs.getString("ref_no");
                     jtxtVoucher.setText(viewDataRs.getString("ref_no").substring(initial.length()));
+                    jtxtVoucherNo.setText(viewDataRs.getString("voucher_no"));
                     jtxtVDate.setText(lb.ConvertDateFormetForDBForConcurrency(viewDataRs.getString("voucher_date")));
                     jtxtInvoiceNo.setText(viewDataRs.getString("bill_no"));
                     jtxtRateDollarRs.setText(lb.Convert2DecFmt(viewDataRs.getDouble("rate_dollar_rs")));
@@ -473,8 +487,8 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private void onviewVoucher() {
         this.dispose();
 
-        String sql = "SELECT sbh.ref_no, sbh.voucher_date, am.name AS ac_name, " +
-            "sbh.bill_no, sbh.net_amount FROM sale_bill_head sbh, account_master am WHERE am.ac_cd = sbh.fk_account_id AND is_del = 0 ORDER BY ref_no";
+        String sql = "SELECT sbh.voucher_no, sbh.voucher_date, am.name AS ac_name, " +
+            "sbh.bill_no, sbh.net_amount FROM sale_bill_head sbh, account_master am WHERE am.id = sbh.fk_account_id ORDER BY ref_no";
         taxInvoiceView.setColumnValue(new int[]{1, 2, 3, 4, 5});
         String view_header = view_title+" VIEW";
 
@@ -503,7 +517,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
         PreparedStatement psLocal = null;
         int change = 0;
         if (navLoad.getMode().equalsIgnoreCase("N")) {
-            sql = "INSERT INTO sale_bill_head(voucher_date, bill_no, rate_dollar_rs, fk_account_id, total_qty, total_amt, disc_per, disc_rs, amount_total, bill_amount, adj_amount, net_amount, remark, p_date, chck, user_cd, ref_no) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO sale_bill_head(voucher_no, voucher_date, bill_no, rate_dollar_rs, fk_account_id, total_qty, total_amt, disc_per, disc_rs, amount_total, bill_amount, adj_amount, net_amount, remark, p_date, chck, user_cd, ref_no) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             ref_no = lb.generateKey("sale_bill_head", "ref_no", 7, initial);
         } else if (navLoad.getMode().equalsIgnoreCase("E")) {
             SalesBillUpdate sb = new SalesBillUpdate();
@@ -513,7 +527,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
             psLocal = dataConnection.prepareStatement(sql);
             change += psLocal.executeUpdate();
 
-            sql = "UPDATE sale_bill_head SET voucher_date = ?, bill_no = ?, rate_dollar_rs = ?, fk_account_id = ?, total_qty = ?, total_amt = ?, disc_per = ?, disc_rs = ?, amount_total = ?, bill_amount = ?, adj_amount = ?, net_amount = ?, remark = ?, p_date = ?, chck = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE ref_no = ?";
+            sql = "UPDATE sale_bill_head SET voucher_no = ?, voucher_date = ?, bill_no = ?, rate_dollar_rs = ?, fk_account_id = ?, total_qty = ?, total_amt = ?, disc_per = ?, disc_rs = ?, amount_total = ?, bill_amount = ?, adj_amount = ?, net_amount = ?, remark = ?, p_date = ?, chck = ?, user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE ref_no = ?";
         }
         int check = 0;
         String p_date = jtxtPDate.getText();
@@ -523,23 +537,24 @@ public class SalesBill extends javax.swing.JInternalFrame {
             p_date = lb.tempConvertFormatForDBorConcurrency(p_date);
         }
         psLocal = dataConnection.prepareStatement(sql);
-        psLocal.setString(1, lb.tempConvertFormatForDBorConcurrency(jtxtVDate.getText())); // Voucher Date
-        psLocal.setString(2, jtxtInvoiceNo.getText()); // Bill No
-        psLocal.setDouble(3, lb.replaceAll(jtxtRateDollarRs.getText())); // amount type
-        psLocal.setString(4, lb.getAccountMstName(jtxtACAlias.getText(), "C")); // AC CD
-        psLocal.setDouble(5, lb.replaceAll(jlblQty.getText())); // Total Qty
-        psLocal.setDouble(6, lb.replaceAll(jlblAmt.getText())); // Total Amt
-        psLocal.setDouble(7, lb.replaceAll(jtxtDiscPer.getText())); // Disc Per
-        psLocal.setDouble(8, lb.replaceAll(jtxtDiscRs.getText())); // Disc Rs
-        psLocal.setDouble(9, lb.replaceAll(jtxtTotalAmt.getText())); // Total Amt
-        psLocal.setDouble(10, lb.replaceAll(jtxtBillAmount.getText())); // Bill Amt
-        psLocal.setDouble(11, lb.replaceAll(jtxtAdjustAmt.getText())); // Adjustment
-        psLocal.setDouble(12, lb.replaceAll(jtxtNetAmt.getText())); // Net Amt
-        psLocal.setString(13, jtxtRemarks.getText()); // Remarks
-        psLocal.setString(14, p_date); // P_DATE
-        psLocal.setInt(15, check); // CHECK
-        psLocal.setInt(16, DeskFrame.user_id); // User CD
-        psLocal.setString(17, ref_no); // Ref No
+        psLocal.setString(1, jtxtVoucherNo.getText());
+        psLocal.setString(2, lb.tempConvertFormatForDBorConcurrency(jtxtVDate.getText())); // Voucher Date
+        psLocal.setString(3, jtxtInvoiceNo.getText()); // Bill No
+        psLocal.setDouble(4, lb.replaceAll(jtxtRateDollarRs.getText())); // amount type
+        psLocal.setString(5, lb.getAccountMstName(jtxtACAlias.getText(), "C")); // AC CD
+        psLocal.setDouble(6, lb.replaceAll(jlblQty.getText())); // Total Qty
+        psLocal.setDouble(7, lb.replaceAll(jlblAmt.getText())); // Total Amt
+        psLocal.setDouble(8, lb.replaceAll(jtxtDiscPer.getText())); // Disc Per
+        psLocal.setDouble(9, lb.replaceAll(jtxtDiscRs.getText())); // Disc Rs
+        psLocal.setDouble(10, lb.replaceAll(jtxtTotalAmt.getText())); // Total Amt
+        psLocal.setDouble(11, lb.replaceAll(jtxtBillAmount.getText())); // Bill Amt
+        psLocal.setDouble(12, lb.replaceAll(jtxtAdjustAmt.getText())); // Adjustment
+        psLocal.setDouble(13, lb.replaceAll(jtxtNetAmt.getText())); // Net Amt
+        psLocal.setString(14, jtxtRemarks.getText()); // Remarks
+        psLocal.setString(15, p_date); // P_DATE
+        psLocal.setInt(16, check); // CHECK
+        psLocal.setInt(17, DeskFrame.user_id); // User CD
+        psLocal.setString(18, ref_no); // Ref No
         change += psLocal.executeUpdate();
 
         sql = "INSERT INTO sale_bill_detail(sr_no, fk_main_category_id, fk_sub_category_id, fk_slab_category_id, slab, qty, rate, amt, rate_dollar, amt_dollar, ref_no) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -673,6 +688,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jbtnAdd = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
         jtxtRateDollarRs = new javax.swing.JTextField();
+        jtxtVoucherNo = new javax.swing.JTextField();
         jlblAmt = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jtxtRemarks = new javax.swing.JTextField();
@@ -959,11 +975,11 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jtxtRateDollarRs.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jtxtRateDollarRs.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
         jtxtRateDollarRs.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jtxtRateDollarRsFocusLost(evt);
-            }
             public void focusGained(java.awt.event.FocusEvent evt) {
                 jtxtRateDollarRsFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtRateDollarRsFocusLost(evt);
             }
         });
         jtxtRateDollarRs.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -972,6 +988,22 @@ public class SalesBill extends javax.swing.JInternalFrame {
             }
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 jtxtRateDollarRsKeyTyped(evt);
+            }
+        });
+
+        jtxtVoucherNo.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtVoucherNo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jtxtVoucherNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtVoucherNoFocusGained(evt);
+            }
+        });
+        jtxtVoucherNo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtVoucherNoKeyPressed(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtVoucherNoKeyTyped(evt);
             }
         });
 
@@ -987,9 +1019,16 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jlblStart, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtVoucher, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jtxtVoucherNo, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1006,16 +1045,11 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         .addComponent(jtxtPDate, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
                         .addComponent(jBillDateBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 135, Short.MAX_VALUE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jtxtACAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel6)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                        .addComponent(jlblStart, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtVoucher, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(54, 54, 54))))
         );
 
         jPanel3Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel22, jLabel23, jLabel25});
@@ -1023,7 +1057,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(7, 7, 7)
+                .addGap(6, 6, 6)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jBillDateBtn1, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1034,9 +1068,11 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     .addComponent(jBillDateBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 20, Short.MAX_VALUE)
                     .addComponent(jtxtVDate)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)
-                    .addComponent(jtxtVoucher, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)
                     .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jtxtVoucherNo))
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jtxtVoucher, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)
                         .addComponent(jlblStart, javax.swing.GroupLayout.DEFAULT_SIZE, 24, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1561,7 +1597,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                     .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(0, 31, Short.MAX_VALUE)
                         .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1637,7 +1673,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
                         .addComponent(jtxtRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jtxtAmt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 512, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 517, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jlblQty, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1815,7 +1851,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jtxtVoucherKeyPressed
 
     private void jtxtVoucherKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtVoucherKeyTyped
-        lb.onlyNumber(evt, (7 - initial.length()));
+        
     }//GEN-LAST:event_jtxtVoucherKeyTyped
 
     private void jtxtInvoiceNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtInvoiceNoFocusGained
@@ -2246,6 +2282,18 @@ public class SalesBill extends javax.swing.JInternalFrame {
         lb.onlyNumber(evt, 15);
     }//GEN-LAST:event_jtxtRateDollarRsKeyTyped
 
+    private void jtxtVoucherNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtVoucherNoFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtVoucherNoFocusGained
+
+    private void jtxtVoucherNoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtVoucherNoKeyPressed
+        lb.enterEvent(evt, jtxtVDate);
+    }//GEN-LAST:event_jtxtVoucherNoKeyPressed
+
+    private void jtxtVoucherNoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtVoucherNoKeyTyped
+        lb.fixLength(evt, 20);
+    }//GEN-LAST:event_jtxtVoucherNoKeyTyped
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBillDateBtn;
     private javax.swing.JButton jBillDateBtn1;
@@ -2309,6 +2357,7 @@ public class SalesBill extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jtxtTotalAmt;
     private javax.swing.JTextField jtxtVDate;
     private javax.swing.JTextField jtxtVoucher;
+    private javax.swing.JTextField jtxtVoucherNo;
     public static javax.swing.JTextArea jtxtparticulars;
     // End of variables declaration//GEN-END:variables
 }

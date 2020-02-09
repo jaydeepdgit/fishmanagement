@@ -474,7 +474,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
             tSlabQty += slabQty;
 
             kgs = lb.replaceAll(jtxtPackagingWeight.getText());
-            jTable1.setValueAt((kgs * slabQty), i, 3);
+            jTable1.setValueAt(lb.Convert2DecFmt(kgs * slabQty), i, 3);
             tKgs += (kgs * slabQty);
 
             blockUsed = lb.replaceAll(jTable1.getValueAt(i, 4).toString());
@@ -496,17 +496,17 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 double rowDollarRate = lb.replaceAll(jTable1.getValueAt(i, 5).toString());
                 if(rowDollarRate > 0) {
                     double rowRate = rowDollarRate * rateDollarRs;
-                    jTable1.setValueAt((rowWeight * rateDollarRs), i, 6);
-                    jTable1.setValueAt(rowRate, i, 7);
-                    jTable1.setValueAt((rowWeight * rowRate), i, 8);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rateDollarRs), i, 6);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowRate), i, 7);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowRate), i, 8);
                 }
                 
                 double rowRate = lb.replaceAll(jTable1.getValueAt(i, 7).toString());
                 if(rowRate > 0) {
                     rowDollarRate = rowRate / rateDollarRs;
-                    jTable1.setValueAt(rowDollarRate, i, 5);
-                    jTable1.setValueAt((rowWeight * rowDollarRate), i, 6);
-                    jTable1.setValueAt((rowWeight * rowRate), i, 8);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowDollarRate), i, 5);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowDollarRate), i, 6);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowRate), i, 8);
                 }
                 
                 totalUSD = lb.replaceAll(jTable1.getValueAt(i, 6).toString());

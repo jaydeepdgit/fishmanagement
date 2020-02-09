@@ -149,8 +149,8 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
                 if(rowRate > 0) {
                     double rowRateDollar = rowRate / rateDollarRs;
                     jTable1.setValueAt((rowWeight * rowRate), i, 5);
-                    jTable1.setValueAt(rowRateDollar, i, 6);
-                    jTable1.setValueAt((rowWeight * rowRateDollar), i, 7);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowRateDollar), i, 6);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowRateDollar), i, 7);
                 }
             }
         }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StockLedger" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" isFloatColumnFooter="true" uuid="a50ebf51-a1ba-41f9-9bd7-692f6413258b">
 	<property name="ireport.zoom" value="2.0"/>
-	<property name="ireport.x" value="0"/>
+	<property name="ireport.x" value="60"/>
 	<property name="ireport.y" value="154"/>
 	<property name="language" value="java"/>
 	<parameter name="ITM_NAME" class="java.lang.String"/>
@@ -122,7 +122,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true"/>
+					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Slab Name]]></text>
 			</staticText>
@@ -136,9 +136,9 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true"/>
+					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Total(Usd)]]></text>
+				<text><![CDATA[Total_USD]]></text>
 			</staticText>
 			<staticText>
 				<reportElement uuid="6ad12754-778f-47e0-9ea0-681990365649" x="218" y="0" width="50" height="20"/>
@@ -150,7 +150,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true"/>
+					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Slab]]></text>
 			</staticText>
@@ -164,7 +164,7 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true"/>
+					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Quantity]]></text>
 			</staticText>
@@ -178,12 +178,12 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true"/>
+					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Rate(Inr)]]></text>
+				<text><![CDATA[Avg_INR]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="377" y="0" width="57" height="20"/>
+				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="377" y="0" width="59" height="20"/>
 				<box topPadding="0" leftPadding="0" rightPadding="2">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -192,12 +192,12 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true"/>
+					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Total(Inr)]]></text>
+				<text><![CDATA[Avg_USD]]></text>
 			</staticText>
 			<staticText>
-				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="434" y="0" width="59" height="20"/>
+				<reportElement uuid="585c08ac-d15b-4aa1-b3f4-d5856459c206" x="436" y="0" width="57" height="20"/>
 				<box topPadding="0" leftPadding="0" rightPadding="2">
 					<pen lineWidth="1.0"/>
 					<topPen lineWidth="1.0"/>
@@ -206,9 +206,9 @@
 					<rightPen lineWidth="1.0"/>
 				</box>
 				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="Arial" size="12" isBold="true"/>
+					<font fontName="Arial" size="11" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Rate(Usd)]]></text>
+				<text><![CDATA[Total_INR]]></text>
 			</staticText>
 		</band>
 	</pageHeader>
@@ -285,21 +285,7 @@
 				<textFieldExpression><![CDATA[$F{rate_inr}]]></textFieldExpression>
 			</textField>
 			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="d704a586-167c-444a-b063-641695477c8b" stretchType="RelativeToTallestObject" x="377" y="0" width="57" height="20"/>
-				<box topPadding="0" leftPadding="0" rightPadding="2">
-					<pen lineWidth="0.25"/>
-					<topPen lineWidth="0.0"/>
-					<leftPen lineWidth="0.0"/>
-					<bottomPen lineWidth="1.0"/>
-					<rightPen lineWidth="1.0"/>
-				</box>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font fontName="Arial" size="11"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{total_inr}]]></textFieldExpression>
-			</textField>
-			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
-				<reportElement uuid="d704a586-167c-444a-b063-641695477c8b" stretchType="RelativeToTallestObject" x="434" y="0" width="59" height="20"/>
+				<reportElement uuid="d704a586-167c-444a-b063-641695477c8b" stretchType="RelativeToTallestObject" x="377" y="0" width="59" height="20"/>
 				<box topPadding="0" leftPadding="0" rightPadding="2">
 					<pen lineWidth="0.25"/>
 					<topPen lineWidth="0.0"/>
@@ -311,6 +297,20 @@
 					<font fontName="Arial" size="11"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{rate_usd}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement uuid="d704a586-167c-444a-b063-641695477c8b" stretchType="RelativeToTallestObject" x="436" y="0" width="57" height="20"/>
+				<box topPadding="0" leftPadding="0" rightPadding="2">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.0"/>
+					<leftPen lineWidth="0.0"/>
+					<bottomPen lineWidth="1.0"/>
+					<rightPen lineWidth="1.0"/>
+				</box>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial" size="11"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{total_inr}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

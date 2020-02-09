@@ -47,7 +47,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
     private ResultSet rsLocal = null;
     private TableRowSorter<TableModel> rowSorter;
     private CachedRowSet crsMain = null;
-    String colname[] = new String[]{"main_cat", "sub_cat", "itm_name", "pcs", "slab", "block", "rate_inr", "total_inr", "rate_usd", "total_usd"};
+    String colname[] = new String[]{"main_cat", "sub_cat", "itm_name", "pcs", "slab", "block", "rate_inr", "rate_usd", "total_inr", "total_usd"};
     int column[] = new int[]{0, 0, 0, 0, 1, 0, 2, 2, 2, 2};
     String Syspath = System.getProperty("user.dir");
 
@@ -199,8 +199,8 @@ public class StockSummary extends javax.swing.JInternalFrame {
                 arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
                 arr[5] = lb.Convert2DecFmt(rsLocal.getDouble("block"));
                 arr[6] = lb.getIndianFormat(rsLocal.getDouble("rate_inr"));
-                arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
-                arr[8] = lb.getIndianFormat(rsLocal.getDouble("rate_usd"));
+                arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_usd"));                
+                arr[8] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
                 arr[9] = lb.getIndianFormat(rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
                 lb.appendColumnToCacheRowSet(crsMain, arr, column);
                 pcs += rsLocal.getDouble("pcs");
@@ -216,8 +216,8 @@ public class StockSummary extends javax.swing.JInternalFrame {
             arr[4] = lb.Convert2DecFmt(slab);
             arr[5] = lb.Convert2DecFmt(block);
             arr[6] = "";
-            arr[7] = lb.Convert2DecFmt(total_inr);
-            arr[8] = "";
+            arr[7] = "";
+            arr[8] = lb.Convert2DecFmt(total_inr);
             arr[9] = lb.Convert2DecFmt(total_usd);
             lb.appendColumnToCacheRowSet(crsMain, arr, column);
         } catch(Exception ex) {
@@ -304,7 +304,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "SR No", "Sub Category", "Slab Category", "Slab", "Quantity", "Rate_INR", "Price_INR", "Rate_USD", "Price_USD"
+                "SR No", "Sub Category", "Slab Category", "Slab", "Quantity", "Avg_INR", "Avg_USD", "Price_INR", "Price_USD"
             }
         ) {
             boolean[] canEdit = new boolean [] {
