@@ -2247,6 +2247,51 @@ public class Library {
         }
     }
 
+    public void setTableWithMultiFooter(JPanel jPanel, JTable jTableDet, JComponent[] compHeader, JComponent[] compFooter, int footerY) {
+        int maxHeightHeaderComp = 0;
+        int maxHeightFooterComp = 0;
+        int x = 0;
+        int y = 0;
+
+        if (compHeader != null) {
+            for (int i = 0; i < compHeader.length; i++) {
+                if (compHeader[i] != null) {
+                    if (maxHeightHeaderComp < compHeader[i].getHeight()) {
+                        maxHeightHeaderComp = compHeader[i].getHeight();
+                    }
+                }
+            }
+            // SETTING HEADER
+            x = jPanel.getX();
+            y = jPanel.getY() - maxHeightHeaderComp;
+            for (int i = 0; i < jTableDet.getColumnCount(); i++) {
+                if (compHeader[i] != null) {
+                    compHeader[i].setBounds(x, y, jTableDet.getColumn(jTableDet.getColumnName(i).toString()).getWidth() - 1, maxHeightHeaderComp);
+                }
+                x += jTableDet.getColumn(jTableDet.getColumnName(i).toString()).getWidth();
+            }
+        }
+        if (compFooter != null) {
+            for (int i = 0; i < compFooter.length; i++) {
+                if (compFooter[i] != null) {
+                    Dimension d = compFooter[i].getPreferredSize();
+                    if (maxHeightFooterComp < d.height) {
+                        maxHeightFooterComp = d.height;
+                    }
+                }
+            }
+            // SETTING FOOTER
+            x = jPanel.getX();
+            y = jPanel.getY() + jPanel.getHeight() + footerY;
+            for (int i = 0; i < jTableDet.getColumnCount(); i++) {
+                if (compFooter[i] != null) {
+                    compFooter[i].setBounds(x, y, jTableDet.getColumn(jTableDet.getColumnName(i).toString()).getWidth() - 1, maxHeightFooterComp);
+                }
+                x += jTableDet.getColumn(jTableDet.getColumnName(i).toString()).getWidth();
+            }
+        }
+    }
+    
     public void selectAll(java.awt.event.FocusEvent evt) {
         ((JTextField) evt.getSource()).selectAll();
     }
