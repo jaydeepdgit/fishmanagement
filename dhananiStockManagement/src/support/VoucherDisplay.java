@@ -133,7 +133,8 @@ public class VoucherDisplay extends javax.swing.JInternalFrame {
     
     private void breakUpReport(String ref_no) {
         String sql = "SELECT gm.rate_dollar_rs, gs.grad_qty, sc.name AS itm_name, am.name AS ac_name, gm.v_date, \n" +
-                "gs.kgs AS qty, gs.rate_inr, gs.rate_usd, subc.name as sub_cat_name, mc.name as main_cat_name \n" +
+                "gs.kgs AS qty, gs.rate_inr, gs.rate_usd, subc.name as sub_cat_name, mc.name as main_cat_name, \n" +
+                "gm.expense, gm.depb, gm.total_usd_expense, gm.total_usd_depb, gm.total_inr_expense, gm.total_inr_depb \n" +
                 "FROM `grade_main` gm \n" +
                 "LEFT JOIN `grade_sub` gs ON gm.id = gs.id\n" +
                 "LEFT JOIN `slab_category` sc ON sc.id = gs.fk_slab_category_id\n" +

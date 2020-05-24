@@ -93,7 +93,6 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
         setIconToPnael();
         jTable1.setBackground(new Color(253, 243, 243));
         setTitle(Constants.PURCHASE_BILL_FORM_NAME);
-        navLoad.jbtnPrint.setVisible(true);
     }
 
     private void setIconToPnael() {

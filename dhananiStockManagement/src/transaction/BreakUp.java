@@ -178,7 +178,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
             public void callView() {
                 onviewVoucher();
             }
-
+            
             @Override
             public void callPrint() {
                 try {

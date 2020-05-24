@@ -405,6 +405,7 @@ public abstract class NavigationPanel1 extends javax.swing.JPanel {
         jbtnNext = new javax.swing.JButton();
         jbtnLast = new javax.swing.JButton();
         jbtnView = new javax.swing.JButton();
+        jbtnPrint = new javax.swing.JButton();
         jlblMsg = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(253, 243, 243));
@@ -846,7 +847,7 @@ public abstract class NavigationPanel1 extends javax.swing.JPanel {
     private javax.swing.JButton jbtnNew;
     private javax.swing.JButton jbtnNext;
     private javax.swing.JButton jbtnPrevious;
-    public static final javax.swing.JButton jbtnPrint = new javax.swing.JButton();
+    private javax.swing.JButton jbtnPrint;
     private javax.swing.JButton jbtnSave;
     private javax.swing.JButton jbtnView;
     private javax.swing.JLabel jlblMsg;
