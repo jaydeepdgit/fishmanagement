@@ -1876,6 +1876,36 @@ public class Library {
         }
         return returnVal;
     }
+    
+    public String getTalliNo(String strVal, String tag) {
+        PreparedStatement pstLocal = null;
+        ResultSet rsLocal = null;
+        String returnVal = "";
+        String sql = "";
+        if ((strVal == null || strVal.trim().equalsIgnoreCase("")) && tag.equalsIgnoreCase("C")) {
+            return "0";
+        }
+        try {
+            if (tag.equalsIgnoreCase("C")) {
+                sql = "SELECT id FROM purchase_bill_head WHERE talli_no = '"+ strVal +"'";
+            } else if (tag.equalsIgnoreCase("N")) {
+                sql = "SELECT talli_no FROM purchase_bill_head WHERE id = '"+ strVal +"'";
+            }
+
+            if (sql != null) {
+                pstLocal = dataConnection.prepareStatement(sql);
+                rsLocal = pstLocal.executeQuery();
+                while (rsLocal.next()) {
+                    returnVal = rsLocal.getString(1);
+                }
+                closeResultSet(rsLocal);
+                closeStatement(pstLocal);
+            }
+        } catch (Exception ex) {
+            printToLogFile("Exception at getSubCategory In Library", ex);
+        }
+        return returnVal;
+    }
 
     public String getSlabCategory(String strVal, String tag, String subCat) {
         PreparedStatement pstLocal = null;

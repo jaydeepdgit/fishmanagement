@@ -73,6 +73,7 @@ public class Constants {
     public static String PURCHASE_AVERAGE_FORM_NAME = "PURCHASE AVERAGE";
     public static String WORKABILITY_FORM_NAME = "WORKABILITY";
     public static String STOCK_SUMMARY_FORM_NAME = "STOCK SUMMARY";
+    public static String PROFIT_LOSS_FORM_NAME = "PROFIT LOSS";
     public static String COLLECTION_REPORT_FORM_NAME = "COLLECTION REPORT";
     public static String GROUP_SUMMARY_FORM_NAME = "GROUP SUMMARY";
     public static String GENERAL_LEDGER_FORM_NAME = "GENERAL LEDGER";

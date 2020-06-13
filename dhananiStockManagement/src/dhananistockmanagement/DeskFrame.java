@@ -55,6 +55,7 @@ import reports.CollectionReport;
 import reports.DailyActivityReport;
 import reports.GeneralLedger;
 import reports.GroupSummary;
+import reports.ProfitLoss;
 import reports.PurchaseAverage;
 import reports.StockSummary;
 import reports.Workablity;
@@ -585,6 +586,7 @@ public class DeskFrame extends javax.swing.JFrame {
         jmnGroupSummary = new javax.swing.JMenuItem();
         jmnGeneralLedger = new javax.swing.JMenuItem();
         jmnDailyActivity = new javax.swing.JMenuItem();
+        jmnProfitLoss = new javax.swing.JMenuItem();
         utility = new javax.swing.JMenu();
         jmnCmpnyStting = new javax.swing.JMenuItem();
         jmnManageUser = new javax.swing.JMenuItem();
@@ -865,6 +867,16 @@ public class DeskFrame extends javax.swing.JFrame {
             }
         });
         report.add(jmnDailyActivity);
+
+        jmnProfitLoss.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
+        jmnProfitLoss.setMnemonic('S');
+        jmnProfitLoss.setText("PROFIT LOSS");
+        jmnProfitLoss.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jmnProfitLossActionPerformed(evt);
+            }
+        });
+        report.add(jmnProfitLoss);
 
         jMenuBar1.add(report);
 
@@ -1342,6 +1354,17 @@ public class DeskFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jmnDailyActivityActionPerformed
 
+    private void jmnProfitLossActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmnProfitLossActionPerformed
+        int index = checkAlradyOpen(Constants.PROFIT_LOSS_FORM_NAME);
+        if (index == -1) {
+            ProfitLoss pl = new ProfitLoss();
+            addOnScreen(pl, Constants.PROFIT_LOSS_FORM_NAME);
+            pl.setTitle(Constants.PROFIT_LOSS_FORM_NAME);
+        } else {
+            tabbedPane.setSelectedIndex(index);
+        }
+    }//GEN-LAST:event_jmnProfitLossActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public static javax.swing.JDesktopPane jDesktopPane1;
     private javax.swing.JMenuBar jMenuBar1;
@@ -1369,6 +1392,7 @@ public class DeskFrame extends javax.swing.JFrame {
     private javax.swing.JMenuItem jmnManageEmail;
     private javax.swing.JMenuItem jmnManageUser;
     private javax.swing.JMenuItem jmnMinimize;
+    private javax.swing.JMenuItem jmnProfitLoss;
     private javax.swing.JMenuItem jmnPurchaseAvarage;
     private javax.swing.JMenuItem jmnPurchaseBill;
     private javax.swing.JMenuItem jmnQuickOpen;

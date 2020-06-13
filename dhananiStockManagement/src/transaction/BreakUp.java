@@ -50,7 +50,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
     private ReportTable breakUpView = null;
     Connection dataConnection = DeskFrame.connMpAdmin;
     private String initial = Constants.BREAK_UP_INITIAL;
-    private PickList mainCategoryPickList = null, subCategoryPickList = null, accountMasterPickList = null;
+    private PickList mainCategoryPickList = null, subCategoryPickList = null, accountMasterPickList = null, purchaseMasterPickList = null;
     String Syspath = System.getProperty("user.dir");
 
     /**
@@ -97,22 +97,24 @@ public class BreakUp extends javax.swing.JInternalFrame {
 
     private void setPickListView() {
         mainCategoryPickList = new PickList(dataConnection);
-
         mainCategoryPickList.setLayer(getLayeredPane());
         mainCategoryPickList.setPickListComponent(jtxtMainCategory);
         mainCategoryPickList.setNextComponent(jtxtSubCategory);
 
         subCategoryPickList = new PickList(dataConnection);
-
         subCategoryPickList.setLayer(getLayeredPane());
         subCategoryPickList.setPickListComponent(jtxtSubCategory);
         subCategoryPickList.setNextComponent(jtxtPackagingWeight);
 
         accountMasterPickList = new PickList(dataConnection);
-
         accountMasterPickList.setLayer(getLayeredPane());
         accountMasterPickList.setPickListComponent(jtxtAccountName);
         accountMasterPickList.setNextComponent(jtxtExpense);
+        
+        purchaseMasterPickList = new PickList(dataConnection);
+        purchaseMasterPickList.setLayer(getLayeredPane());
+        purchaseMasterPickList.setPickListComponent(jtxtTalliNo);
+        purchaseMasterPickList.setNextComponent(jbtnAdd);
     }
 
     private void makeChildTableBreakUp() {
@@ -234,6 +236,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 jtxtAccountName.setText("");
                 jtxtMainCategory.setText("");
                 jtxtSubCategory.setText("");
+                jtxtTalliNo.setText("");
                 jtxtExpense.setText("");
                 jtxtDEPB.setText("");
                 jtxtPackagingWeight.setText("0.000");
@@ -246,6 +249,8 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 jlblUSDExpense.setText("0.000");
                 jlblUSDDepb.setText("0.000");
                 jlblUSDTotal.setText("0.000");
+                jlblINRProfitLoss.setText("0.000");
+                jlblUSDProfitLoss.setText("0.000");
                 jlblKgs.setText("0.000");
                 jlblSlabQty.setText("0.000");
                 lb.setDateChooserProperty(jtxtVDate);
@@ -273,6 +278,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 jTable1.setEnabled(bFlag);
                 jtxtMainCategory.setEnabled(bFlag);
                 jtxtSubCategory.setEnabled(bFlag);
+                jtxtTalliNo.setEnabled(bFlag);
                 jtxtAccountName.setEnabled(bFlag);
                 jbtnAdd.setEnabled(bFlag);
                 jtxtVDate.requestFocusInWindow();
@@ -312,6 +318,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
                     jtxtAccountName.setText(lb.getAccountMstName(viewDataRs.getString("fk_account_master_id"), "N"));
                     jtxtMainCategory.setText(lb.getMainCategory(viewDataRs.getString("fk_main_category_id"), "N"));
                     jtxtSubCategory.setText(lb.getSubCategory(sub_category_id, "N"));
+                    jtxtTalliNo.setText(lb.getTalliNo(viewDataRs.getString("purchase_id"), "N"));
                     jlblDay.setText(lb.setDay(jtxtVDate));
                     jtxtPackagingWeight.setText(viewDataRs.getString("packaging_weight"));
                     jtxtRateDollarRs.setText(viewDataRs.getString("rate_dollar_rs"));
@@ -324,10 +331,12 @@ public class BreakUp extends javax.swing.JInternalFrame {
                     jlblUSDExpense.setText(lb.getIndianFormat(viewDataRs.getDouble("total_usd_expense")));
                     jlblUSDDepb.setText(lb.getIndianFormat(viewDataRs.getDouble("total_usd_depb")));
                     jlblUSDTotal.setText(lb.getIndianFormat(viewDataRs.getDouble("grand_total_usd")));
+                    jlblUSDProfitLoss.setText(lb.getIndianFormat(viewDataRs.getDouble("profit_loss_usd")));
                     jlblINR.setText(lb.getIndianFormat(viewDataRs.getDouble("total_inr")));
                     jlblINRExpense.setText(lb.getIndianFormat(viewDataRs.getDouble("total_inr_expense")));
                     jlblINRDepb.setText(lb.getIndianFormat(viewDataRs.getDouble("total_inr_depb")));
                     jlblINRTotal.setText(lb.getIndianFormat(viewDataRs.getDouble("grand_total_inr")));
+                    jlblINRProfitLoss.setText(lb.getIndianFormat(viewDataRs.getDouble("profit_loss_inr")));
                     jlblBlock.setText(lb.getIndianFormat(viewDataRs.getDouble("total_block")));
                     jlblUser.setText(lb.getUserName(viewDataRs.getString("user_cd"), "N"));
                     jlblEditNo.setText(viewDataRs.getString("edit_no"));
@@ -401,7 +410,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
         PreparedStatement psLocal = null;
         int change = 0;
         if (navLoad.getMode().equalsIgnoreCase("N")) {
-            sql = "INSERT INTO grade_main (fk_account_master_id, v_date, fk_main_category_id, fk_sub_category_id, packaging_weight, rate_dollar_rs, expense, depb, total_slabqty, total_kgs, total_blockused, total_usd, total_inr, total_block, total_usd_expense, total_usd_depb, grand_total_usd, total_inr_expense, total_inr_depb, grand_total_inr, fix_time, user_cd, id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) +"', ?, ?)";
+            sql = "INSERT INTO grade_main (fk_account_master_id, v_date, fk_main_category_id, fk_sub_category_id, packaging_weight, rate_dollar_rs, expense, depb, total_slabqty, total_kgs, total_blockused, total_usd, total_inr, total_block, total_usd_expense, total_usd_depb, grand_total_usd, total_inr_expense, total_inr_depb, grand_total_inr, purchase_id, profit_loss_usd, profit_loss_inr, fix_time, user_cd, id) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) +"', ?, ?)";
             id = lb.generateKey("grade_main", "id", 8, initial); // GENERATE REF NO
         } else if (navLoad.getMode().equalsIgnoreCase("E")) {
             breakupBillUpdate.deleteEntry(id);
@@ -410,7 +419,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
             psLocal = dataConnection.prepareStatement(sql);
             change += psLocal.executeUpdate();
 
-            sql = "UPDATE grade_main SET fk_account_master_id = ?, v_date = ?, fk_main_category_id = ?, fk_sub_category_id = ?, packaging_weight = ?, rate_dollar_rs = ?, expense = ?, depb = ?, total_slabqty = ?, total_kgs = ?, total_blockused = ?, total_usd = ?, total_inr = ?, total_block = ?, total_usd_expense = ?, total_usd_depb = ?, grand_total_usd = ?, total_inr_expense = ?, total_inr_depb = ?, grand_total_inr = ?, fix_time = '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) 
+            sql = "UPDATE grade_main SET fk_account_master_id = ?, v_date = ?, fk_main_category_id = ?, fk_sub_category_id = ?, packaging_weight = ?, rate_dollar_rs = ?, expense = ?, depb = ?, total_slabqty = ?, total_kgs = ?, total_blockused = ?, total_usd = ?, total_inr = ?, total_block = ?, total_usd_expense = ?, total_usd_depb = ?, grand_total_usd = ?, total_inr_expense = ?, total_inr_depb = ?, grand_total_inr = ?, purchase_id = ?, profit_loss_usd = ?, profit_loss_inr = ?, fix_time = '"+ new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) 
                 +"', user_cd = ?, edit_no = edit_no + 1, time_stamp = CURRENT_TIMESTAMP WHERE id = ?";
         }
         
@@ -436,8 +445,11 @@ public class BreakUp extends javax.swing.JInternalFrame {
         psLocal.setDouble(18, lb.replaceAll(jlblINRExpense.getText())); // inr expense
         psLocal.setDouble(19, lb.replaceAll(jlblINRDepb.getText())); // inr depb
         psLocal.setDouble(20, lb.replaceAll(jlblINRTotal.getText())); // inr grand total
-        psLocal.setInt(21, DeskFrame.user_id); // user_cd
-        psLocal.setString(22, id); // id
+        psLocal.setString(21, lb.getTalliNo(jtxtTalliNo.getText(), "C")); // talli no
+        psLocal.setDouble(22, lb.replaceAll(jlblUSDProfitLoss.getText())); // usd profit loss
+        psLocal.setDouble(23, lb.replaceAll(jlblINRProfitLoss.getText())); // inr profit loss
+        psLocal.setInt(24, DeskFrame.user_id); // user_cd
+        psLocal.setString(25, id); // id
         change += psLocal.executeUpdate();
 
         sql = "INSERT INTO grade_sub (sr_no, fk_slab_category_id, grad_qty, kgs, block_used, rate_usd, total_usd, rate_inr, total_inr, block, id) VALUES (?, ?, ?, ?, ?, ? ,? ,?, ?, ?, ?)";
@@ -490,10 +502,12 @@ public class BreakUp extends javax.swing.JInternalFrame {
         JComponent[] footer1 = new JComponent[]{null, null, null, null, null, jlblExpense, jlblUSDExpense, null, jlblINRExpense, null, null, null};
         JComponent[] footer2 = new JComponent[]{null, null, null, null, null, jlblDepb, jlblUSDDepb, null, jlblINRDepb, null, null, null};
         JComponent[] footer3 = new JComponent[]{null, null, null, null, null, jlblGrandTotal, jlblUSDTotal, null, jlblINRTotal, null, null, null};
+        JComponent[] footer4 = new JComponent[]{null, null, null, null, null, jlblProftLoss, jlblUSDProfitLoss, null, jlblINRProfitLoss, null, null, null};
         lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer, 0);
-        lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer1, 25);
-        lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer2, 50);
-        lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer3, 75);
+        lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer1, 20);
+        lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer2, 40);
+        lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer3, 60);
+        lb.setTableWithMultiFooter(jPanel1, jTable1, null, footer4, 80);
     }
 
     private void setJtableTotal() {
@@ -570,6 +584,28 @@ public class BreakUp extends javax.swing.JInternalFrame {
         jlblUSDDepb.setText(lb.Convert2DecFmt(totaldepb / rateDollarRs));
         jlblUSDTotal.setText(lb.Convert2DecFmt(grandTotal / rateDollarRs));
         
+        double USDPurchase = 0.00;
+        double INRPurchase = 0.00;
+        if(jtxtTalliNo.getText() != null && jtxtTalliNo.getText() != "") {
+            try {
+                PreparedStatement pstLocal = dataConnection.prepareStatement("SELECT total_amount, total_amount_dollar FROM purchase_bill_head WHERE talli_no LIKE '%"+ jtxtTalliNo.getText() +"%'");
+                ResultSet rsLocal = pstLocal.executeQuery();
+                if(rsLocal.next()) {
+                    USDPurchase = rsLocal.getDouble("total_amount_dollar");
+                    INRPurchase = rsLocal.getDouble("total_amount");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        
+        if(USDPurchase > 0) {
+            jlblUSDProfitLoss.setText(lb.Convert2DecFmt((grandTotal / rateDollarRs) - USDPurchase));
+        }
+        if(INRPurchase > 0) {
+            jlblINRProfitLoss.setText(lb.Convert2DecFmt(grandTotal - INRPurchase));
+        }
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -613,6 +649,8 @@ public class BreakUp extends javax.swing.JInternalFrame {
         jLabel28 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
         jtxtDEPB = new javax.swing.JTextField();
+        jLabel30 = new javax.swing.JLabel();
+        jtxtTalliNo = new javax.swing.JTextField();
         jlblKgs = new javax.swing.JLabel();
         jbtnEmail = new javax.swing.JButton();
         jlblUSD = new javax.swing.JLabel();
@@ -629,6 +667,9 @@ public class BreakUp extends javax.swing.JInternalFrame {
         jlblDepb = new javax.swing.JLabel();
         jlblExpense = new javax.swing.JLabel();
         jlblGrandTotal = new javax.swing.JLabel();
+        jlblProftLoss = new javax.swing.JLabel();
+        jlblUSDProfitLoss = new javax.swing.JLabel();
+        jlblINRProfitLoss = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(211, 226, 245));
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
@@ -836,11 +877,11 @@ public class BreakUp extends javax.swing.JInternalFrame {
         jtxtSubCategory.setMinimumSize(new java.awt.Dimension(2, 25));
         jtxtSubCategory.setPreferredSize(new java.awt.Dimension(2, 25));
         jtxtSubCategory.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jtxtSubCategoryFocusLost(evt);
-            }
             public void focusGained(java.awt.event.FocusEvent evt) {
                 jtxtSubCategoryFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtSubCategoryFocusLost(evt);
             }
         });
         jtxtSubCategory.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -883,7 +924,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
         jLabel25.setText("Account Name:");
 
         jLabel26.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
-        jLabel26.setText("Packaging Weight:");
+        jLabel26.setText("Pack. Weight:");
 
         jtxtPackagingWeight.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
         jtxtPackagingWeight.setAutoscrolls(false);
@@ -986,31 +1027,48 @@ public class BreakUp extends javax.swing.JInternalFrame {
             }
         });
 
+        jLabel30.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jLabel30.setText("Talli No:");
+
+        jtxtTalliNo.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        jtxtTalliNo.setAutoscrolls(false);
+        jtxtTalliNo.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 1, new java.awt.Color(255, 0, 0)));
+        jtxtTalliNo.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jtxtTalliNoFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jtxtTalliNoFocusLost(evt);
+            }
+        });
+        jtxtTalliNo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jtxtTalliNoActionPerformed(evt);
+            }
+        });
+        jtxtTalliNo.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                jtxtTalliNoKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jtxtTalliNoKeyReleased(evt);
+            }
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                jtxtTalliNoKeyTyped(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel23)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 259, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel24)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel26)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel27)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 83, Short.MAX_VALUE)
-                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1018,16 +1076,24 @@ public class BreakUp extends javax.swing.JInternalFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jtxtVoucher, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jtxtVDate, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, 0)
                         .addComponent(jBillDateBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jlblDay, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel25)
+                        .addComponent(jLabel25))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel24)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jtxtAccountName, javax.swing.GroupLayout.PREFERRED_SIZE, 263, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel28)
@@ -1037,7 +1103,21 @@ public class BreakUp extends javax.swing.JInternalFrame {
                         .addComponent(jLabel29)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jtxtDEPB, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 4, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel26)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel27)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel30)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jtxtTalliNo)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -1062,18 +1142,24 @@ public class BreakUp extends javax.swing.JInternalFrame {
                     .addComponent(jLabel25, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                    .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jtxtMainCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jtxtSubCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE))
-                    .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(7, 7, 7))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jtxtMainCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jtxtSubCategory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jtxtPackagingWeight, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
+                                .addComponent(jLabel27, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jtxtRateDollarRs, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel30, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(7, 7, 7))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jtxtTalliNo, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(jbtnAdd, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(7, 7, 7))))
         );
 
         jPanel3Layout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {jLabel23, jLabel24, jtxtMainCategory, jtxtSubCategory});
@@ -1285,6 +1371,45 @@ public class BreakUp extends javax.swing.JInternalFrame {
             }
         });
 
+        jlblProftLoss.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        jlblProftLoss.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jlblProftLoss.setText("Profit/Loss");
+        jlblProftLoss.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jlblProftLoss.setMaximumSize(new java.awt.Dimension(24, 20));
+        jlblProftLoss.setMinimumSize(new java.awt.Dimension(24, 20));
+        jlblProftLoss.setPreferredSize(new java.awt.Dimension(24, 20));
+        jlblProftLoss.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jlblProftLossComponentResized(evt);
+            }
+        });
+
+        jlblUSDProfitLoss.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        jlblUSDProfitLoss.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jlblUSDProfitLoss.setText("0.00");
+        jlblUSDProfitLoss.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jlblUSDProfitLoss.setMaximumSize(new java.awt.Dimension(24, 20));
+        jlblUSDProfitLoss.setMinimumSize(new java.awt.Dimension(24, 20));
+        jlblUSDProfitLoss.setPreferredSize(new java.awt.Dimension(24, 20));
+        jlblUSDProfitLoss.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jlblUSDProfitLossComponentResized(evt);
+            }
+        });
+
+        jlblINRProfitLoss.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        jlblINRProfitLoss.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        jlblINRProfitLoss.setText("0.00");
+        jlblINRProfitLoss.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(4, 110, 152)));
+        jlblINRProfitLoss.setMaximumSize(new java.awt.Dimension(24, 20));
+        jlblINRProfitLoss.setMinimumSize(new java.awt.Dimension(24, 20));
+        jlblINRProfitLoss.setPreferredSize(new java.awt.Dimension(24, 20));
+        jlblINRProfitLoss.addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                jlblINRProfitLossComponentResized(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -1311,8 +1436,8 @@ public class BreakUp extends javax.swing.JInternalFrame {
                         .addComponent(jbtnEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jlblSlabQty, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jlblKgs, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1320,18 +1445,24 @@ public class BreakUp extends javax.swing.JInternalFrame {
                                 .addComponent(jlblBlockUsed, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jlblUSDTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jlblDepb, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jlblUSDExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jlblGrandTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jlblUSDDepb, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addGroup(layout.createSequentialGroup()
                                 .addComponent(jlblExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jlblUSD, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jlblUSD, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jlblProftLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jlblUSDProfitLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jlblINRProfitLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jlblDepb, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jlblUSDExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -1359,7 +1490,11 @@ public class BreakUp extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jlblINRExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jlblUSDExpense, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jlblDepb, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jlblDepb, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jlblINRProfitLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jlblUSDProfitLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jlblProftLoss, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jlblINRDepb, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1643,7 +1778,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_jtxtRateDollarRsActionPerformed
 
     private void jtxtRateDollarRsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtRateDollarRsKeyPressed
-        lb.enterEvent(evt, jbtnAdd);
+        lb.enterEvent(evt, jtxtTalliNo);
     }//GEN-LAST:event_jtxtRateDollarRsKeyPressed
 
     private void jtxtExpenseFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtExpenseFocusLost
@@ -1722,6 +1857,54 @@ public class BreakUp extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jlblGrandTotalComponentResized
 
+    private void jtxtTalliNoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtTalliNoFocusGained
+        lb.selectAll(evt);
+    }//GEN-LAST:event_jtxtTalliNoFocusGained
+
+    private void jtxtTalliNoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jtxtTalliNoFocusLost
+        purchaseMasterPickList.setVisible(false);
+    }//GEN-LAST:event_jtxtTalliNoFocusLost
+
+    private void jtxtTalliNoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jtxtTalliNoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jtxtTalliNoActionPerformed
+
+    private void jtxtTalliNoKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtTalliNoKeyPressed
+        purchaseMasterPickList.setLocation(jtxtTalliNo.getX() + jPanel3.getX(), jtxtTalliNo.getY() + jtxtTalliNo.getHeight() + jPanel3.getY());
+        purchaseMasterPickList.pickListKeyPress(evt);
+    }//GEN-LAST:event_jtxtTalliNoKeyPressed
+
+    private void jtxtTalliNoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtTalliNoKeyReleased
+        try {
+            String sql = "SELECT talli_no FROM purchase_bill_head ph WHERE talli_no LIKE '%"+ jtxtTalliNo.getText() +"%' AND id NOT IN (SELECT purchase_id FROM grade_main gm WHERE gm.purchase_id IS NOT NULL)";
+            purchaseMasterPickList.setReturnComponent(new JTextField[]{jtxtTalliNo});
+            purchaseMasterPickList.setValidation(dataConnection.prepareStatement("SELECT talli_no FROM purchase_bill_head ph WHERE talli_no = ? AND id NOT IN (SELECT purchase_id FROM grade_main gm WHERE gm.purchase_id IS NOT NULL)"));
+            PreparedStatement pstLocal = dataConnection.prepareStatement(sql);
+            purchaseMasterPickList.setFirstAssociation(new int[]{0});
+            purchaseMasterPickList.setSecondAssociation(new int[]{0});
+            purchaseMasterPickList.setPreparedStatement(pstLocal);
+            purchaseMasterPickList.pickListKeyRelease(evt);
+        } catch (Exception ex) {
+            lb.printToLogFile("Exception at jtxtMainCategoryKeyReleased In Break Up", ex);
+        }
+    }//GEN-LAST:event_jtxtTalliNoKeyReleased
+
+    private void jtxtTalliNoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jtxtTalliNoKeyTyped
+        lb.fixLength(evt, 255);
+    }//GEN-LAST:event_jtxtTalliNoKeyTyped
+
+    private void jlblProftLossComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jlblProftLossComponentResized
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jlblProftLossComponentResized
+
+    private void jlblUSDProfitLossComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jlblUSDProfitLossComponentResized
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jlblUSDProfitLossComponentResized
+
+    private void jlblINRProfitLossComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_jlblINRProfitLossComponentResized
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jlblINRProfitLossComponentResized
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jBillDateBtn;
     private javax.swing.JLabel jLabel12;
@@ -1736,6 +1919,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
+    private javax.swing.JLabel jLabel30;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -1753,14 +1937,17 @@ public class BreakUp extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jlblINR;
     private javax.swing.JLabel jlblINRDepb;
     private javax.swing.JLabel jlblINRExpense;
+    private javax.swing.JLabel jlblINRProfitLoss;
     private javax.swing.JLabel jlblINRTotal;
     private javax.swing.JLabel jlblKgs;
+    private javax.swing.JLabel jlblProftLoss;
     private javax.swing.JLabel jlblSlabQty;
     private javax.swing.JLabel jlblStart;
     private javax.swing.JLabel jlblTimeStamp;
     private javax.swing.JLabel jlblUSD;
     private javax.swing.JLabel jlblUSDDepb;
     private javax.swing.JLabel jlblUSDExpense;
+    private javax.swing.JLabel jlblUSDProfitLoss;
     private javax.swing.JLabel jlblUSDTotal;
     private javax.swing.JLabel jlblUser;
     private javax.swing.JTextField jtxtAccountName;
@@ -1770,6 +1957,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
     private javax.swing.JTextField jtxtPackagingWeight;
     private javax.swing.JTextField jtxtRateDollarRs;
     private javax.swing.JTextField jtxtSubCategory;
+    private javax.swing.JTextField jtxtTalliNo;
     private javax.swing.JTextField jtxtVDate;
     private javax.swing.JTextField jtxtVoucher;
     // End of variables declaration//GEN-END:variables
