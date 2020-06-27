@@ -145,11 +145,18 @@ public class PurchaseBill extends javax.swing.JInternalFrame {
                 jTable1.setValueAt(i+1, i, 0);
                 double rowWeight = lb.replaceAll(jTable1.getValueAt(i, 3).toString());
                 double rowRate = lb.replaceAll(jTable1.getValueAt(i, 4).toString());
-                if(rowRate > 0) {
-                    double rowRateDollar = rowRate / rateDollarRs;
-                    jTable1.setValueAt((rowWeight * rowRate), i, 5);
-                    jTable1.setValueAt(lb.Convert2DecFmt(rowRateDollar), i, 6);
-                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowRateDollar), i, 7);
+                double rowDollarRate = lb.replaceAll(jTable1.getValueAt(i, 6).toString());
+                
+                if(rowDollarRate > 0) {
+                    double rate = rowDollarRate * rateDollarRs;
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rate), i, 5);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rate), i, 4);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowDollarRate), i, 7);
+                } else {
+                    double rateDollar = rowRate / rateDollarRs;
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowRate), i, 5);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rateDollar), i, 6);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rateDollar), i, 7);
                 }
             }
         }

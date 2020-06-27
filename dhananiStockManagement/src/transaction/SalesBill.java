@@ -143,11 +143,17 @@ public class SalesBill extends javax.swing.JInternalFrame {
                 jTable1.setValueAt(i+1, i, 0);
                 double rowWeight = lb.replaceAll(jTable1.getValueAt(i, 5).toString());
                 double rowRate = lb.replaceAll(jTable1.getValueAt(i, 6).toString());
-                if(rowRate > 0) {
-                    double rowRateDollar = rowRate / rateDollarRs;
-                    jTable1.setValueAt((rowWeight * rowRate), i, 7);
-                    jTable1.setValueAt(rowRateDollar, i, 8);
-                    jTable1.setValueAt((rowWeight * rowRateDollar), i, 9);
+                double rowDollarRate = lb.replaceAll(jTable1.getValueAt(i, 8).toString());
+                if(rowDollarRate > 0) {
+                    double rate = rowDollarRate * rateDollarRs;
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rate), i, 7);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rate), i, 6);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowDollarRate), i, 9);
+                } else {
+                    double rateDollar = rowRate / rateDollarRs;
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rowRate), i, 7);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rateDollar), i, 8);
+                    jTable1.setValueAt(lb.Convert2DecFmt(rowWeight * rateDollar), i, 9);
                 }
             }
         }
