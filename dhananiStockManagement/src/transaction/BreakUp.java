@@ -575,7 +575,7 @@ public class BreakUp extends javax.swing.JInternalFrame {
         double depb = lb.replaceAll(jtxtDEPB.getText());
         double totalExpense = tKgs * expense;
         double totaldepb = (tINR * depb)/100;
-        double grandTotal = tINR + totalExpense + totaldepb;
+        double grandTotal = (tINR - totalExpense) + totaldepb;
         jlblINRExpense.setText(lb.Convert2DecFmt(totalExpense));
         jlblINRDepb.setText(lb.Convert2DecFmt(totaldepb));
         jlblINRTotal.setText(lb.Convert2DecFmt(grandTotal));

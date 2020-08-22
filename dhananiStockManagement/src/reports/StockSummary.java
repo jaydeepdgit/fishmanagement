@@ -47,8 +47,8 @@ public class StockSummary extends javax.swing.JInternalFrame {
     private ResultSet rsLocal = null;
     private TableRowSorter<TableModel> rowSorter;
     private CachedRowSet crsMain = null;
-    String colname[] = new String[]{"main_cat", "sub_cat", "itm_name", "pcs", "slab", "block", "rate_inr", "rate_usd", "total_inr", "total_usd"};
-    int column[] = new int[]{0, 0, 0, 0, 1, 0, 2, 2, 2, 2};
+    String colname[] = new String[]{"main_cat", "sub_cat", "itm_name", "pcs", "slab", "rate_inr", "rate_usd", "total_inr", "total_usd"};
+    int column[] = new int[]{0, 0, 0, 0, 1, 2, 2, 2, 2};
     String Syspath = System.getProperty("user.dir");
 
     /**
@@ -84,7 +84,7 @@ public class StockSummary extends javax.swing.JInternalFrame {
             JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
             l.setHorizontalAlignment(SwingConstants.RIGHT);
             //Get the status for the current row.
-            if(col == 3 || col == 4 || col == 5 || col == 6 || col == 7 || col == 8 || col == 9) {
+            if(col == 3 || col == 4 || col == 5 || col == 6 || col == 7 || col == 8) {
                 double val = Double.parseDouble(lb.getDeCustomFormat(jTable1.getValueAt(row, col).toString()));
                 if(val >= 0) {
                     if(!isSelected) {
@@ -163,13 +163,16 @@ public class StockSummary extends javax.swing.JInternalFrame {
         String fromDate = jtxtFromDate.getText();
         String toDate = jtxtToDate.getText();
         try {
-            String sql = "SELECT sc.id AS slabid, sbc.name as sub_category, mc.name as main_category, sc.name AS slabCategory, SUM((st.opb + st.pur + st.sal_r + st.qty) - st.sal - st.pur_r) AS pcs,\n" +
-                "AVG(gs.rate_inr) AS rate_inr, AVG(gs.rate_usd) AS rate_usd, \n" +
-                "st.block AS block FROM stock0_2 st \n" +
+            String sql = "SELECT slabid, sub_category, main_category, slabCategory, SUM(pcs) AS pcs, AVG(rate_inr) AS rate_inr, AVG(rate_usd) AS rate_usd FROM \n" +
+                "(SELECT sc.id AS slabid, sbc.name AS sub_category, mc.name AS main_category, sc.name AS slabCategory, ((st.opb + st.pur + st.sal_r + st.qty) - st.sal - st.pur_r) AS pcs,\n" +
+                "CASE WHEN gs.rate_inr IS NOT NULL THEN gs.rate_inr ELSE sbd.rate END AS rate_inr, \n" +
+                "CASE WHEN gs.rate_usd IS NOT NULL THEN gs.rate_usd ELSE sbd.rate_dollar END AS rate_usd, \n" +
+                "st.doc_id FROM stock0_2 st \n" +
                 "LEFT JOIN grade_sub gs ON st.doc_id = gs.id AND st.fk_slab_category_id = gs.fk_slab_category_id\n" +
+                "LEFT JOIN sale_bill_detail sbd ON st.doc_id = sbd.ref_no AND st.fk_slab_category_id = sbd.fk_slab_category_id\n" +
                 "LEFT JOIN slab_category sc ON st.fk_slab_category_id = sc.id \n" +
-                "LEFT JOIN sub_category sbc ON sc.fk_sub_category_id = sbc.id \n" + 
-                "LEFT JOIN main_category mc ON sbc.fk_main_category_id = mc.id \n" + 
+                "LEFT JOIN sub_category sbc ON sc.fk_sub_category_id = sbc.id \n" +
+                "LEFT JOIN main_category mc ON sbc.fk_main_category_id = mc.id \n" +
                 "WHERE st.fk_slab_category_id IS NOT NULL";
             
             if(!jtxtMainItemName.getText().equalsIgnoreCase("")) {
@@ -185,40 +188,76 @@ public class StockSummary extends javax.swing.JInternalFrame {
                 + " st.doc_date <= '"+ lb.ConvertDateFormetForDB(toDate) +"') OR st.doc_date IS NULL)";
             }
             
-            sql += " GROUP BY slabid ORDER BY slabid";
+            sql += " GROUP BY st.stock2_id) AS stock GROUP BY slabid ORDER BY sub_category,slabid";
             psLocal = dataConnection.prepareStatement(sql);
             rsLocal = psLocal.executeQuery();
             crsMain = lb.getBlankCachedRowSet(colname, column);
-            String arr[] = new String[10];
-            double pcs = 0.00, slab = 0.00, block = 0.00, total_inr = 0.00, total_usd = 0.00;
+            String arr[] = new String[9];
+            double pcs = 0.00, slab = 0.00, total_inr = 0.00, total_usd = 0.00;
+            double cat_pcs = 0.00, cat_slab = 0.00, cat_total_inr = 0.00, cat_total_usd = 0.00;
+            String subCategory = "";
             while (rsLocal.next()) {
+                if((!subCategory.equals("")) && (!subCategory.equals(rsLocal.getString("sub_category")))) {
+                    arr[0] = "";
+                    arr[1] = "";
+                    arr[2] = "Total";
+                    arr[3] = lb.Convert2DecFmt(cat_slab);
+                    arr[4] = lb.Convert2DecFmt(cat_pcs);
+                    arr[5] = "";
+                    arr[6] = "";
+                    arr[7] = lb.Convert2DecFmt(cat_total_inr);
+                    arr[8] = lb.Convert2DecFmt(cat_total_usd);
+                    lb.appendColumnToCacheRowSet(crsMain, arr, column);
+                    
+                    cat_pcs = 0.00; 
+                    cat_slab = 0.00;
+                    cat_total_inr = 0.00;
+                    cat_total_usd = 0.00;
+                }
+                
                 arr[0] = rsLocal.getString("main_category");
                 arr[1] = rsLocal.getString("sub_category");
                 arr[2] = rsLocal.getString("slabCategory");
                 arr[3] = lb.Convert2DecFmt(rsLocal.getDouble("pcs") / 10);                
                 arr[4] = lb.Convert2DecFmt(rsLocal.getDouble("pcs"));
-                arr[5] = lb.Convert2DecFmt(rsLocal.getDouble("block"));
-                arr[6] = lb.getIndianFormat(rsLocal.getDouble("rate_inr"));
-                arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_usd"));                
-                arr[8] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
-                arr[9] = lb.getIndianFormat(rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
+                arr[5] = lb.getIndianFormat(rsLocal.getDouble("rate_inr"));
+                arr[6] = lb.getIndianFormat(rsLocal.getDouble("rate_usd"));                
+                arr[7] = lb.getIndianFormat(rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
+                arr[8] = lb.getIndianFormat(rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
                 lb.appendColumnToCacheRowSet(crsMain, arr, column);
+                cat_pcs += rsLocal.getDouble("pcs");
+                cat_slab += rsLocal.getDouble("pcs") / 10;
+                cat_total_inr += (rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
+                cat_total_usd += (rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
+                
+                subCategory = rsLocal.getString("sub_category");
+                
                 pcs += rsLocal.getDouble("pcs");
                 slab += rsLocal.getDouble("pcs") / 10;
-                block += rsLocal.getDouble("block");
                 total_inr += (rsLocal.getDouble("rate_inr") * rsLocal.getDouble("pcs"));
                 total_usd += (rsLocal.getDouble("rate_usd") * rsLocal.getDouble("pcs"));
             }
+            
             arr[0] = "";
             arr[1] = "";
             arr[2] = "Total";
-            arr[3] = lb.Convert2DecFmt(pcs);
-            arr[4] = lb.Convert2DecFmt(slab);
-            arr[5] = lb.Convert2DecFmt(block);
+            arr[3] = lb.Convert2DecFmt(cat_slab);
+            arr[4] = lb.Convert2DecFmt(cat_pcs);
+            arr[5] = "";
             arr[6] = "";
-            arr[7] = "";
-            arr[8] = lb.Convert2DecFmt(total_inr);
-            arr[9] = lb.Convert2DecFmt(total_usd);
+            arr[7] = lb.Convert2DecFmt(cat_total_inr);
+            arr[8] = lb.Convert2DecFmt(cat_total_usd);
+            lb.appendColumnToCacheRowSet(crsMain, arr, column);
+                    
+            arr[0] = "";
+            arr[1] = "";
+            arr[2] = "Grand Total";
+            arr[3] = lb.Convert2DecFmt(slab);
+            arr[4] = lb.Convert2DecFmt(pcs);
+            arr[5] = "";
+            arr[6] = "";
+            arr[7] = lb.Convert2DecFmt(total_inr);
+            arr[8] = lb.Convert2DecFmt(total_usd);
             lb.appendColumnToCacheRowSet(crsMain, arr, column);
         } catch(Exception ex) {
             lb.printToLogFile("Exception at MakeQuery In Stock Summary", ex);
@@ -777,10 +816,10 @@ public class StockSummary extends javax.swing.JInternalFrame {
                     row.add(crsMain.getString(3));
                     row.add(crsMain.getString(4));
                     row.add(crsMain.getString(5));
+                    row.add(crsMain.getString(6));
                     row.add(crsMain.getString(7));
                     row.add(crsMain.getString(8));
                     row.add(crsMain.getString(9));
-                    row.add(crsMain.getString(10));
                     model.addRow(row);
                     i++;
                 }
